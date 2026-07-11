@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shop Essenshea | Natural luxury for everyday ritual</title>
+    <meta name="description" content="Shop Essenshea's signature butters, oils, haircare and fragrance-led essentials." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <a class="brand" href="index.html" aria-label="Essenshea home">
+          <img class="brand-logo" src="assets/images/essenshea-logo.svg" alt="Essenshea logo" />
+          <span class="brand-text">
+            <strong>Essenshea</strong>
+            <small>Natural luxury, rooted in ritual</small>
+          </span>
+        </a>
+        <nav class="topnav" aria-label="Primary navigation">
+          <a href="catalog.html">Catalog</a>
+          <a href="shop.html">Shop</a>
+          <a href="about.html">About</a>
+          <a href="index.html#contact">Contact</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="shop-hero">
+          <p class="eyebrow">Shop essentials</p>
+          <h1>Curated rituals for skin, scent and self-care.</h1>
+          <p class="hero__copy">
+            Browse the Essenshea range for body care, nourishing oils, hair rituals and bespoke requests designed to feel indulgent from the first touch.
+          </p>
+          <div class="hero__actions">
+            <a class="button button--primary" href="#shop-products">Browse products</a>
+            <a class="button button--ghost" href="index.html#contact">Request wholesale pricing</a>
+          </div>
+        </section>
+
+        <section class="shop-browse">
+          <div class="section-heading">
+            <p class="eyebrow">Storefront</p>
+            <h2>Browse ready products, request specialist items, or design a custom formulation.</h2>
+          </div>
+          <p class="shop-intro">
+            Select a product to open its detail card, then add it to your request cart. Some items are available now; others are ordered on request and scheduled for manufacture.
+          </p>
+          <div id="shop-products" class="shop-product-grid"></div>
+        </section>
+
+        <section class="shop-actions">
+          <div class="cart-panel">
+            <div class="cart-panel__header">
+              <p class="eyebrow">Your cart</p>
+              <h2>Selected products and request queue</h2>
+            </div>
+            <div id="cart-items" class="cart-items">
+              <p class="empty-cart">Your request cart is empty. Open a product to add it.</p>
+            </div>
+            <div class="cart-summary">
+              <div>
+                <span id="cart-count">0 items selected</span>
+                <span id="cart-total"></span>
+              </div>
+              <span id="cart-note">Ready to request when you are.</span>
+            </div>
+            <button id="checkout-button" class="button button--primary" disabled>Send request</button>
+            <p class="cart-hint">
+              Available products are shipped quickly. Request-only items are queued, priced, and scheduled by the seller.
+            </p>
+          </div>
+
+          <aside class="shop-guide">
+            <h3>How this store works</h3>
+            <ul>
+              <li>Browse curated products and open an item to review details.</li>
+              <li>Add one or several items to your request cart.</li>
+              <li>Submit the cart and the seller will confirm pricing, availability and schedule fulfillment.</li>
+            </ul>
+            <div class="shop-schedule">
+              <p><strong>Made-to-order scheduling:</strong> Custom and request-only items are prepared after your order is received and priced. We keep each request in a structured queue until shipment.</p>
+            </div>
+          </aside>
+        </section>
+
+        <section class="custom-request">
+          <div class="section-heading">
+            <p class="eyebrow">Custom design</p>
+            <h2>Create a bespoke product request with fragrance and formula direction.</h2>
+          </div>
+          <p class="shop-intro">
+            Tell us what you want, choose your fragrance family, and share the texture or ritual you have in mind. The seller will confirm a price and schedule production once your request is accepted.
+          </p>
+          <form id="custom-request-form" class="custom-request-form">
+            <label>
+              Full name
+              <input type="text" name="name" placeholder="Amina Njeri" required />
+            </label>
+            <label>
+              Email address
+              <input type="email" name="email" placeholder="hello@brand.com" required />
+            </label>
+            <label>
+              Product type
+              <select name="productType" required>
+                <option value="Body butter">Body butter</option>
+                <option value="Body oil">Body oil</option>
+                <option value="Haircare">Haircare serum</option>
+                <option value="Fragrance">Fragrance blend</option>
+                <option value="Gift set">Gift set</option>
+              </select>
+            </label>
+            <fieldset class="fragrance-options">
+              <legend>Preferred fragrance notes</legend>
+              <label><input type="checkbox" name="notes" value="Lavender" /> Lavender</label>
+              <label><input type="checkbox" name="notes" value="Rose" /> Rose</label>
+              <label><input type="checkbox" name="notes" value="Vanilla" /> Vanilla</label>
+              <label><input type="checkbox" name="notes" value="Peppermint" /> Peppermint</label>
+              <label><input type="checkbox" name="notes" value="Oak & Amber" /> Oak & Amber</label>
+              <label><input type="checkbox" name="notes" value="Citrus" /> Citrus</label>
+              <label><input type="checkbox" name="notes" value="Cedarwood" /> Cedarwood</label>
+            </fieldset>
+            <label>
+              Describe your request
+              <textarea name="details" placeholder="Tell us the texture, scent, finish or purpose you want." required></textarea>
+            </label>
+            <button class="button button--primary" type="submit">Request custom product</button>
+            <p class="form-status" id="custom-request-status" role="status" aria-live="polite"></p>
+          </form>
+        </section>
+
+        <section class="shop-collections">
+          <div class="section-heading">
+            <p class="eyebrow">Discover more</p>
+            <h2>Browse our full categories for wholesale, gift sets and signature collections.</h2>
+          </div>
+          <div id="shop-collections" class="shop-collections-grid"></div>
+        </section>
+
+        <div id="product-modal" class="modal-overlay hidden" aria-hidden="true" role="dialog" aria-modal="true">
+          <div class="modal-card">
+            <div class="modal-header">
+              <h2 id="modal-title"></h2>
+              <button id="modal-close" class="modal-close" aria-label="Close product details">×</button>
+            </div>
+            <div class="modal-body">
+              <img id="modal-image" class="modal-image" src="" alt="" />
+              <p id="modal-description" class="modal-description"></p>
+              <p id="modal-details" class="modal-details"></p>
+            </div>
+            <div class="modal-footer">
+              <button id="modal-action" class="button button--primary" type="button">Add to cart</button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <strong>Essenshea</strong>
+          <p>Organic luxury for skin, scent and ritual — built to support retail, gifting and wholesale customers with premium presentation.</p>
+        </div>
+        <div class="footer-links">
+          <a href="catalog.html">Catalog</a>
+          <a href="shop.html">Shop</a>
+          <a href="about.html">About</a>
+          <a href="index.html#contact">Contact</a>
+        </div>
+        <div class="footer-contact">
+          <p>Phone: +254 727 349749</p>
+          <p>WhatsApp: +254 727 349 749</p>
+          <p>M-Pesa Till: 9402567</p>
+        </div>
+      </footer>
+    </div>
+    <script src="assets/js/agent-config.js"></script>
+    <script src="assets/js/agent.js"></script>
+    <script src="assets/js/shop.js"></script>
+  </body>
+</html>

@@ -1,0 +1,15 @@
+<svg width="280" height="120" viewBox="0 0 280 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#D1B27D" />
+      <stop offset="100%" stop-color="#8F6438" />
+    </linearGradient>
+  </defs>
+  <g opacity="0.96">
+    <path d="M34 22c16-18 32-20 47-12 14 7 25 20 31 35 6 16 4 34-5 47-9 13-29 10-42 5-11-4-19-12-26-23-5-8-7-20-5-32 1-10 5-18 10-20z" fill="url(#goldGrad)" />
+    <path d="M46 35c11-9 22-10 33-4 9 5 15 13 18 23 3 11 0 23-7 30-8 8-21 7-30 4-8-3-13-9-18-18-3-6-3-14-2-22 1-7 4-13 6-13z" fill="#F9F2E6" />
+    <path d="M72 82c6 6 12 11 18 12 8 1 16-1 23-6 4-3 8-7 11-12 5-8 6-18 3-27-2-6-6-11-11-14-6-4-13-3-20 1-7 4-12 10-16 17-3 6-5 13-4 19 0 4 1 8 2 11z" fill="url(#goldGrad)" opacity="0.9" />
+  </g>
+  <text x="126" y="66" fill="#1B1713" font-family="'Cormorant Garamond', serif" font-size="42" letter-spacing="0.03em">Essenshea</text>
+  <text x="126" y="90" fill="#8F6438" font-family="'Inter', sans-serif" font-size="12" letter-spacing="0.18em">just perfect</text>
+</svg>

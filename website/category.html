@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Essenshea Collection | Category details</title>
+    <meta
+      name="description"
+      content="Browse every product in a dedicated Essenshea category page with descriptions, pricing, and collection details."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <a class="brand" href="index.html" aria-label="Essenshea home">
+          <img class="brand-logo" src="assets/images/essenshea-logo.svg" alt="Essenshea logo" />
+          <span class="brand-text">
+            <strong>Essenshea</strong>
+            <small>Natural luxury, rooted in ritual</small>
+          </span>
+        </a>
+        <nav class="topnav" aria-label="Primary navigation">
+          <a href="catalog.html">Catalog</a>
+          <a href="shop.html">Shop</a>
+          <a href="about.html">About</a>
+          <a href="index.html#contact">Contact</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="category-hero">
+          <div>
+            <p class="eyebrow">Collection</p>
+            <h1 id="category-title">Loading category...</h1>
+            <p id="category-description">Please wait while we load this collection.</p>
+            <div class="category-meta">
+              <span id="category-products-count"></span>
+              <span id="category-tag">Curated collection</span>
+            </div>
+            <a class="category-backlink" href="catalog.html">Back to catalog</a>
+          </div>
+          <img id="category-image" src="" alt="Category image" />
+        </section>
+
+        <section class="category-products">
+          <div class="section-heading">
+            <p class="eyebrow">Products</p>
+            <h2>Browse every item in this collection.</h2>
+          </div>
+          <div id="category-product-grid" class="category-product-grid"></div>
+        </section>
+
+        <section class="category-notice">
+          <p id="category-notice-text">Every product is priced and fulfilled by Essenshea. Some items are available now, and request-only items will be reviewed by the seller before pricing and shipping are confirmed.</p>
+        </section>
+
+        <div id="category-modal" class="modal-overlay hidden" aria-hidden="true" role="dialog" aria-modal="true">
+          <div class="modal-card">
+            <div class="modal-header">
+              <h2 id="category-modal-title"></h2>
+              <button id="category-modal-close" class="modal-close" aria-label="Close product details">×</button>
+            </div>
+            <div class="modal-body">
+              <img id="category-modal-image" class="modal-image" src="" alt="" />
+              <p id="category-modal-description" class="modal-description"></p>
+              <p id="category-modal-details" class="modal-details"></p>
+            </div>
+            <div class="modal-footer">
+              <button id="category-modal-action" class="button button--primary" type="button">Close</button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <strong>Essenshea</strong>
+          <p>Organic luxury for skin, scent and ritual — curated collections for everyday beauty and retail-ready gifting.</p>
+        </div>
+        <div class="footer-links">
+          <a href="catalog.html">Catalog</a>
+          <a href="shop.html">Shop</a>
+          <a href="about.html">About</a>
+          <a href="index.html#contact">Contact</a>
+        </div>
+        <div class="footer-contact">
+          <p>Phone: +254 727 349749</p>
+          <p>WhatsApp: +254 727 349 749</p>
+          <p>M-Pesa Till: 9402567</p>
+        </div>
+      </footer>
+    </div>
+
+    <script src="assets/js/agent-config.js"></script>
+    <script src="assets/js/agent.js"></script>
+    <script src="assets/js/category.js"></script>
+  </body>
+</html>
