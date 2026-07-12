@@ -50,8 +50,8 @@ If you do not know the answer, say so and offer to help the customer request the
 
     let agentMessage = '';
     if (Array.isArray(response.content)) {
-      const textContent = response.content.find((block: any) => block.type === 'text');
-      agentMessage = textContent ? textContent.text : '';
+      const textBlock = response.content.find((block) => block.type === 'text') as { type: 'text'; text: string } | undefined;
+      agentMessage = textBlock ? textBlock.text : '';
     }
 
     if (!agentMessage) {
@@ -68,8 +68,8 @@ If you do not know the answer, say so and offer to help the customer request the
       });
 
       if (Array.isArray(fallbackResponse.content)) {
-        const textContent = fallbackResponse.content.find((block: any) => block.type === 'text');
-        agentMessage = textContent ? textContent.text : 'No response generated.';
+        const textBlock = fallbackResponse.content.find((block) => block.type === 'text') as { type: 'text'; text: string } | undefined;
+        agentMessage = textBlock ? textBlock.text : 'No response generated.';
       }
     }
 

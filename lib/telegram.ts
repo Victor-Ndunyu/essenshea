@@ -1,5 +1,5 @@
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const AGENT_API_URL = process.env.AGENT_API_URL;
+const AGENT_API_URL = process.env.AGENT_API_URL!;
 
 if (!TELEGRAM_BOT_TOKEN) {
   throw new Error('TELEGRAM_BOT_TOKEN must be set in environment');
