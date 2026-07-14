@@ -1,6 +1,18 @@
 import { Anthropic } from '@anthropic-ai/sdk';
 
-const client = new Anthropic({ apiKey: process.env.CLAUDE_API_KEY });
+let anthropicClient: Anthropic | null = null;
+
+function getAnthropicClient(): Anthropic {
+  if (!anthropicClient) {
+    const apiKey = process.env.CLAUDE_API_KEY;
+    if (!apiKey) {
+      throw new Error('CLAUDE_API_KEY must be set in environment');
+    }
+    anthropicClient = new Anthropic({ apiKey });
+  }
+  return anthropicClient;
+}
+
 const preferredModel = process.env.AGENT_MODEL || 'google/gemini-2.5-flash';
 const fallbackModel = process.env.AGENT_FALLBACK_MODEL || 'groq/llama-3.3-70b-versatile';
 
@@ -25,6 +37,8 @@ export async function POST(req: Request) {
         headers: { 'Content-Type': 'application/json' },
       });
     }
+
+    const client = getAnthropicClient();
 
     const sourceInstruction =
       source === 'telegram'
