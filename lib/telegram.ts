@@ -1,12 +1,17 @@
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const AGENT_API_URL = process.env.AGENT_API_URL!;
-
-if (!TELEGRAM_BOT_TOKEN) {
-  throw new Error('TELEGRAM_BOT_TOKEN must be set in environment');
+function getTelegramBotToken(): string {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) {
+    throw new Error('TELEGRAM_BOT_TOKEN must be set in environment');
+  }
+  return token;
 }
 
-if (!AGENT_API_URL) {
-  throw new Error('AGENT_API_URL must be set in environment');
+function getAgentApiUrl(): string {
+  const url = process.env.AGENT_API_URL;
+  if (!url) {
+    throw new Error('AGENT_API_URL must be set in environment');
+  }
+  return url;
 }
 
 export async function sendTelegramMessage(chatId: number, text: string): Promise<void> {
@@ -14,10 +19,11 @@ export async function sendTelegramMessage(chatId: number, text: string): Promise
     throw new Error('Message text cannot be empty');
   }
 
+  const botToken = getTelegramBotToken();
   const truncatedText = text.substring(0, 4096);
 
   const response = await fetch(
-    `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+    `https://api.telegram.org/bot${botToken}/sendMessage`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -36,7 +42,8 @@ export async function sendTelegramMessage(chatId: number, text: string): Promise
 }
 
 export async function sendTypingIndicator(chatId: number): Promise<void> {
-  await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendChatAction`, {
+  const botToken = getTelegramBotToken();
+  await fetch(`https://api.telegram.org/bot${botToken}/sendChatAction`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -47,7 +54,8 @@ export async function sendTypingIndicator(chatId: number): Promise<void> {
 }
 
 export async function callBusinessAgent(message: string, sessionId: string): Promise<string> {
-  const response = await fetch(AGENT_API_URL, {
+  const agentUrl = getAgentApiUrl();
+  const response = await fetch(agentUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
