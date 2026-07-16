@@ -37,7 +37,7 @@ function renderCatalog(categories) {
 loadCatalog();
 
 if (wholesaleForm && formStatus) {
-  wholesaleForm.addEventListener('submit', (event) => {
+  wholesaleForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
     const name = wholesaleForm.elements.name.value.trim();
@@ -48,7 +48,39 @@ if (wholesaleForm && formStatus) {
       return;
     }
 
-    formStatus.textContent = `Thank you, ${name}. We will reach out shortly with wholesale options and sample availability.`;
-    wholesaleForm.reset();
+    formStatus.textContent = 'Sending your request…';
+
+    try {
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: [
+            {
+              title: 'Wholesale inquiry',
+              quantity: 1,
+              priceText: 'Price on request',
+            },
+          ],
+          customer: {
+            name,
+            contact: email,
+            email,
+          },
+          type: 'wholesale',
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        formStatus.textContent = `Thank you, ${name}. We will reach out shortly with wholesale options and sample availability.`;
+        wholesaleForm.reset();
+      } else {
+        formStatus.textContent = `Failed to send: ${result.error || 'Unknown error'}`;
+      }
+    } catch (error) {
+      formStatus.textContent = `Failed to send request: ${error.message}`;
+    }
   });
 }

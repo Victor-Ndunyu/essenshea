@@ -14,7 +14,8 @@
           "image": "../Essenshea_Catalogue/Body_Butters_and_Balms/images/raw_whipped_shea_butter_250ml.jpg",
           "description": "Raw, NO additives \u2022 Perfect for acne, rashes \u2022 Fades stretch marks and dark spots \u2022 Moisturizes the skin & scalp \u2022Gives skin a youthful look \u2022Fights eczema and psoriasis \u2022 Soothes inflammations",
           "price": "KES\u00a0850.00",
-          "priceValue": 850.0
+          "priceValue": 850.0,
+          "stock": null
         },
         {
           "name": "Lavender Whipped Shea Butter 250ml",
@@ -22,7 +23,8 @@
           "image": "../Essenshea_Catalogue/Body_Butters_and_Balms/images/lavender_whipped_shea_butter_250ml.jpg",
           "description": "Ingredients: shea butter, olive oil, coconut oil, Lavender essential oil \u2022 Fades stretch marks \u2022 Relaxing and calming benefits of lavender \u2022 Soothes inflammations \u2022Treats eczema and acne \u2022 Moisturize skin and scalp \u2022 Promotes healthy hair growth \u2022 Heals wounds and scrapes \u2022Give skin a youthful look",
           "price": "KES\u00a0850.00",
-          "priceValue": 850.0
+          "priceValue": 850.0,
+          "stock": null
         },
         {
           "name": "Bubblegum Whipped Shea butter 250ml",
@@ -30,7 +32,8 @@
           "image": "../Essenshea_Catalogue/Body_Butters_and_Balms/images/bubblegum_whipped_shea_butter_250ml.jpg",
           "description": "Natural NO chemical additives & preservatives \u2022 Sweet scent \u2022 Perfect for all skin types \u2022 Fades stretch marks \u2022 Soothes inflammations \u2022Gentle on the skin \u2022 Gives skin a youthful look \u2022Brightens dull looking skin",
           "price": "KES\u00a0850.00",
-          "priceValue": 850.0
+          "priceValue": 850.0,
+          "stock": null
         },
         {
           "name": "Peppermint Whipped Shea Butter 250ml",
@@ -38,7 +41,8 @@
           "image": "../Essenshea_Catalogue/Body_Butters_and_Balms/images/peppermint_whipped_shea_butter_250ml.jpg",
           "description": "Ingredients: shea butter, olive oil, coconut oil, peppermint essential oil Natural, NO chemical additives \u2022 Calming and soothing on skin \u2022 Natural deodorant \u2022 Soothes itchiness and inflammations \u2022 Moisturize skin, scalp and hair \u2022 Give skin and hair a healthy glow \u2022 Fades stretch marks \u2022 Manage eczema, acne, psoriasis",
           "price": "KES\u00a0850.00",
-          "priceValue": 850.0
+          "priceValue": 850.0,
+          "stock": null
         },
         {
           "name": "Customized Whipped Shea Butter",
@@ -46,7 +50,8 @@
           "image": "../Essenshea_Catalogue/Body_Butters_and_Balms/images/customized_whipped_shea_butter.jpg",
           "description": "An extraordinary option to customize a body butter to suit your preference only available at Essenshea. Pick your preference in butters, oils and fragrances. Price depends on ingredients and size. Regular prices 250g- 1,000 300g- 1,150 500g- 1,550 1kg- 2400",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Oak & Amber Body Balm for Men 250ml",
@@ -54,7 +59,8 @@
           "image": "../Essenshea_Catalogue/Body_Butters_and_Balms/images/oak_amber_body_balm_for_men_250ml.jpg",
           "description": "Infused with Sandalwood fragrance.",
           "price": "KES\u00a01,000.00",
-          "priceValue": 1000.0
+          "priceValue": 1000.0,
+          "stock": null
         },
         {
           "name": "Mignight Creed Body Balm For Men 250ml",
@@ -62,7 +68,8 @@
           "image": "../Essenshea_Catalogue/Body_Butters_and_Balms/images/mignight_creed_body_balm_for_men_250ml.jpg",
           "description": "Infused with Smoky chamomile fragrance.",
           "price": "KES\u00a01,000.00",
-          "priceValue": 1000.0
+          "priceValue": 1000.0,
+          "stock": null
         }
       ]
     },
@@ -80,7 +87,8 @@
           "image": "../Essenshea_Catalogue/Body_Oils_and_Tonics/images/shea_body_oil_150ml.jpg",
           "description": "\u2022Natural, organic \u2022 No added fragrance or preservatives \u2022 Perfect for all skin types \u2022Moisturizes, soothes itchy skin and gives skin a glow. \u2022 Very lightweight,, not greasy",
           "price": "KES\u00a01,080.00",
-          "priceValue": 1080.0
+          "priceValue": 1080.0,
+          "stock": null
         },
         {
           "name": "Fruits & Lilies  Body Oil 150ml",
@@ -88,7 +96,8 @@
           "image": "../Essenshea_Catalogue/Body_Oils_and_Tonics/images/fruits_lilies_body_oil_150ml.jpg",
           "description": "\u2022 Non comedogenic ( Doesn't clog pores) \u2022 For face and body use \u2022 Lightweight \u2022 Not sticky \u2022 Perfect for all skin types \u2022 Safe for baby skin",
           "price": "KES\u00a01,080.00",
-          "priceValue": 1080.0
+          "priceValue": 1080.0,
+          "stock": null
         },
         {
           "name": "Sugar & Lime  Body Oil 150ml",
@@ -96,7 +105,8 @@
           "image": "../Essenshea_Catalogue/Body_Oils_and_Tonics/images/sugar_lime_body_oil_150ml.jpg",
           "description": "\u2022 Non comedogenic ( Doesn't clog pores) \u2022 For face and body use \u2022 Lightweight \u2022 Not sticky \u2022 Perfect for all skin types \u2022 Safe for baby skin",
           "price": "KES\u00a01,080.00",
-          "priceValue": 1080.0
+          "priceValue": 1080.0,
+          "stock": null
         },
         {
           "name": "Rosewood musk  Body Oil 150ml",
@@ -104,7 +114,8 @@
           "image": "../Essenshea_Catalogue/Body_Oils_and_Tonics/images/rosewood_musk_body_oil_150ml.jpg",
           "description": "\u2022 Non comedogenic ( Doesn't clog pores) \u2022 For face and body use \u2022 Lightweight \u2022 Not sticky \u2022 Perfect for all skin types \u2022 Safe for baby skin",
           "price": "KES\u00a01,080.00",
-          "priceValue": 1080.0
+          "priceValue": 1080.0,
+          "stock": null
         },
         {
           "name": "Chocolate Fudge Body Oil 150ml",
@@ -112,7 +123,8 @@
           "image": "../Essenshea_Catalogue/Body_Oils_and_Tonics/images/chocolate_fudge_body_oil_150ml.jpg",
           "description": "\u2022Non comedogenic ( Doesn't clog pores) \u2022 For face and body use \u2022 Lightweight \u2022 Not sticky \u2022 Perfect for all skin types \u2022 Safe for baby skin",
           "price": "KES\u00a01,080.00",
-          "priceValue": 1080.0
+          "priceValue": 1080.0,
+          "stock": null
         },
         {
           "name": "Strawberry Shortcake Body Oil 150ml",
@@ -120,7 +132,8 @@
           "image": "../Essenshea_Catalogue/Body_Oils_and_Tonics/images/strawberry_shortcake_body_oil_150ml.jpg",
           "description": "Non comedogenic ( Doesn't clog pores) \u2022 For face and body use \u2022 Lightweight \u2022 Not sticky \u2022 Perfect for all skin types \u2022 Safe for baby skin",
           "price": "KES\u00a01,080.00",
-          "priceValue": 1080.0
+          "priceValue": 1080.0,
+          "stock": null
         },
         {
           "name": "Wood & Spice Body Tonic for Men 200ml",
@@ -128,7 +141,8 @@
           "image": "../Essenshea_Catalogue/Body_Oils_and_Tonics/images/wood_spice_body_tonic_for_men_200ml.jpg",
           "description": "Infused with cedarwood essential oil",
           "price": "KES\u00a01,480.00",
-          "priceValue": 1480.0
+          "priceValue": 1480.0,
+          "stock": null
         },
         {
           "name": "Midnight Creed Body Tonic for Men 200ml",
@@ -136,7 +150,8 @@
           "image": "../Essenshea_Catalogue/Body_Oils_and_Tonics/images/midnight_creed_body_tonic_for_men_200ml.jpg",
           "description": "Infused with smoky chamomile essential oil",
           "price": "KES\u00a01,480.00",
-          "priceValue": 1480.0
+          "priceValue": 1480.0,
+          "stock": null
         },
         {
           "name": "Oak & Amber Body Tonic for Men 200ml",
@@ -144,7 +159,8 @@
           "image": "../Essenshea_Catalogue/Body_Oils_and_Tonics/images/oak_amber_body_tonic_for_men_200ml.jpg",
           "description": "Infused with sandalwood essential oil.",
           "price": "KES\u00a01,480.00",
-          "priceValue": 1480.0
+          "priceValue": 1480.0,
+          "stock": null
         }
       ]
     },
@@ -162,7 +178,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/extra_virgin_coconut_oil.jpg",
           "description": "250ml. Ksh 700 500ml. Ksh 1200 1L. Ksh 1800",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Baobal Oil",
@@ -170,7 +187,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/baobal_oil.jpg",
           "description": "120ml ksh 600 250ml ksh 900 500ml ksh 1250 1L ksh 2200 BENEFITS \u2022 Rich with Vitamin E and fatty acids to moisturize skin & scalp. \u2022 Provide a barrier to protect from environmental elements. \u2022 Protect collagen to ensure skin elasticity and prevent sagging, wrinkles and fine lines. \u2022 Gentle oil cleanser. Massage a few drops on skin to strip down oils and makeup to open up pores before using your regular cleanser. \u2022 Fights acne. It is lightweight non comedogenic oil perfect for oily skin to moisturize without causing breakouts. \u2022 Nourishes & moisturize hair & scalp to prevent frizz, breakage and dryness. \u2022 Soother inflammation & eczema. Baobab oil is a rich source of omega fatty acids that fight inflammation, making it an excellent choice for sensitive or inflamed skin.",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Extra Virgin Olive Oil",
@@ -178,7 +196,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/extra_virgin_olive_oil.jpg",
           "description": "120ml. Ksh 600 250ml. Ksh 1050 500ml. Ksh 1300 1L. Ksh 1800",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Vitamin E Oil",
@@ -186,7 +205,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/vitamin_e_oil.jpg",
           "description": "120ml. Ksh 700 250ml. Ksh 950 500ml Ksh 1650 1L. Ksh 2600",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Jojoba oil",
@@ -194,7 +214,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/jojoba_oil.jpg",
           "description": "120ml. Ksh 1,100 250ml ksh 1,900 500ml. Ksh 3,100 1L. Ksh 4700",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Shea Nut Oil",
@@ -202,7 +223,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/shea_nut_oil.jpg",
           "description": "500ml. Ksh 1050 1L. Ksh 1450",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Lavender Oil",
@@ -210,7 +232,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/lavender_oil.jpg",
           "description": "120ml. Ksh 750 250ml Ksh 1,150 500ml. Ksh 1,800 1L. Ksh 2,900",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Rosehip Oil",
@@ -218,7 +241,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/rosehip_oil.jpg",
           "description": "120ml Ksh 1200 250ml Ksh 1900 500ml Ksh 3300 1L Ksh 5000",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Cypress Oil",
@@ -226,7 +250,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/cypress_oil.jpg",
           "description": "120ml. Ksh 750 250ml. Ksh 1250 500ml. Ksh 2100 1L. Ksh 3600",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Eucalyptus Oil",
@@ -234,7 +259,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/eucalyptus_oil.jpg",
           "description": "120ml. Ksh 700 250ml. Ksh 1050 500ml. Ksh 1750 1L. Ksh 2900",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Camphor Oil",
@@ -242,7 +268,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/camphor_oil.jpg",
           "description": "120ml. Ksh 1100 250ml. Ksh 1600 500ml. Ksh 1900 1L. Ksh 2300",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Calendula Oil",
@@ -250,7 +277,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/calendula_oil.jpg",
           "description": "120ml. Ksh 1200 250ml. Ksh 1700 500ml. Ksh 2600 1L. Ksh 4800",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Carrot Seed Oil",
@@ -258,7 +286,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/carrot_seed_oil.jpg",
           "description": "120ml. Ksh 900 250ml. Ksh 1500 500ml. Ksh 2500 1L. Ksh 4200",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Cedarwood Oil",
@@ -266,7 +295,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/cedarwood_oil.jpg",
           "description": "120ml. Ksh 750 250ml. Ksh 1200 500ml. Ksh 1600 1L. Ksh 2700",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Chamomile Oil",
@@ -274,7 +304,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/chamomile_oil.jpg",
           "description": "120ml. Ksh 450 250ml. Ksh 1400 500ml. Ksh 2500 1L. Ksh 3100",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Chia Seed Oil",
@@ -282,7 +313,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/chia_seed_oil.jpg",
           "description": "120ml. Ksh 750 250ml. Ksh 1200 500ml. Ksh 1700 1L. Ksh 2800",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Citronella Oil",
@@ -290,7 +322,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/citronella_oil.jpg",
           "description": "120ml. Ksh 750 250ml. Ksh 1200 500ml. Ksh 1700 1L. Ksh 2700",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Clove Oil",
@@ -298,7 +331,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/clove_oil.jpg",
           "description": "120ml. Ksh 750 250ml. Ksh 1250 500ml. Ksh 1800 1L. Ksh 2700",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Coffee Oil",
@@ -306,7 +340,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/coffee_oil.jpg",
           "description": "120ml. Ksh 750 250ml. Ksh 1250 500ml. Ksh 1800 1L. Ksh 2700",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Cucumber Seed Oil",
@@ -314,7 +349,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/cucumber_seed_oil.jpg",
           "description": "120ml. Ksh 800 250ml. Ksh 1350 500ml. Ksh 2600 1L. Ksh 3600",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Papaya Seed Oil",
@@ -322,7 +358,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/papaya_seed_oil.jpg",
           "description": "120ml. Ksh 800 250ml. Ksh 1300 500ml. Ksh 1900 1L. Ksh 2600",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Avocado Oil",
@@ -330,7 +367,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/avocado_oil.jpg",
           "description": "120ml ksh 550 250ml ksh 700 500ml ksh 1100 1L ksh 1500 BENEFITS \u2022 Skin moisturizer. Avocado oil is a good source of vitamin E, potassium and lecithin. Naturally, the moisturizing elements of the oil improve the dry and rough texture of the skin. It also helps the skin to rejuvenate. \u2022 Helps prevent acne. It helps to reduce acne inflammation and treats it within a short period of time. It also provides ultimate hydration to your skin without leaving any oil residue. \u2022 Treats sunburn. It is packed with vitamin E, D, protein and lecithin that help boost healing, which helps in treating sunburned skin. Our avocado oil eases the symptoms of sunburn such as redness, skin irritation etc. \u2022 Slow down signs of aging. Avocado oil contains essential fatty acids and oleic acid that promotes collagen synthesis in your skin. \u2022 Help with eczema & psoriasis. Being antioxidant-rich and filled with vitamins, avocado oil can be extremely useful for dry and flaky skin. Eczema and psoriasis both make your skin irritated, itchy and flaky. Avocado oil can soothe irritated skin, hydrate it and reduce the symptoms of these skin conditions. \u2022Moisturize scalp & nails. Avocado oil improves brittle and dry nails. It keeps the skin around your nails soft and prevents nail breakage. If used as a hair mask, it can help with dandruff issues as well. Your scalp feels moisturized and well-nourished after an avocado mask application. \u2022 Smoothen, soften & strengthen hair. Avocado oil's emollience helps to optimally hydrate hair while potassium and magnesium (two minerals found in avocado oil) lock in moisture. The result is improved hair texture with a shine boost. \u2022 Protect & repair hair. Avocado oil helps improve overall hair health as it contains natural fatty acids that help to repair the hair cuticle and prevent breakage. AND - due to its ability to hydrate hair and lock in moisture, it can also help prevent heat styling damage.",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Blackseed Oil",
@@ -338,7 +376,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/blackseed_oil.jpg",
           "description": "120ml ksh 700 250ml ksh 950 500ml ksh 1300 1L ksh 2100 BENEFITS \u2022 Skin conditions. Due to its anti-inflammatory and antimicrobial effects, black seed oil may help reduce symptoms of dermatological conditions like psoriasis, eczema, vitiligo and acne. \u2022 Wound healing & skin repair. Due to its antioxidant, anti-inflammatory and antibacterial properties, Black seed oil can also stimulate the production of collagen, speeding up the skin's healing process. \u2022 Hair health. Black seed oil may help reduce scalp conditions like a dry, flaky scalp. \u2022 Revitalize skin. With vitamins A, B, and C aplenty, this oil also helps the skin retain moisture, and thanks to an abundance of fatty acids, it may also help to smoothen out the appearance of fine lines and wrinkles. \u2022 Even out skin tone. Together the vitamin A, amino acids, and fatty acids in black seed oil work together to hydrate skin cells. This is because vitamin A has the ability to increase epidermal turnover (aka the generation of the skin cells). \u2022 Manage hair loss. Studies have found that a hair treatment containing black seed oil resulted in a reduction in hair fallout of up to 76%.",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Aloe Vera Oil",
@@ -346,7 +385,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/aloe_vera_oil.jpg",
           "description": "120ml ksh 550 250ml ksh 800 500ml ksh 1300 1L ksh 2000 BENEFITS \u2022 Soothe skin inflammation. \u2022 Fades acne, acne scars and blemishes. \u2022 Boost hair growth. \u2022 Nourishes dry flaky scalp. \u2022 Promote shiny healthy hair. \u2022 Treat fungal infections on skin and scalp. \u2022 Even skin tone. \u2022 Hydrate skin & slow aging. \u2022 Fade stretchmarks.",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Grapeseed Oil",
@@ -354,7 +394,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/grapeseed_oil.jpg",
           "description": "120ml ksh 800 250ml ksh 1100 500ml ksh 1600 1L ksh 2500 BENEFITS For Skin: \u2022 Moisturizer: Grapeseed oil is easily absorbed and makes an excellent natural moisturizer for all skin types. It helps maintain skin hydration without leaving a greasy residue. \u2022 Antioxidant Properties: It's rich in antioxidants, including vitamin E and proanthocyanidins, which can protect the skin from damage caused by free radicals and UV radiation, potentially slowing the signs of aging. \u2022Anti-Inflammatory: Grapeseed oil has anti-inflammatory properties and can help soothe irritated or sensitive skin. It's useful for conditions like eczema and psoriasis. \u2022 Acne Control: Due to its non-comedogenic nature, it can be applied to acne-prone skin to help regulate oil production and prevent clogged pores. \u2022Scar Reduction: Grapeseed oil assists in reducing the appearance of scars, stretch marks, and blemishes, promoting skin regeneration. \u2022 Skin Tightening: Some people use grapeseed oil to tighten and tone the skin. Its astringent properties can enhance skin firmness and reduce the appearance of fine lines and wrinkles. For Hair: \u2022 Hair Moisturization: Grapeseed oil can be applied to dry or frizzy hair to provide moisture and shine without weighing the hair down. It's a great option for those with fine or thin hair. \u2022Strengthening: The oil contains linoleic acid, which can strengthen hair and help prevent breakage. It's especially useful for people with fragile or damaged hair. \u2022 Dandruff Control: Grapeseed oil can be massaged into the scalp to help control dandruff and alleviate an itchy, flaky scalp. \u2022 Heat Protectant: It serves as a natural heat protectant when applied to the hair before using heat styling tools like hairdryers and straighteners. \u2022Split End Treatment: Grapeseed oil can be used to reduce the appearance of split ends and maintain hair health. \u2022 Natural Conditioner: It can be used as a leave-in conditioner to make hair softer, smoother, and more manageable.",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Moringa Oil",
@@ -362,7 +403,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/moringa_oil.jpg",
           "description": "120ml ksh 950 250ml ksh 1300 500ml ksh 2300 1L ksh 3500 BENEFITS For Skin: \u2022 Moisturization: Moringa oil is a lightweight and easily absorbed oil that provides deep hydration to the skin, making it an excellent natural moisturizer for all skin types. \u2022 Antioxidant Properties: It's rich in antioxidants, such as vitamins A, C, and E, which help protect the skin from damage by free radicals and UV radiation, potentially slowing down the signs of aging. \u2022Anti-Inflammatory: Moringa oil contains anti-inflammatory compounds that can soothe and calm irritated or sensitive skin. It's beneficial for conditions like eczema and psoriasis. \u2022Acne Control: Due to its non-comedogenic nature, moringa oil can be applied to acne-prone skin to help regulate oil production and prevent clogged pores, making it a suitable oil for those with acne. \u2022Wound Healing: Moringa oil may promote wound healing and reduce the appearance of scars. It supports skin regeneration and may help minimize the visibility of scars and blemishes. \u2022 Skin Toning: It's used for skin toning and can help improve skin's overall texture and firmness, reducing the appearance of fine lines and wrinkles. For Hair: \u2022 Hair Moisturization: Moringa oil can be used to moisturize and condition the hair, providing shine and reducing frizz. It's especially beneficial for dry or brittle hair. \u2022 Strength and Growth: Moringa oil contains essential nutrients that help strengthen hair and promote hair growth. It can reduce breakage and support the health of hair follicles. \u2022Dandruff Control: It can be applied to the scalp to help alleviate dandruff and dryness. Its antifungal and antimicrobial properties can maintain a healthy scalp. \u2022 Natural Shine: Moringa oil gives hair a natural shine and smoothness without being heavy or greasy. \u2022 Protective Barrier: When used as a leave-in treatment, it forms a protective barrier that shields the hair from environmental pollutants and heat damage.",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Virgin Coconut Oil",
@@ -370,7 +412,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/virgin_coconut_oil.jpg",
           "description": "120ml. Ksh 400 250ml. Ksh 600 1L. Ksh 1000",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Amla Oil",
@@ -378,7 +421,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/amla_oil.jpg",
           "description": "120ml ksh 700 250ml ksh 1100 500ml ksh 2100 1L ksh 3000 BENEFITS \u2022 Prevents Gray Hair: Amla hair oil can prevent premature graying of hair by reducing oxidative stress that ages hair follicles faster. \u2022 Natural Hair Conditioner: Amla hair oil has fatty acids which can help moisturise and nourish dry hair, tame frizz, reduce hair fall and breakage of hair. \u2022 Soothing Effect: Amla oil can help soothe dry, irritated scalp. It helps to reduce itching by giving a cooling effect to the scalp. \u2022 Protects and Strengthens Hair: Amla hair oil can strengthen your hair by protecting them from environmental damage. \u2022 Boosts hair density: Use of amla oil for hair growth reduces hair loss and regulates better growth. \u2022 Amla oil improves the thickness and volume of your hair. Amla oil overall improves the hair texture and density. \u2022 Controls dandruff: If you have an oily scalp, amla oil helps to mildly exfoliate the scalp and absorb all the excess oil, thus controlling the dandruff. \u2022 Treats Lice: With no side effects it is an effective hair oil for treating head lice on children. Simply apply oil, leave it for an hour and then comb through. \u2022 Scalp Cleanser: Amla hair oil naturally cleanses the scalp. The antioxidants in amla protect your scalp from damage caused by dirt, dust, smoke and styling tools. \u2022 Nourishing: Amla Hair Oil is rich in vitamin C and other essential nutrients that help to improve the condition of hair.",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Apricot Kernel Oil",
@@ -386,7 +430,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/apricot_kernel_oil.jpg",
           "description": "100ml ksh 500 250ml ksh 700 500ml ksh 1000 1L ksh 1700 BENEFITS \u2022 Brighten skin tone. Apricot oil is a good source of vitamins C and E, and these antioxidants help boost the skin cell turnover, promoting a brighter complexion and even tone. \u2022 Moisturize skin. Since it is a good source of vitamin A and other fatty acids, the oil can strengthen the skin barrier, improve its texture, and restore damaged skin. \u2022 Prevent acne & inflammation. Apricot oil has antibacterial, antifungal, and anti-inflammatory properties. It is effective to ease the symptoms of conditions like eczema and psoriasis. \u2022 Reduce signs of aging. It is a source of vitamin A that may help minimize the appearance of wrinkles and fine lines, rebuild collagen, and tighten the skin and also protect your skin from further UV damage. USES: \u2022 Soap Making. \u2022 Massage oils & body oils. Mix 10 drops of any essential oil with 60 mL of apricot oil. Store the mix in a glass jar. Use it three times a week. \u2022 Oil cleanser. Mix a few drops of essential oils and 20mL of apricot oil. Massage your skin with the oil blend. Leave it on for 20 minutes and then rinse it off. Use it three times a week. \u2022 Sealant. After finishing your skin care routine, massage your face with 2-3 drops of apricot oil.",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Argan Oil",
@@ -394,7 +439,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/argan_oil.jpg",
           "description": "100ml ksh 900 250ml ksh 1700 500ml ksh 2800 1L ksh 5200 BENEFITS \u2022 Promotes smooth silky hair. \u2022 Protects dyed hair against heat & styling damage. \u2022 Hydrates and moisturizes dry skin. \u2022 Help slow down signs of aging; increases skin elasticity.",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Sunflower Oil",
@@ -402,7 +448,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/sunflower_oil.jpg",
           "description": "500ml ksh 900 1L. Ksh Benefits \u2022 Hydrate \u2022 Doesn't clog pores \u2022Minimize signs of aging \u2022 Even out skin tone. \u2022It's also full of antioxidants like vitamin E, vitamin A, vitamin C, vitamin K, and vitamin D. Use to make organic soaps, body oils, hair oils, whipped body butters, face oils, massage oils etc.",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Yellow Castor Oil",
@@ -410,7 +457,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/yellow_castor_oil.jpg",
           "description": "120ml. Ksh 550 250ml. Ksh 900 500ml. Ksh 1300 1L. Ksh 1700 Benefits; \u2022 Clears ache \u2022 Improves Skin exture \u2022 Improves Skin Complexion \u2022 Gives Healthy, Shiny Hair \u2022Prevent Wrinkles \u2022Speeds hair growth \u2022 Strengthen hair \u2022Prevent Hair breakage \u2022 Repair and prevent split ends Use to make soaps, hair growth oils, body oils and whipped body butters.",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Virgin Olive Oil",
@@ -418,7 +466,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/virgin_olive_oil.jpg",
           "description": "120ml - Ksh 450 250ml - Ksh 700 500ml. Ksh 1200 1L. Ksh 1700",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Sweet almond oil",
@@ -426,7 +475,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/sweet_almond_oil.jpg",
           "description": "250ml 1,100/- 500ml 1600/- 1L 2400/-",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Vanilla oil",
@@ -434,7 +484,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/vanilla_oil.jpg",
           "description": "250ml Ksh 1250 500ml Ksh 1800 1L. Ksh 2400",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Turmeric oil",
@@ -442,7 +493,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/turmeric_oil.jpg",
           "description": "250ml. 1400 500ml 2050 1L. 2900",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Batana oil",
@@ -450,7 +502,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/batana_oil.jpg",
           "description": "100ml. 1500 500ml 3650 1L. 6700",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Sesame Seed Oil",
@@ -458,7 +511,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/sesame_seed_oil.jpg",
           "description": "500ml. Ksh 1200 1L. Ksh 1550",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Jamaican Black Castor Oil",
@@ -466,7 +520,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/jamaican_black_castor_oil.jpg",
           "description": "120ml ksh 700 250ml ksh 950 500ml ksh 1400 1L ksh 2100 BENEFITS For Skin: \u2022Moisturizer: JBCO is a thick and rich oil that provides deep hydration to the skin. It's beneficial for dry or rough skin and can help improve overall skin moisture. \u2022 Anti-Inflammatory: The oil contains ricinoleic acid, which has anti-inflammatory properties. It can be used to soothe irritated skin, reduce redness, and alleviate minor skin issues like rashes or sunburn. \u2022 Anti-Acne: JBCO's antimicrobial and anti-inflammatory properties may help in managing acne by preventing bacterial growth and reducing inflammation. It can be used as a spot treatment. \u2022 Scar Reduction: Some people use JBCO to reduce the appearance of scars and stretch marks. The oil's nourishing and hydrating properties may support skin repair and regeneration. \u2022 Natural Cleanser: JBCO can be used as a natural cleanser or makeup remover. Its thick consistency can effectively remove makeup and impurities from the skin. For Hair: \u2022Hair Growth: JBCO is widely recognized for its potential to promote hair growth. It strengthens hair follicles, prevents hair breakage, and may lead to longer and healthier hair when applied to the scalp. \u2022Thicker Hair: The oil's nutrients and omega-9 fatty acids can help make hair strands thicker and more resilient. It's often used in hair care routines to achieve fuller and more voluminous hair. \u2022Dandruff Control: JBCO can be applied to the scalp to control dandruff and flaky scalp conditions. Its antifungal properties help maintain a healthy scalp. \u2022Split End Treatment: It can be used to treat and prevent split ends, helping maintain the overall health and appearance of hair. \u2022 Sealant for Moisture: JBCO is often used as a sealant in the \"LOC\" (Liquid, Oil, Cream) method for curly and coily hair types. It locks in moisture, keeping hair hydrated and preventing dryness. \u2022Hot Oil Treatment: JBCO can be used in hot oil treatments to condition and revitalize damaged or dry hair.",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Vitamin E oil",
@@ -474,7 +529,8 @@
           "image": "../Essenshea_Catalogue/Carrier_Oils/images/vitamin_e_oil.jpg",
           "description": "120ml. Ksh 700 250ml. Ksh 950 500ml Ksh 1650 1L. Ksh 2600",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         }
       ]
     },
@@ -492,7 +548,8 @@
           "image": "../Essenshea_Catalogue/Essential_Oils/images/rose_essential_oil.jpg",
           "description": "10ml. Ksh 700 50ml. Ksh 1450 100ml. Ksh 2100",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Bergamot Essential Oil",
@@ -500,7 +557,8 @@
           "image": "../Essenshea_Catalogue/Essential_Oils/images/bergamot_essential_oil.jpg",
           "description": "10ml. Ksh 680 50ml. Ksh 1200 100ml. Ksh 1950",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Peppermint Essential Oil",
@@ -508,7 +566,8 @@
           "image": "../Essenshea_Catalogue/Essential_Oils/images/peppermint_essential_oil.jpg",
           "description": "10ml. Ksh 520 50ml. Ksh 1050 100ml. Ksh 1500",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Lavender Essential Oil",
@@ -516,7 +575,8 @@
           "image": "../Essenshea_Catalogue/Essential_Oils/images/lavender_essential_oil.jpg",
           "description": "10ml. Ksh 670 50ml. Ksh 1300 100ml. Ksh 1900",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Rosemary Essential Oil",
@@ -524,7 +584,8 @@
           "image": "../Essenshea_Catalogue/Essential_Oils/images/rosemary_essential_oil.jpg",
           "description": "10ml. Ksh 570 50ml. Ksh 830 100ml. Ksh 1800",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Lemongrass Essential Oil",
@@ -532,7 +593,8 @@
           "image": "../Essenshea_Catalogue/Essential_Oils/images/lemongrass_essential_oil.jpg",
           "description": "10ml. Ksh 520 50ml. Ksh 920 100ml. Ksh 1700",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Mint Essential Oil",
@@ -540,7 +602,8 @@
           "image": "../Essenshea_Catalogue/Essential_Oils/images/mint_essential_oil.jpg",
           "description": "10ml. Ksh 520 50ml Ksh 900 100ml. Ksh 1700",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Chamomile Essential Oil",
@@ -548,7 +611,8 @@
           "image": "../Essenshea_Catalogue/Essential_Oils/images/chamomile_essential_oil.jpg",
           "description": "10ml. Ksh 850 50ml. Ksh 2400 100ml. Ksh 4000",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Clove Essential Oil",
@@ -556,7 +620,8 @@
           "image": "../Essenshea_Catalogue/Essential_Oils/images/clove_essential_oil.jpg",
           "description": "10ml. Ksh 470 30ml. Ksh 1050 100ml. Ksh 1700 BENEFITS \u2022Acne treatment. Clove oil has antimicrobial and anti-inflammatory properties, making it a potential natural remedy for acne. Diluted clove oil can be applied topically to treat acne blemishes. \u2022 Skin Infections: Its antimicrobial properties make clove oil useful for treating various skin infections, such as fungal infections or cuts and wounds. \u2022 Skin Rejuvenation: The antioxidant properties of clove oil can help combat free radicals and promote healthier, more youthful-looking skin. \u2022Anti-Aging: Clove oil's antioxidant content may help reduce the signs of aging, such as wrinkles and fine lines. \u2022 Skin Irritations: It can provide relief from skin irritations and itchiness, particularly when diluted and applied to the affected areas. \u2022Promotes Hair Growth: Clove oil can improve blood circulation to the scalp, which may promote hair growth. It's often used in hair care products for this purpose. \u2022Dandruff Treatment: Clove oil's antimicrobial properties can help combat dandruff and flaky scalp conditions. It can be added to your regular shampoo or diluted in a carrier oil and massaged onto the scalp. \u2022Hair Conditioning: When diluted with a carrier oil, clove oil can serve as a hair conditioner. It helps with frizz and improve the overall texture of your hair.",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Camphor Essential Oil",
@@ -564,7 +629,8 @@
           "image": "../Essenshea_Catalogue/Essential_Oils/images/camphor_essential_oil.jpg",
           "description": "10ml. Ksh 370 30ml. Ksh 850 100ml. Ksh 1400",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Eucalyptus Essential Oil",
@@ -572,7 +638,8 @@
           "image": "../Essenshea_Catalogue/Essential_Oils/images/eucalyptus_essential_oil.jpg",
           "description": "10ml. Ksh 500 30ml. Ksh 980 100ml. Ksh 1600",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Cedarwood Essential Oil",
@@ -580,7 +647,8 @@
           "image": "../Essenshea_Catalogue/Essential_Oils/images/cedarwood_essential_oil.jpg",
           "description": "10ml. Ksh 400 30ml. Ksh 900 100ml. 1400",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Tea Tree Essential Oil",
@@ -588,7 +656,8 @@
           "image": "../Essenshea_Catalogue/Essential_Oils/images/tea_tree_essential_oil.jpg",
           "description": "10ml. Ksh 500 30ml. Ksh 1080 100ml. Ksh 1700",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Frankincense Essential Oil",
@@ -596,7 +665,8 @@
           "image": "../Essenshea_Catalogue/Essential_Oils/images/frankincense_essential_oil.jpg",
           "description": "10ml. Ksh 800 50ml. Ksh 1900 100ml. Ksh 2600",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Sandalwood Essential Oil",
@@ -604,7 +674,8 @@
           "image": "../Essenshea_Catalogue/Essential_Oils/images/sandalwood_essential_oil.jpg",
           "description": "10ml. Ksh 870/- 50ml. Ksh 1900/- 100ml. Ksh 3100/-",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Cinnamon Bark Essential Oil",
@@ -612,7 +683,8 @@
           "image": "../Essenshea_Catalogue/Essential_Oils/images/cinnamon_bark_essential_oil.jpg",
           "description": "10ml. Ksh 650 50ml. Ksh 1000 100ml. Ksh 1500",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         }
       ]
     },
@@ -630,7 +702,8 @@
           "image": "../Essenshea_Catalogue/Fragrances/images/fragrances.jpg",
           "description": "See product listing for details.",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Bubblegum fragrance",
@@ -638,7 +711,8 @@
           "image": "../Essenshea_Catalogue/Fragrances/images/bubblegum_fragrance.jpg",
           "description": "30ml. Ksh 650 100ml. Ksh 1050 Ts",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Warm chocolate fragrance",
@@ -646,7 +720,8 @@
           "image": "../Essenshea_Catalogue/Fragrances/images/warm_chocolate_fragrance.jpg",
           "description": "30ml. Ksh 500 100ml. Ksh 900 Ts",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Vanilla bean fragrance",
@@ -654,7 +729,8 @@
           "image": "../Essenshea_Catalogue/Fragrances/images/vanilla_bean_fragrance.jpg",
           "description": "30ml. Ksh 600 100ml. Ksh 1050 Ac",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Verbena Freshness",
@@ -662,7 +738,8 @@
           "image": "../Essenshea_Catalogue/Fragrances/images/verbena_freshness.jpg",
           "description": "30ml. Ksh 550 100ml. Ksh 980",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Nectarine Bliss",
@@ -670,7 +747,8 @@
           "image": "../Essenshea_Catalogue/Fragrances/images/nectarine_bliss.jpg",
           "description": "30ml. Ksh 550 100ml. Ksh 980",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         }
       ]
     },
@@ -688,7 +766,8 @@
           "image": "../Essenshea_Catalogue/Gels_and_Hydrosols/images/aloe_vera_gel.jpg",
           "description": "250g 800/- 500g 1,200/- 1kg 1,600/-",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         }
       ]
     },
@@ -706,7 +785,8 @@
           "image": "../Essenshea_Catalogue/Gift_Sets/images/gift_set_1.jpg",
           "description": "\u2022 Jewelry set with necklace, earrings and a complimentary ring. (Box included) \u2022 Body oil \u2022 Card \u2022 1 forever rose (pink, white, red) \u2022 Gift bag",
           "price": "KES\u00a02,600.00",
-          "priceValue": 2600.0
+          "priceValue": 2600.0,
+          "stock": null
         },
         {
           "name": "Gift set #2",
@@ -714,7 +794,8 @@
           "image": "../Essenshea_Catalogue/Gift_Sets/images/gift_set_2.jpg",
           "description": "\u2022 Jewellery set with necklace, earrings and a complimentary ring. (Box included) \u2022 Whipped body butter \u2022 Forever rose \u2022 Card \u2022 Gift bag",
           "price": "KES\u00a02,400.00",
-          "priceValue": 2400.0
+          "priceValue": 2400.0,
+          "stock": null
         },
         {
           "name": "Gift set #3",
@@ -722,7 +803,8 @@
           "image": "../Essenshea_Catalogue/Gift_Sets/images/gift_set_3.jpg",
           "description": "\u2022 Silver Men\u2019s watch. (Box included) \u2022 Luxe body balm for men. \u2022 Body tonic for men. \u2022 Card \u2022 Gift Bag",
           "price": "KES\u00a03,400.00",
-          "priceValue": 3400.0
+          "priceValue": 3400.0,
+          "stock": null
         },
         {
           "name": "Gift set #4",
@@ -730,7 +812,8 @@
           "image": "../Essenshea_Catalogue/Gift_Sets/images/gift_set_4.jpg",
           "description": "\u2022 Men\u2019s watch ( box included) \u2022 luxe body balm for men \u2022 Beard elixir \u2022 Body tonic for men \u2022 Card \u2022 Gift bag",
           "price": "KES\u00a04,000.00",
-          "priceValue": 4000.0
+          "priceValue": 4000.0,
+          "stock": null
         },
         {
           "name": "Gift set #5",
@@ -738,7 +821,8 @@
           "image": "../Essenshea_Catalogue/Gift_Sets/images/gift_set_5.jpg",
           "description": "\u2022 Mens watch \u2022 Beard elixir \u2022 Card \u2022 Gift bag",
           "price": "KES\u00a01,800.00",
-          "priceValue": 1800.0
+          "priceValue": 1800.0,
+          "stock": null
         }
       ]
     },
@@ -756,7 +840,8 @@
           "image": "../Essenshea_Catalogue/Haircare/images/hair_growth_serum_100ml.jpg",
           "description": "\u2022 Perfect blend of Natural, plant based oils. \u2022 Repair broken & damaged hair \u2022 Increase length and volume of hair \u2022 Moisturize hair and scalp \u2022 Soothe itchy scalp \u2022 Stop dandruff \u2022 Regrowth of balding spots and receding hairline. \u2022 Perfect for babies and adults",
           "price": "KES\u00a0900.00",
-          "priceValue": 900.0
+          "priceValue": 900.0,
+          "stock": null
         },
         {
           "name": "Rosemary Hair Pritz 100ml",
@@ -764,7 +849,8 @@
           "image": "../Essenshea_Catalogue/Haircare/images/rosemary_hair_pritz_100ml.jpg",
           "description": "A careful blend of plant extracts with rosemary, clove, peppermint and other ingredients to; \u2022 Hydrate hair strands \u2022 Stimulate hair folicles \u2022 Disinfect scalp from fungal infection \u2022 Reduce scalp itching \u2022 Boost healthy hair",
           "price": "KES\u00a0550.00",
-          "priceValue": 550.0
+          "priceValue": 550.0,
+          "stock": null
         },
         {
           "name": "Beard Elixir for Men 50ml",
@@ -772,7 +858,8 @@
           "image": "../Essenshea_Catalogue/Haircare/images/beard_elixir_for_men_50ml.jpg",
           "description": "The perfect blend of natural oils and essential oils to boost thick beard, vivid black color, reduce breakage and smooth texture.",
           "price": "KES\u00a0700.00",
-          "priceValue": 700.0
+          "priceValue": 700.0,
+          "stock": null
         }
       ]
     },
@@ -790,7 +877,8 @@
           "image": "../Essenshea_Catalogue/Raw_Butters/images/raw_unrefined_cocoa_butter.jpg",
           "description": "500g. 1500 1kg. 2500",
           "price": "Price on request",
-          "priceValue": null
+          "priceValue": null,
+          "stock": null
         },
         {
           "name": "Raw Ghana Shea Butter",
@@ -798,7 +886,8 @@
           "image": "../Essenshea_Catalogue/Raw_Butters/images/raw_ghana_shea_butter.jpg",
           "description": "1/4kg. 1000 1/2kg. 1600 1kg. 2600",
           "price": "KES\u00a01,000.00",
-          "priceValue": 1000.0
+          "priceValue": 1000.0,
+          "stock": null
         },
         {
           "name": "Raw Ugandan Shea Butter",
@@ -806,7 +895,8 @@
           "image": "../Essenshea_Catalogue/Raw_Butters/images/raw_ugandan_shea_butter.jpg",
           "description": "1/2kg. 800 1kg. 1300",
           "price": "KES\u00a0800.00",
-          "priceValue": 800.0
+          "priceValue": 800.0,
+          "stock": null
         },
         {
           "name": "Raw Unrefined Mango Butter",
@@ -814,7 +904,8 @@
           "image": "../Essenshea_Catalogue/Raw_Butters/images/raw_unrefined_mango_butter.jpg",
           "description": "1/2kg 1400/- 1kg. 2300/-",
           "price": "KES\u00a01,350.00",
-          "priceValue": 1350.0
+          "priceValue": 1350.0,
+          "stock": null
         }
       ]
     }

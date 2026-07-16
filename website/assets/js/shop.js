@@ -222,16 +222,71 @@ function removeFromCart(productId) {
   renderCart();
 }
 
-function submitCartRequest() {
+async function submitCartRequest() {
   if (!cart.length) return;
 
-  const requestDetails = cart.map((item) => `${item.quantity}× ${item.title}`).join('\n');
-  alert(`Your request has been sent:\n\n${requestDetails}\n\nThe seller will reach out to confirm price and schedule fulfillment.`);
-  cart.length = 0;
-  renderCart();
+  const checkoutButton = document.getElementById('checkout-button');
+  if (checkoutButton) {
+    checkoutButton.disabled = true;
+    checkoutButton.textContent = 'Sending…';
+  }
+
+  const customerName = prompt('Your name:');
+  if (!customerName || !customerName.trim()) {
+    if (checkoutButton) {
+      checkoutButton.disabled = false;
+      checkoutButton.textContent = 'Submit request';
+    }
+    return;
+  }
+
+  const customerContact = prompt('Phone number or email:');
+  if (!customerContact || !customerContact.trim()) {
+    if (checkoutButton) {
+      checkoutButton.disabled = false;
+      checkoutButton.textContent = 'Submit request';
+    }
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: cart.map((item) => ({
+          title: item.title,
+          quantity: item.quantity,
+          priceText: item.priceText,
+        })),
+        customer: {
+          name: customerName.trim(),
+          contact: customerContact.trim(),
+        },
+        type: 'cart',
+      }),
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      alert(result.message);
+      cart.length = 0;
+      renderCart();
+    } else {
+      alert(`Failed to submit: ${result.error || 'Unknown error'}`);
+    }
+  } catch (error) {
+    alert(`Failed to submit request: ${error.message}`);
+  } finally {
+    if (checkoutButton) {
+      checkoutButton.disabled = false;
+      checkoutButton.textContent = 'Submit request';
+    }
+  }
 }
 
-function handleCustomRequestSubmit(event) {
+async function handleCustomRequestSubmit(event) {
   event.preventDefault();
   const formData = new FormData(customRequestForm);
   const name = formData.get('name').trim();
@@ -245,8 +300,41 @@ function handleCustomRequestSubmit(event) {
     return;
   }
 
-  customRequestStatus.textContent = 'Your custom request has been sent. A seller will reply with a price and schedule.';
-  customRequestForm.reset();
+  customRequestStatus.textContent = 'Sending your request…';
+
+  try {
+    const response = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: [
+          {
+            title: `Custom request: ${productType || 'Unspecified'}`,
+            quantity: 1,
+            priceText: 'Price on request',
+          },
+        ],
+        customer: {
+          name,
+          contact: email,
+          email,
+          notes: `${details}${notes.length ? ' | Fragrance notes: ' + notes.join(', ') : ''}`,
+        },
+        type: 'custom',
+      }),
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      customRequestStatus.textContent = result.message;
+      customRequestForm.reset();
+    } else {
+      customRequestStatus.textContent = `Failed to send: ${result.error || 'Unknown error'}`;
+    }
+  } catch (error) {
+    customRequestStatus.textContent = `Failed to send request: ${error.message}`;
+  }
 }
 
 renderCart();
