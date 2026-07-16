@@ -1,17 +1,17 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>About Essenshea | Natural luxury rooted in ritual</title>
-    <meta name="description" content="Learn about the story, philosophy and artisan approach behind Essensheaâ€™s botanical collections." />
+    <meta name="description" content="Learn about the story, philosophy and artisan approach behind Essenshea's botanical collections." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/style-new.css" />
   </head>
   <body>
     <div class="page-shell">
@@ -29,14 +29,21 @@
           <a href="/about">About</a>
           <a href="/#contact">Contact</a>
         </nav>
+        <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="topnav">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
       </header>
 
       <main>
         <section class="hero hero--about">
           <div class="hero__content">
             <p class="eyebrow">The Essenshea story</p>
-            <h1>Crafted for people who want beauty that feels both purposeful and indulgent.</h1>
-            <p class="hero__copy">
+            <h1 class="display-lg">Crafted for people who want beauty that feels both purposeful and indulgent.</h1>
+            <p class="hero__copy body-lg">
               Essenshea brings together organic shea, nourishing oils, fragrance-led body care and wellness essentials into a grounded luxury experience for everyday ritual.
             </p>
           </div>
@@ -45,26 +52,100 @@
           </div>
         </section>
 
-        <section class="story-grid">
-          <article class="story-card">
-            <h2>Rooted in nature</h2>
-            <p>From whips and balms to aromatic oils and sacred scents, the collections are crafted around botanical nourishment and the comfort of tactile self-care.</p>
-          </article>
-          <article class="story-card">
-            <h2>Made for modern rituals</h2>
-            <p>Whether it is a daily body oil, a custom blend, or a gift set for someone special, every product is designed to feel considered, elevated and personal.</p>
-          </article>
-          <article class="story-card">
-            <h2>Built for retail and wholesale</h2>
-            <p>Essenshea supports flexible purchasing for individual customers, retail shelves and curated bulk orders with a direct, responsive service model.</p>
-          </article>
+        <section class="story-grid section">
+          <div class="section-heading reveal">
+            <h2 class="display-md">What guides every formulation</h2>
+          </div>
+          <div class="grid grid--3">
+            <article class="story-card card reveal stagger-1">
+              <div class="story-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+                  <path d="M12 6v6l4 2"></path>
+                </svg>
+              </div>
+              <h3 class="heading-md">Rooted in nature</h3>
+              <p class="body">From whips and balms to aromatic oils and sacred scents, the collections are crafted around botanical nourishment and the comfort of tactile self-care.</p>
+            </article>
+            <article class="story-card card reveal stagger-2">
+              <div class="story-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+              </div>
+              <h3 class="heading-md">Made for modern rituals</h3>
+              <p class="body">Whether it is a daily body oil, a custom blend, or a gift set for someone special, every product is designed to feel considered, elevated and personal.</p>
+            </article>
+            <article class="story-card card reveal stagger-3">
+              <div class="story-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                  <path d="M8 21h8"></path>
+                  <path d="M12 17v4"></path>
+                </svg>
+              </div>
+              <h3 class="heading-md">Built for retail and wholesale</h3>
+              <p class="body">Essenshea supports flexible purchasing for individual customers, retail shelves and curated bulk orders with a direct, responsive service model.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="philosophy section">
+          <div class="grid grid--2" style="align-items: center; gap: var(--space-2xl);">
+            <div class="reveal">
+              <p class="eyebrow">Our philosophy</p>
+              <h2 class="display-md">Luxury that respects the ritual, not just the result.</h2>
+              <p class="body-lg">We believe the best self-care is unhurried. Each formula begins with a question: what does the skin truly need? The answer guides every ingredient choice, every texture decision, every scent profile. No fillers, no shortcuts — just botanical integrity and sensory honesty.</p>
+            </div>
+            <div class="reveal stagger-1">
+              <img src="../Essenshea_Catalogue/Body_Butters/images/body_butter_1.jpg" alt="Shea butter texture close-up" style="width: 100%; border-radius: var(--radius-xl); box-shadow: var(--shadow-xl);" />
+            </div>
+          </div>
+        </section>
+
+        <section class="values section">
+          <div class="section-heading reveal">
+            <h2 class="display-md">The principles we formulate by</h2>
+          </div>
+          <ul class="values-list grid grid--3">
+            <li class="value-item card reveal stagger-1">
+              <span class="value-number">01</span>
+              <h3 class="heading-md">Botanical integrity</h3>
+              <p class="body">Every ingredient is chosen for its functional benefit and sensory contribution. No synthetic fillers, no hidden shortcuts.</p>
+            </li>
+            <li class="value-item card reveal stagger-2">
+              <span class="value-number">02</span>
+              <h3 class="heading-md">Scent as signal</h3>
+              <p class="body">Fragrance is not an afterthought. Each blend is composed to support the ritual — calming, energizing, grounding or uplifting.</p>
+            </li>
+            <li class="value-item card reveal stagger-3">
+              <span class="value-number">03</span>
+              <h3 class="heading-md">Texture that serves</h3>
+              <p class="body">From fast-absorbing oils to rich, protective butters, every texture is engineered for how it feels in use, not just how it looks in a jar.</p>
+            </li>
+            <li class="value-item card reveal stagger-1">
+              <span class="value-number">04</span>
+              <h3 class="heading-md">Made to order, not to stock</h3>
+              <p class="body">Small-batch production means fresher product, less waste, and the flexibility to customize for wholesale partners.</p>
+            </li>
+            <li class="value-item card reveal stagger-2">
+              <span class="value-number">05</span>
+              <h3 class="heading-md">Transparent sourcing</h3>
+              <p class="body">We trace key ingredients to origin. When you ask where the shea comes from, we can tell you the cooperative and the harvest season.</p>
+            </li>
+            <li class="value-item card reveal stagger-3">
+              <span class="value-number">06</span>
+              <h3 class="heading-md">Ritual over routine</h3>
+              <p class="body">The goal is not efficiency. It is presence. Products designed to slow you down, even for thirty seconds.</p>
+            </li>
+          </ul>
         </section>
       </main>
 
       <footer class="site-footer">
         <div>
           <strong>Essenshea</strong>
-          <p>Organic luxury for skin, scent and ritual â€” designed for meaningful gifting, retail presence and premium self-care.</p>
+          <p class="body">Organic luxury for skin, scent and ritual — designed for meaningful gifting, retail presence and premium self-care.</p>
         </div>
         <div class="footer-links">
           <a href="/catalog">Catalog</a>
@@ -73,12 +154,13 @@
           <a href="/#contact">Contact</a>
         </div>
         <div class="footer-contact">
-          <p>Phone: +254 727 349749</p>
-          <p>WhatsApp: +254 727 349 749</p>
-          <p>M-Pesa Till: 9402567</p>
+          <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;margin-right:8px;vertical-align:middle"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>+254 727 349 749</p>
+          <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;margin-right:8px;vertical-align:middle"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>WhatsApp: +254 727 349 749</p>
+          <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;margin-right:8px;vertical-align:middle"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>M-Pesa Till: 9402567</p>
         </div>
       </footer>
     </div>
+
     <script src="assets/js/agent-config.js"></script>
     <script src="assets/js/agent.js"></script>
   </body>

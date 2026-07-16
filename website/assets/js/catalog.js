@@ -13,7 +13,7 @@ async function loadCatalog() {
     renderCatalog();
   } catch (error) {
     console.error('Unable to load catalog data', error);
-    root.innerHTML = '<p class="value-card">The collection is being prepared. Please refresh shortly.</p>';
+    root.innerHTML = '<p class="body" style="text-align: center; padding: var(--space-2xl);">The collection is being prepared. Please refresh shortly.</p>';
   }
 }
 
@@ -51,7 +51,7 @@ function renderCatalog() {
       : catalogCategories.filter((category) => category.title === activeFilter);
 
   if (!filtered.length) {
-    root.innerHTML = '<p class="value-card">No products match this selection yet.</p>';
+    root.innerHTML = '<p class="body" style="text-align: center; padding: var(--space-2xl);">No products match this selection yet.</p>';
     return;
   }
 
@@ -61,26 +61,26 @@ function renderCatalog() {
         .slice(0, 6)
         .map(
           (product) => `
-            <div class="catalog-product">
-              <img src="${product.image}" alt="${product.name}" />
-              <span>${product.name}</span>
-            </div>
+            <article class="catalog-product card">
+              <img src="${product.image}" alt="${product.name}" class="catalog-product__image" />
+              <h3 class="catalog-product__title heading-sm">${product.name}</h3>
+            </article>
           `
         )
         .join('');
 
       return `
-        <article class="catalog-section-card">
+        <article class="catalog-section-card card reveal">
           <div class="catalog-section-card__header">
             <div>
               <p class="eyebrow">${category.tag}</p>
-              <h2>${category.title}</h2>
+              <h2 class="heading-lg">${category.title}</h2>
             </div>
-            <span class="catalog-count">${category.items} items</span>
+            <span class="catalog-count caption">${category.items} items</span>
           </div>
-          <p class="catalog-section-card__copy">${excerpt(category.description, 110)}</p>
-          <div class="catalog-product-grid">${productsMarkup}</div>
-          <a class="button button--ghost" href="category.html?slug=${category.slug}">View all products</a>
+          <p class="catalog-section-card__copy body">${excerpt(category.description, 110)}</p>
+          <div class="catalog-product-grid grid grid--3">${productsMarkup}</div>
+          <a class="btn btn--secondary" href="category.html?slug=${category.slug}">View all products</a>
         </article>
       `;
     })

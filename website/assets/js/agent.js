@@ -18,26 +18,28 @@ function createAgentMarkup() {
   const wrapper = document.createElement('div');
   wrapper.id = 'agent-widget';
   wrapper.innerHTML = `
-    <button id="agent-launcher" class="agent-launcher" aria-label="Open Essenshea assistant">
+    <button id="agent-launcher" class="agent-launcher btn btn--primary btn--icon" aria-label="Open Essenshea assistant">
       <span class="agent-launcher-icon">🧚</span>
     </button>
-    <aside id="agent-panel" class="agent-panel hidden" aria-hidden="true">
-      <div class="agent-header">
+    <aside id="agent-panel" class="agent-panel card hidden" aria-hidden="true" style="width: 100%; max-width: 420px; position: fixed; bottom: 100px; right: 24px; z-index: var(--z-tooltip);">
+      <div class="agent-header" style="display: flex; align-items: flex-start; justify-content: space-between; padding: var(--space-lg); border-bottom: 1px solid var(--color-border);">
         <div>
           <p class="eyebrow">Essenshea Assistant</p>
-          <h2>How can I help today?</h2>
+          <h2 class="heading-md">How can I help today?</h2>
         </div>
-        <button id="agent-close" class="agent-panel-close" aria-label="Close assistant">×</button>
+        <button id="agent-close" class="btn btn--ghost btn--icon" aria-label="Close assistant" style="padding: var(--space-xs);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
       </div>
-      <div class="agent-status-bar">
+      <div class="agent-status-bar" style="display: flex; gap: var(--space-md); padding: var(--space-sm) var(--space-lg); font-size: var(--text-xs); color: var(--color-muted); border-bottom: 1px solid var(--color-border);">
         <span>Provider: ${AGENT_CONFIG.brainProvider || 'google'}</span>
         <span>${AGENT_CONFIG.apiUrl ? 'Connected' : 'Endpoint missing'}</span>
       </div>
-      <div class="agent-body">
-        <div class="agent-chat-window" id="agent-chat-window"></div>
-        <form id="agent-send-form" class="agent-send-form">
-          <input id="agent-input" type="text" placeholder="Type your question..." aria-label="Agent message input" />
-          <button type="submit" class="button button--primary">Send</button>
+      <div class="agent-body" style="display: flex; flex-direction: column; height: 400px;">
+        <div class="agent-chat-window" id="agent-chat-window" style="flex: 1; overflow-y: auto; padding: var(--space-lg); display: flex; flex-direction: column; gap: var(--space-md);"></div>
+        <form id="agent-send-form" class="agent-send-form" style="display: flex; gap: var(--space-sm); padding: var(--space-lg); border-top: 1px solid var(--color-border);">
+          <input id="agent-input" type="text" placeholder="Type your question..." aria-label="Agent message input" class="form-input" style="flex: 1;" />
+          <button type="submit" class="btn btn--primary">Send</button>
         </form>
       </div>
     </aside>
