@@ -32,29 +32,7 @@ def parse_product_section(section: str, category_dir: Path, default_image: str) 
         else:
             description_lines.append(line)
 
-    price_text = ""
-    price_value = None
-    for index in range(len(description_lines) - 1, -1, -1):
-        line = description_lines[index]
-        if re.search(r"\bKES\s*[\d,]+(?:\.\d{2})?\b", line, re.IGNORECASE):
-            price_text = line
-            del description_lines[index]
-            break
-        if re.search(r"\bPrice\s+on\s+request\b", line, re.IGNORECASE):
-            price_text = "Price on request"
-            del description_lines[index]
-            break
-
-    description = " ".join(description_lines).strip()
-    description = re.sub(r"\s+", " ", description)
-    if not description:
-        description = "A premium Essenshea product crafted for ritual and wellness."
-
-    if price_text:
-        match = re.search(r"KES\s*([\d,]+(?:\.\d{2})?)", price_text, re.IGNORECASE)
-        if match:
-            price_value = float(match.group(1).replace(",", ""))
-    else:
+    # Extract stock info from description lines
     stock_value = None
     for index in range(len(description_lines) - 1, -1, -1):
         line = description_lines[index]
@@ -64,6 +42,7 @@ def parse_product_section(section: str, category_dir: Path, default_image: str) 
             del description_lines[index]
             break
 
+    # Extract price info from description lines
     price_text = ""
     price_value = None
     for index in range(len(description_lines) - 1, -1, -1):
@@ -77,6 +56,7 @@ def parse_product_section(section: str, category_dir: Path, default_image: str) 
             del description_lines[index]
             break
 
+    # Build final description from remaining lines
     description = " ".join(description_lines).strip()
     description = re.sub(r"\s+", " ", description)
     if not description:

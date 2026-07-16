@@ -1,18 +1,8 @@
-import { Anthropic } from '@anthropic-ai/sdk';
+﻿import { promises as fs } from 'fs';
+import path from 'path';
 
-let anthropicClient: Anthropic | null = null;
-
-function getAnthropicClient(): Anthropic {
-  if (!anthropicClient) {
-    const apiKey = process.env.CLAUDE_API_KEY;
-    if (!apiKey) {
-      throw new Error('CLAUDE_API_KEY must be set in environment');
-    }
-    anthropicClient = new Anthropic({ apiKey });
-  }
-  return anthropicClient;
-}
-
+const AGENT_API_KEY = process.env.AGENT_API_KEY || process.env.NVIDIA_AGENT_API_KEY || '';
+const AGENT_BASE_URL = process.env.AGENT_BASE_URL || 'https://integrate.api.nvidia.com/v1';
 const preferredModel = process.env.AGENT_MODEL || 'google/gemini-2.5-flash';
 const fallbackModel = process.env.AGENT_FALLBACK_MODEL || 'groq/llama-3.3-70b-versatile';
 
@@ -25,7 +15,69 @@ You are not a salesperson; you are a trusted guide who helps customers choose an
 
 const websiteContext = `Essenshea is a premium natural beauty boutique offering body butters, carrier oils, essential oils, hydrosols, gift sets, haircare, and raw butters.
 Products are often priced by request and fulfilled with care. The customer can browse categories, request items, and ask for availability or shipping details.
+Contact: +254 727 349749 | M-Pesa Till: 9402567
 `;
+
+let catalogSummary: string | null = null;
+
+async function getCatalogSummary(): Promise<string> {
+  if (catalogSummary) return catalogSummary;
+
+  try {
+    const catalogPath = path.join(process.cwd(), 'website', 'data', 'catalog.json');
+    const raw = await fs.readFile(catalogPath, 'utf-8');
+    const data = JSON.parse(raw);
+
+    const lines: string[] = ['Here is the current Essenshea product catalog:'];
+
+    for (const category of data.categories || []) {
+      lines.push(`\n## ${category.title} (${category.items} products)`);
+      for (const product of category.products || []) {
+        const price = product.price || 'Price on request';
+        lines.push(`- ${product.name} — ${price}`);
+      }
+    }
+
+    catalogSummary = lines.join('\n');
+  } catch (err) {
+    console.error('Failed to load catalog for agent prompt:', err);
+    catalogSummary = '';
+  }
+
+  return catalogSummary;
+}
+
+async function callModel(model: string, systemPrompt: string, userMessage: string): Promise<string> {
+  if (!AGENT_API_KEY) {
+    throw new Error('AGENT_API_KEY or NVIDIA_AGENT_API_KEY must be set in environment');
+  }
+
+  const response = await fetch(`${AGENT_BASE_URL}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${AGENT_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage },
+      ],
+      max_tokens: 1024,
+      temperature: 0.7,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Model API error (${response.status}): ${errorText}`);
+  }
+
+  const data = await response.json();
+  const content = data.choices?.[0]?.message?.content;
+  return content || '';
+}
 
 export async function POST(req: Request) {
   try {
@@ -38,53 +90,24 @@ export async function POST(req: Request) {
       });
     }
 
-    const client = getAnthropicClient();
-
     const sourceInstruction =
       source === 'telegram'
         ? 'You are communicating via Telegram. Keep responses concise, conversational, and formatted with Markdown where helpful.'
         : 'You are communicating via the website interface. Keep responses friendly, rich, and helpful.';
 
+    const catalog = await getCatalogSummary();
+
     const systemPrompt = `${assistantPersona}
 ${websiteContext}
+${catalog}
 ${sourceInstruction}
 If you do not know the answer, say so and offer to help the customer request the item or connect them with the seller.`;
 
-    const response = await client.messages.create({
-      model: preferredModel,
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages: [
-        {
-          role: 'user',
-          content: message,
-        },
-      ],
-    });
-
-    let agentMessage = '';
-    if (Array.isArray(response.content)) {
-      const textBlock = response.content.find((block) => block.type === 'text') as { type: 'text'; text: string } | undefined;
-      agentMessage = textBlock ? textBlock.text : '';
-    }
+    let agentMessage = await callModel(preferredModel, systemPrompt, message);
 
     if (!agentMessage) {
-      const fallbackResponse = await client.messages.create({
-        model: fallbackModel,
-        max_tokens: 1024,
-        system: systemPrompt,
-        messages: [
-          {
-            role: 'user',
-            content: message,
-          },
-        ],
-      });
-
-      if (Array.isArray(fallbackResponse.content)) {
-        const textBlock = fallbackResponse.content.find((block) => block.type === 'text') as { type: 'text'; text: string } | undefined;
-        agentMessage = textBlock ? textBlock.text : 'No response generated.';
-      }
+      console.warn(`Primary model ${preferredModel} returned empty response, trying fallback ${fallbackModel}`);
+      agentMessage = await callModel(fallbackModel, systemPrompt, message);
     }
 
     if (!agentMessage) {
