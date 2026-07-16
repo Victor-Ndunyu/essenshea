@@ -102,10 +102,10 @@ function renderShopCollections() {
   shopCollectionsRoot.innerHTML = shopCollections
     .map(
       (item) => `
-        <article class="shop-collection-card">
-          <h3>${item.title}</h3>
-          <p>${item.copy}</p>
-          <a href="${item.link}">Discover</a>
+        <article class="shop-collection-card card">
+          <h3 class="heading-md">${item.title}</h3>
+          <p class="body">${item.copy}</p>
+          <a class="btn btn--secondary" href="${item.link}">Discover</a>
         </article>
       `
     )
@@ -117,16 +117,16 @@ function renderShopProducts() {
   shopProductsRoot.innerHTML = shopProducts
     .map(
       (product) => `
-        <article class="product-card" data-id="${product.id}">
-          <img src="${product.image}" alt="${product.title}" />
+        <article class="product-card card" data-id="${product.id}">
+          <img src="${product.image}" alt="${product.title}" class="product-card__image" />
           <div class="product-card__content">
-            <span class="product-flag">${product.available ? 'Available' : 'Request only'}</span>
-            <h3>${product.title}</h3>
-            <p>${product.descriptionExcerpt}</p>
+            <span class="product-flag badge ${product.available ? 'badge--success' : 'badge--warning'}">${product.available ? 'Available' : 'Request only'}</span>
+            <h3 class="heading-md">${product.title}</h3>
+            <p class="body">${product.descriptionExcerpt}</p>
             <div class="product-card__meta">
-              <span>${product.priceText}</span>
-              <span class="product-stock">${product.stockText}</span>
-              <button class="button button--ghost product-open" data-id="${product.id}">View</button>
+              <span class="product-price heading-md" style="color: var(--color-accent-2);">${product.priceText}</span>
+              <span class="product-stock caption">${product.stockText}</span>
+              <button class="btn btn--secondary btn--sm product-open" data-id="${product.id}">View</button>
             </div>
           </div>
         </article>
@@ -139,7 +139,7 @@ function renderCart() {
   if (!cartItemsRoot || !cartCount || !cartNote || !checkoutButton) return;
 
   if (!cart.length) {
-    cartItemsRoot.innerHTML = '<p class="empty-cart">Your request cart is empty. Open a product to add it.</p>';
+    cartItemsRoot.innerHTML = '<p class="empty-cart body">Your request cart is empty. Open a product to add it.</p>';
     cartCount.textContent = '0 items selected';
     if (cartTotal) {
       cartTotal.textContent = '';
@@ -154,10 +154,10 @@ function renderCart() {
       (item) => `
         <div class="cart-item">
           <div>
-            <strong>${item.quantity}× ${item.title}</strong>
-            <p>${item.available ? 'Available stock will be prepared for shipment.' : 'Requested item will be queued and scheduled.'}</p>
+            <strong class="body">${item.quantity}× ${item.title}</strong>
+            <p class="caption">${item.available ? 'Available stock will be prepared for shipment.' : 'Requested item will be queued and scheduled.'}</p>
           </div>
-          <button class="button button--ghost cart-remove" data-id="${item.id}">Remove</button>
+          <button class="btn btn--ghost btn--sm cart-remove" data-id="${item.id}">Remove</button>
         </div>
       `
     )

@@ -75,19 +75,19 @@ function renderCategoryProducts(category) {
       const stockText = typeof product.stock === 'number' ? `In stock: ${product.stock}` : 'Stock pending';
 
       return `
-        <article class="category-product-card">
-          <img src="${product.image}" alt="${product.name}" />
+        <article class="category-product-card card">
+          <img src="${product.image}" alt="${product.name}" class="category-product-card__image" />
           <div class="category-product-card__body">
             <div>
-              <h3>${product.name}</h3>
-              <p>${excerpt(product.description, 100)}</p>
+              <h3 class="heading-md">${product.name}</h3>
+              <p class="body">${excerpt(product.description, 100)}</p>
             </div>
             <div class="category-product-card__meta">
-              <span>${priceText}</span>
-              <span>${available ? 'Available' : 'Request only'}</span>
-              <span class="product-stock">${stockText}</span>
+              <span class="product-price heading-md" style="color: var(--color-accent-2);">${priceText}</span>
+              <span class="badge ${available ? 'badge--success' : 'badge--warning'}">${available ? 'Available' : 'Request only'}</span>
+              <span class="product-stock caption">${stockText}</span>
             </div>
-            <button type="button" class="button button--ghost category-product-open" data-product="${product.slug}">
+            <button type="button" class="btn btn--secondary btn--sm category-product-open" data-product="${product.slug}">
               View details
             </button>
           </div>

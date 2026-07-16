@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -11,10 +11,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/style-new.css" />
   </head>
   <body>
     <div class="page-shell">
@@ -32,19 +32,26 @@
           <a href="/about">About</a>
           <a href="#contact">Contact</a>
         </nav>
+        <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="topnav">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
       </header>
 
       <main id="home">
         <section class="hero">
           <div class="hero__content">
-            <p class="eyebrow">Wholesales â€¢ Retail â€¢ Bespoke blends</p>
-            <h1>Organic luxury for skin, scent and self-care.</h1>
-            <p class="hero__copy">
+            <p class="eyebrow">Wholesale · Retail · Bespoke blends</p>
+            <h1 class="display-lg">Organic luxury for skin, scent and self-care.</h1>
+            <p class="hero__copy body-lg">
               Essenshea creates elevated shea-based care with rich botanicals, artisan fragrance and a calming ritual feel inspired by the warmth of the brand mark.
             </p>
             <div class="hero__actions">
-              <a class="button button--primary" href="#collections">Explore the collection</a>
-              <a class="button button--ghost" href="#contact">Request wholesale pricing</a>
+              <a class="btn btn--primary" href="#collections">Explore the collection</a>
+              <a class="btn btn--secondary" href="#contact">Request wholesale pricing</a>
             </div>
             <ul class="hero__highlights">
               <li>100% natural ingredients</li>
@@ -57,140 +64,146 @@
               src="../Essenshea_Catalogue/Body_Butters_and_Balms/images/raw_whipped_shea_butter_250ml.jpg"
               alt="Raw whipped shea butter"
             />
-            <div class="hero__card">
-              <p>Signature ritual</p>
-              <h2>Raw Whipped Shea Butter</h2>
-              <span>Rich, restorative and made for daily glow.</span>
+            <div class="hero__badge">
+              <span class="hero__badge-label">Signature ritual</span>
+              <h2 class="hero__badge-title">Raw Whipped Shea Butter</h2>
+              <span class="hero__badge-desc">Rich, restorative and made for daily glow.</span>
             </div>
           </div>
         </section>
 
-        <section class="values" id="craft">
-          <article>
+        <section class="values section" id="craft">
+          <div class="section-heading reveal">
             <p class="eyebrow">Why Essenshea</p>
-            <h2>Luxury that feels intimate, grounded and unmistakably African.</h2>
-          </article>
-          <div class="value-grid">
-            <div class="value-card">
-              <h3>Botanical depth</h3>
-              <p>Layered blends of shea, carrier oils and essential oils that feel indulgent and purposeful.</p>
+            <h2 class="display-md">Luxury that feels intimate, grounded and unmistakably African.</h2>
+          </div>
+          <div class="value-grid grid grid--3">
+            <div class="value-card card reveal stagger-1">
+              <h3 class="heading-md">Botanical depth</h3>
+              <p class="body">Layered blends of shea, carrier oils and essential oils that feel indulgent and purposeful.</p>
             </div>
-            <div class="value-card">
-              <h3>Artisan finish</h3>
-              <p>Each product is designed as a sensory experience with fragrance-led identity and premium presentation.</p>
+            <div class="value-card card reveal stagger-2">
+              <h3 class="heading-md">Artisan finish</h3>
+              <p class="body">Each product is designed as a sensory experience with fragrance-led identity and premium presentation.</p>
             </div>
-            <div class="value-card">
-              <h3>Wholesale-ready</h3>
-              <p>Flexible options for retail, gifting, custom bundles and bulk orders with transparent pricing.</p>
+            <div class="value-card card reveal stagger-3">
+              <h3 class="heading-md">Wholesale-ready</h3>
+              <p class="body">Flexible options for retail, gifting, custom bundles and bulk orders with transparent pricing.</p>
             </div>
           </div>
         </section>
 
-        <section class="collections" id="collections">
-          <div class="section-heading">
+        <section class="collections section" id="collections">
+          <div class="section-heading reveal">
             <p class="eyebrow">Collections</p>
-            <h2>A catalogue shaped for self-care rituals and gifting moments.</h2>
+            <h2 class="display-md">A catalogue shaped for self-care rituals and gifting moments.</h2>
           </div>
-          <div id="catalog-grid" class="catalog-grid"></div>
+          <div id="catalog-grid" class="catalog-grid grid grid--3"></div>
         </section>
 
-        <section class="values">
-          <article>
+        <section class="values section">
+          <div class="section-heading reveal">
             <p class="eyebrow">Crafted experience</p>
-            <h2>Beauty that feels considered, tactile and quietly indulgent.</h2>
-          </article>
-          <div class="value-grid">
-            <div class="value-card">
-              <h3>Curated bundles</h3>
-              <p>Creating giftable sets and wellness rituals that make premium self-care easy to discover.</p>
+            <h2 class="display-md">Beauty that feels considered, tactile and quietly indulgent.</h2>
+          </div>
+          <div class="value-grid grid grid--3">
+            <div class="value-card card reveal stagger-1">
+              <h3 class="heading-md">Curated bundles</h3>
+              <p class="body">Creating giftable sets and wellness rituals that make premium self-care easy to discover.</p>
             </div>
-            <div class="value-card">
-              <h3>Custom formulations</h3>
-              <p>Personalized blends for customers who want a fragrance, texture or finish that feels genuinely theirs.</p>
+            <div class="value-card card reveal stagger-2">
+              <h3 class="heading-md">Custom formulations</h3>
+              <p class="body">Personalized blends for customers who want a fragrance, texture or finish that feels genuinely theirs.</p>
             </div>
-            <div class="value-card">
-              <h3>Direct service</h3>
-              <p>Wholesale and retail support with responsive communication and clear purchasing options.</p>
+            <div class="value-card card reveal stagger-3">
+              <h3 class="heading-md">Direct service</h3>
+              <p class="body">Wholesale and retail support with responsive communication and clear purchasing options.</p>
             </div>
           </div>
         </section>
 
-        <section class="feature-band">
-          <div class="feature-band__copy">
+        <section class="feature-band section">
+          <div class="feature-band__copy reveal">
             <p class="eyebrow">Featured ritual</p>
-            <h2>From body care to hair nourishment, every formula is crafted with intention.</h2>
-            <p>
-              The Essenshea experience blends soothing body oils, fragrance-led balms and scalp-conscious haircare into a cohesive luxury brand language.
-            </p>
+            <h2 class="display-md">From body care to hair nourishment, every formula is crafted with intention.</h2>
+            <p class="body-lg">The Essenshea experience blends soothing body oils, fragrance-led balms and scalp-conscious haircare into a cohesive luxury brand language.</p>
           </div>
           <div class="feature-band__gallery">
-            <img src="../Essenshea_Catalogue/Fragrances/images/fragrances.jpg" alt="Essenshea fragrances" />
-            <img src="../Essenshea_Catalogue/Haircare/images/hair_growth_serum_100ml.jpg" alt="Hair growth serum" />
-            <img src="../Essenshea_Catalogue/Body_Oils_and_Tonics/images/shea_body_oil_150ml.jpg" alt="Shea body oil" />
+            <img src="../Essenshea_Catalogue/Fragrances/images/fragrances.jpg" alt="Essenshea fragrances" class="reveal stagger-1" />
+            <img src="../Essenshea_Catalogue/Haircare/images/hair_growth_serum_100ml.jpg" alt="Hair growth serum" class="reveal stagger-2" />
+            <img src="../Essenshea_Catalogue/Body_Oils_and_Tonics/images/shea_body_oil_150ml.jpg" alt="Shea body oil" class="reveal stagger-3" />
           </div>
         </section>
 
-        <section class="featured">
-          <div class="section-heading">
+        <section class="featured section">
+          <div class="section-heading reveal">
             <p class="eyebrow">Premium storefront</p>
-            <h2>Everything is designed to feel boutique, easy to shop and distinctly Essenshea.</h2>
+            <h2 class="display-md">Everything is designed to feel boutique, easy to shop and distinctly Essenshea.</h2>
           </div>
-          <div class="featured-grid">
-            <article class="featured-card">
-              <h3>Curated collections</h3>
-              <p>Discover ready-to-shop categories with premium imagery, product detail and wholesale-ready bundles.</p>
+          <div class="featured-grid grid grid--3">
+            <article class="featured-card card reveal stagger-1">
+              <h3 class="heading-md">Curated collections</h3>
+              <p class="body">Discover ready-to-shop categories with premium imagery, product detail and wholesale-ready bundles.</p>
             </article>
-            <article class="featured-card">
-              <h3>Retail grade presentation</h3>
-              <p>A polished brand experience built to support selling, gifting and retail partnerships.</p>
+            <article class="featured-card card reveal stagger-2">
+              <h3 class="heading-md">Retail grade presentation</h3>
+              <p class="body">A polished brand experience built to support selling, gifting and retail partnerships.</p>
             </article>
-            <article class="featured-card">
-              <h3>Direct wholesale flow</h3>
-              <p>A clear inquiry path, responsive support details and a service mindset for every buyer.</p>
+            <article class="featured-card card reveal stagger-3">
+              <h3 class="heading-md">Direct wholesale flow</h3>
+              <p class="body">A clear inquiry path, responsive support details and a service mindset for every buyer.</p>
             </article>
           </div>
         </section>
 
-        <section class="contact-section" id="contact">
-          <div class="contact-card">
-            <div class="contact-card__content">
+        <section class="contact-section section" id="contact">
+          <div class="contact-card card">
+            <div class="contact-card__content reveal">
               <p class="eyebrow">Connect with Essenshea</p>
-              <h2>Letâ€™s create something beautiful for your shelves, gifting range or personal ritual.</h2>
-              <p>
-                Reach out for wholesale inquiries, custom blends, or your next order of natural skincare essentials.</p>
+              <h2 class="display-md">Let's create something beautiful for your shelves, gifting range or personal ritual.</h2>
+              <p class="body-lg">Reach out for wholesale inquiries, custom blends, or your next order of natural skincare essentials.</p>
               <div class="contact-list">
-                <a href="tel:+254727349749">Phone: +254 727 349749</a>
-                <a href="https://wa.me/254727349749" target="_blank" rel="noreferrer">WhatsApp: +254 727 349 749</a>
-                <span>M-Pesa Till: 9402567</span>
+                <a href="tel:+254727349749">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                  <span>+254 727 349 749</span>
+                </a>
+                <a href="https://wa.me/254727349749" target="_blank" rel="noreferrer">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                  <span>WhatsApp</span>
+                </a>
+                <span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                  <span>M-Pesa Till: 9402567</span>
+                </span>
               </div>
             </div>
 
             <form class="inquiry-form" id="wholesale-form">
-              <label>
-                Full name
-                <input type="text" name="name" placeholder="Amina Njeri" required />
-              </label>
-              <label>
-                Brand or business
-                <input type="text" name="business" placeholder="The Willow Studio" required />
-              </label>
-              <label>
-                Email address
-                <input type="email" name="email" placeholder="hello@brand.com" required />
-              </label>
-              <label>
-                Order size
-                <select name="size">
+              <div class="form-group">
+                <label class="form-label" for="wholesale-name">Full name</label>
+                <input type="text" id="wholesale-name" name="name" class="form-input" placeholder="Amina Njeri" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="wholesale-business">Brand or business</label>
+                <input type="text" id="wholesale-business" name="business" class="form-input" placeholder="The Willow Studio" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="wholesale-email">Email address</label>
+                <input type="email" id="wholesale-email" name="email" class="form-input" placeholder="hello@brand.com" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="wholesale-size">Order size</label>
+                <select id="wholesale-size" name="size" class="form-select">
                   <option value="Starter">Starter order</option>
                   <option value="Retail ready">Retail ready</option>
                   <option value="Bulk wholesale">Bulk wholesale</option>
                 </select>
-              </label>
-              <label>
-                What are you looking for?
-                <textarea name="details" placeholder="Tell us about your shelves, gifting range or custom blend request."></textarea>
-              </label>
-              <button class="button button--primary" type="submit">Request wholesale pricing</button>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="wholesale-details">What are you looking for?</label>
+                <textarea id="wholesale-details" name="details" class="form-textarea" placeholder="Tell us about your shelves, gifting range or custom blend request."></textarea>
+              </div>
+              <button class="btn btn--primary btn--lg" type="submit">Request wholesale pricing</button>
               <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
             </form>
           </div>
@@ -200,7 +213,7 @@
       <footer class="site-footer">
         <div>
           <strong>Essenshea</strong>
-          <p>Organic luxury for skin, scent and ritual â€” crafted for retail, gifting and wholesale with elevated presentation.</p>
+          <p class="body">Organic luxury for skin, scent and ritual — crafted for retail, gifting and wholesale with elevated presentation.</p>
         </div>
         <div class="footer-links">
           <a href="/catalog">Catalog</a>
@@ -209,9 +222,9 @@
           <a href="/#contact">Contact</a>
         </div>
         <div class="footer-contact">
-          <p>Phone: +254 727 349749</p>
-          <p>WhatsApp: +254 727 349 749</p>
-          <p>M-Pesa Till: 9402567</p>
+          <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;margin-right:8px;vertical-align:middle"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>+254 727 349 749</p>
+          <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;margin-right:8px;vertical-align:middle"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>WhatsApp: +254 727 349 749</p>
+          <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;margin-right:8px;vertical-align:middle"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>M-Pesa Till: 9402567</p>
         </div>
       </footer>
     </div>
