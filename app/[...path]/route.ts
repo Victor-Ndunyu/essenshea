@@ -3,6 +3,7 @@ import path from 'path';
 import { NextRequest, NextResponse } from 'next/server';
 
 const WEBSITE_DIR = path.join(process.cwd(), 'website');
+const CATALOGUE_DIR = path.join(process.cwd(), 'Essenshea_Catalogue');
 
 const MIME_TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -40,23 +41,28 @@ export async function GET(req: NextRequest) {
 
   const cleanPath = pathname.replace(/^\//, '');
   if (PAGE_ROUTES[cleanPath]) {
-    return serveFile(PAGE_ROUTES[cleanPath]);
+    return serveFile(PAGE_ROUTES[cleanPath], WEBSITE_DIR);
   }
 
   const relativePath = pathname.replace(/^\//, '');
 
   if (!relativePath) {
-    return serveFile('index.html');
+    return serveFile('index.html', WEBSITE_DIR);
   }
 
-  return serveFile(relativePath);
+  // Serve Essenshea_Catalogue images
+  if (relativePath.startsWith('Essenshea_Catalogue/')) {
+    return serveFile(relativePath.replace('Essenshea_Catalogue/', ''), CATALOGUE_DIR);
+  }
+
+  return serveFile(relativePath, WEBSITE_DIR);
 }
 
-async function serveFile(relativePath: string): Promise<NextResponse> {
+async function serveFile(relativePath: string, baseDir: string): Promise<NextResponse> {
   const safePath = path.normalize(relativePath).replace(/^(\.\.[/\\])+/, '');
-  const fullPath = path.join(WEBSITE_DIR, safePath);
+  const fullPath = path.join(baseDir, safePath);
 
-  if (!fullPath.startsWith(WEBSITE_DIR)) {
+  if (!fullPath.startsWith(baseDir)) {
     return new NextResponse('Not found', { status: 404 });
   }
 
