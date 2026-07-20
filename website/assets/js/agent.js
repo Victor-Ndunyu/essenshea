@@ -222,7 +222,9 @@ function createCartWidgetMarkup() {
     + '<button id="cart-popup-checkout" class="btn btn--primary" disabled>Send request</button>'
     + '</div>'
     + '</aside>';
-  document.body.appendChild(wrapper.firstElementChild);
+  while (wrapper.firstChild) {
+    document.body.appendChild(wrapper.firstChild);
+  }
 }
 
 function updateCartWidget() {

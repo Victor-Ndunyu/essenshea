@@ -1701,7 +1701,7 @@ a { color: inherit; text-decoration: none; }
 /* ── Cart Widget ── */
 .cart-widget {
   position: fixed;
-  left: 24px;
+  right: 24px;
   top: 24px;
   width: 56px;
   height: 56px;
@@ -1749,7 +1749,7 @@ a { color: inherit; text-decoration: none; }
 /* ── Cart Popup ── */
 .cart-popup {
   position: fixed;
-  left: 24px;
+  right: 24px;
   top: 92px;
   width: min(400px, calc(100% - 48px));
   max-height: calc(100vh - 120px);
