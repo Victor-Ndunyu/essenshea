@@ -1164,28 +1164,8 @@ a { color: inherit; text-decoration: none; }
 }
 
 .principles-list__item {
-  display: grid;
-  grid-template-columns: 44px 1fr;
-  gap: 20px;
   border-bottom: 1px solid var(--ink-border);
   padding-bottom: 36px;
-}
-
-.principles-list__icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: var(--card);
-  border: 1px solid var(--ink-border);
-  display: grid;
-  place-items: center;
-  color: var(--gold);
-  margin-top: 2px;
-}
-
-.principles-list__icon svg {
-  width: 20px;
-  height: 20px;
 }
 
 .principles-list__item:last-child {
@@ -1198,6 +1178,26 @@ a { color: inherit; text-decoration: none; }
   font-size: 1.5rem;
   margin: 0 0 10px;
   line-height: 1.2;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.principles-list__icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1px solid var(--ink-border);
+  display: inline-grid;
+  place-items: center;
+  color: var(--gold);
+}
+
+.principles-list__icon svg {
+  width: 18px;
+  height: 18px;
 }
 
 .principles-list__item p {
@@ -1215,6 +1215,23 @@ a { color: inherit; text-decoration: none; }
   place-items: center;
   padding: 24px;
   z-index: 100;
+}
+
+.modal-overlay ::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-overlay ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-overlay ::-webkit-scrollbar-thumb {
+  background: var(--ink-border);
+  border-radius: 3px;
+}
+
+.modal-overlay ::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-soft);
 }
 
 .modal-overlay.hidden {

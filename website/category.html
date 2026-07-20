@@ -112,9 +112,13 @@ var categoryModalAction = document.getElementById('category-modal-action');
 var categoryModalClose = document.getElementById('category-modal-close');
 var categoryProductGrid = document.getElementById('category-product-grid');
 
-function getQueryParam(name) {
-  var params = new URLSearchParams(window.location.search);
-  return params.get(name);
+function getCategorySlug() {
+  var path = window.location.pathname.replace(/\/$/, '');
+  var parts = path.split('/');
+  if (parts.length >= 2 && parts[parts.length - 2] === 'category') {
+    return decodeURIComponent(parts[parts.length - 1]);
+  }
+  return new URLSearchParams(window.location.search).get('slug') || '';
 }
 
 function openCategoryProductModal(productSlug) {
@@ -160,7 +164,7 @@ function setupEvents() {
 }
 
 (function init() {
-  var slug = getQueryParam('slug');
+  var slug = getCategorySlug();
   if (slug && window.EssensheaAgent && window.EssensheaAgent.data && window.EssensheaAgent.data.catalog) {
     var cats = window.EssensheaAgent.data.catalog.categories || [];
     for (var i = 0; i < cats.length; i++) {
