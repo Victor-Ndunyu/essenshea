@@ -4,7 +4,7 @@ const formStatus = document.getElementById('form-status');
 
 async function loadCatalog() {
   try {
-    const response = await fetch('./data/catalog.json');
+    const response = await fetch('/data/catalog.json');
     const data = await response.json();
     renderCatalog(data.categories);
   } catch (error) {

@@ -164,7 +164,7 @@ async function initializeAgent() {
   });
 
   try {
-    const response = await fetch('data/catalog.json');
+    const response = await fetch('/data/catalog.json');
     const catalogData = await response.json();
     AGENT_DATA.catalog = catalogData;
     const siteProducts = getSiteProducts(catalogData);

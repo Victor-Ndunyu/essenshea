@@ -102,7 +102,6 @@
   <script src="/assets/js/agent-config.js"></script>
   <script src="/assets/js/agent.js"></script>
   <script>
-var currentCategory = null;
 var categoryModal = document.getElementById('category-modal');
 var categoryModalTitle = document.getElementById('category-modal-title');
 var categoryModalImage = document.getElementById('category-modal-image');
@@ -122,11 +121,19 @@ function getCategorySlug() {
 }
 
 function openCategoryProductModal(productSlug) {
-  if (!currentCategory || !categoryModal) return;
+  if (!categoryModal) return;
+  var data = window.EssensheaAgent && window.EssensheaAgent.data && window.EssensheaAgent.data.catalog;
+  if (!data) return;
+  var slug = getCategorySlug();
+  var cat = null;
+  for (var i = 0; i < (data.categories || []).length; i++) {
+    if (data.categories[i].slug === slug) { cat = data.categories[i]; break; }
+  }
+  if (!cat) return;
   var product = null;
-  for (var i = 0; i < currentCategory.products.length; i++) {
-    if (currentCategory.products[i].slug === productSlug) {
-      product = currentCategory.products[i];
+  for (var i = 0; i < cat.products.length; i++) {
+    if (cat.products[i].slug === productSlug) {
+      product = cat.products[i];
       break;
     }
   }
@@ -163,16 +170,7 @@ function setupEvents() {
   });
 }
 
-(function init() {
-  var slug = getCategorySlug();
-  if (slug && window.EssensheaAgent && window.EssensheaAgent.data && window.EssensheaAgent.data.catalog) {
-    var cats = window.EssensheaAgent.data.catalog.categories || [];
-    for (var i = 0; i < cats.length; i++) {
-      if (cats[i].slug === slug) { currentCategory = cats[i]; break; }
-    }
-  }
-  setupEvents();
-})();
+setupEvents();
   </script>
 </body>
 </html>

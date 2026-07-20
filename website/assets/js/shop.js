@@ -40,7 +40,7 @@ function mapAvailability(product) {
 
 async function loadShopData() {
   try {
-    const response = await fetch('./data/catalog.json');
+    const response = await fetch('/data/catalog.json');
     const data = await response.json();
     const categories = data.categories || [];
 

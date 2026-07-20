@@ -6,7 +6,7 @@ let activeFilter = 'All';
 
 async function loadCatalog() {
   try {
-    const response = await fetch('./data/catalog.json');
+    const response = await fetch('/data/catalog.json');
     const data = await response.json();
     catalogCategories = data.categories;
     renderFilters();
