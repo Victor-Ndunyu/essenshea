@@ -54,34 +54,17 @@
 
       <!-- ── Request Cart + Guide ── -->
       <section class="shop-section section--divider">
-        <div class="shop-layout">
-          <div class="cart-panel">
-            <div>
-              <span class="label">Your request list</span>
-              <h2 class="display-md" style="margin:4px 0 0">Selected products and request queue</h2>
-            </div>
-            <div id="cart-items" class="cart-items">
-              <p class="cart-empty">Your request list is empty. Open a product to add it.</p>
-            </div>
-            <div class="cart-summary">
-              <span id="cart-count">0 items</span>
-              <span id="cart-note">Ready to request when you are.</span>
-            </div>
-            <button id="checkout-button" class="btn btn--primary" disabled>Send request</button>
-            <p class="cart-hint">Available products are shipped quickly. Request-only items are queued, priced, and scheduled by the seller. You will receive a confirmation within 24 hours.</p>
+        <aside class="shop-guide" style="max-width:640px">
+          <h3>How request ordering works</h3>
+          <ul>
+            <li>Browse products and open an item to review details and pricing.</li>
+            <li>Add one or several items to your request list.</li>
+            <li>Submit the list and we will confirm pricing, availability and schedule fulfilment.</li>
+          </ul>
+          <div style="padding:16px;border-radius:12px;background:var(--white);border:1px solid var(--ink-border)">
+            <p class="body-sm"><strong>Made to order:</strong> Custom and request-only items are prepared after your order is received. We keep each request in a structured queue until shipment.</p>
           </div>
-          <aside class="shop-guide">
-            <h3>How request ordering works</h3>
-            <ul>
-              <li>Browse products and open an item to review details and pricing.</li>
-              <li>Add one or several items to your request list.</li>
-              <li>Submit the list and we will confirm pricing, availability and schedule fulfilment.</li>
-            </ul>
-            <div style="padding:16px;border-radius:12px;background:var(--white);border:1px solid var(--ink-border)">
-              <p class="body-sm"><strong>Made to order:</strong> Custom and request-only items are prepared after your order is received. We keep each request in a structured queue until shipment.</p>
-            </div>
-          </aside>
-        </div>
+        </aside>
       </section>
 
       <!-- ── Custom Formulation ── -->

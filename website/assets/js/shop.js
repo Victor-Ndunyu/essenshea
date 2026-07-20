@@ -178,6 +178,20 @@ function closeProductModal() {
   productModal.setAttribute('aria-hidden', 'true');
 }
 
+function syncCartToWidget() {
+  var cartData = cart.map(function(item) {
+    return {
+      id: item.id,
+      title: item.title,
+      quantity: item.quantity,
+      available: item.available,
+      priceText: item.priceText,
+    };
+  });
+  try { localStorage.setItem('essenshea_cart', JSON.stringify(cartData)); } catch (e) {}
+  window.dispatchEvent(new CustomEvent('essenshea-cart-update'));
+}
+
 function addToCart(productId) {
   const product = shopProducts.find(function(item) { return item.id === productId; });
   if (!product) return;
@@ -190,6 +204,7 @@ function addToCart(productId) {
   }
 
   renderCart();
+  syncCartToWidget();
   closeProductModal();
 }
 
@@ -198,6 +213,7 @@ function removeFromCart(productId) {
   if (index === -1) return;
   cart.splice(index, 1);
   renderCart();
+  syncCartToWidget();
 }
 
 async function submitCartRequest() {
@@ -246,6 +262,7 @@ async function submitCartRequest() {
       alert(result.message);
       cart.length = 0;
       renderCart();
+      syncCartToWidget();
     } else {
       alert('Failed to submit: ' + (result.error || 'Unknown error'));
     }
