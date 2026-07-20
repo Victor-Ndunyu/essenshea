@@ -80,7 +80,7 @@ function renderCatalog() {
           </div>
           <p class="catalog-section-card__copy body">${excerpt(category.description, 110)}</p>
           <div class="catalog-product-grid grid grid--3">${productsMarkup}</div>
-          <a class="btn btn--secondary" href="category.html?slug=${category.slug}">View all products</a>
+          <a class="btn btn--secondary" href="/category/${category.slug}">View all products</a>
         </article>
       `;
     })

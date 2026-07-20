@@ -1,206 +1,186 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shop Essenshea | Natural luxury for everyday ritual</title>
-    <meta name="description" content="Shop Essenshea's signature butters, oils, haircare and fragrance-led essentials." />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="assets/css/style-new.css" />
-  </head>
-  <body>
-    <div class="page-shell">
-      <header class="topbar">
-        <a class="brand" href="/" aria-label="Essenshea home">
-          <img class="brand-logo" src="assets/images/essenshea-logo.svg" alt="Essenshea logo" />
-          <span class="brand-text">
-            <strong>Essenshea</strong>
-            <small>Natural luxury, rooted in ritual</small>
-          </span>
-        </a>
-        <nav class="topnav" aria-label="Primary navigation">
-          <a href="/catalog">Catalog</a>
-          <a href="/shop">Shop</a>
-          <a href="/about">About</a>
-          <a href="/#contact">Contact</a>
-        </nav>
-        <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="topnav">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
-      </header>
-
-      <main>
-        <section class="hero hero--shop">
-          <div class="hero__content">
-            <p class="eyebrow">Shop essentials</p>
-            <h1 class="display-lg">Curated rituals for skin, scent and self-care.</h1>
-            <p class="hero__copy body-lg">
-              Browse the Essenshea range for body care, nourishing oils, hair rituals and bespoke requests designed to feel indulgent from the first touch.
-            </p>
-            <div class="hero__actions">
-              <a class="btn btn--primary" href="#shop-products">Browse products</a>
-              <a class="btn btn--secondary" href="/#contact">Request wholesale pricing</a>
-            </div>
-          </div>
-        </section>
-
-        <section class="shop-browse section">
-          <div class="section-heading reveal">
-            <p class="eyebrow">Storefront</p>
-            <h2 class="display-md">Browse ready products, request specialist items, or design a custom formulation.</h2>
-          </div>
-          <p class="shop-intro body-lg reveal stagger-1">Select a product to open its detail card, then add it to your request cart. Some items are available now; others are ordered on request and scheduled for manufacture.</p>
-          <div id="shop-products" class="shop-product-grid grid grid--3"></div>
-        </section>
-
-        <section class="shop-actions section">
-          <div class="grid grid--2" style="align-items: start;">
-            <div class="cart-panel card">
-              <div class="cart-panel__header">
-                <p class="eyebrow">Your cart</p>
-                <h2 class="display-sm">Selected products and request queue</h2>
-              </div>
-              <div id="cart-items" class="cart-items">
-                <p class="empty-cart body">Your request cart is empty. Open a product to add it.</p>
-              </div>
-              <div class="cart-summary">
-                <div>
-                  <span id="cart-count" class="caption">0 items selected</span>
-                  <span id="cart-total" class="heading-md" style="color: var(--color-accent-2);"></span>
-                </div>
-                <span id="cart-note" class="caption" style="color: var(--color-muted);">Ready to request when you are.</span>
-              </div>
-              <button id="checkout-button" class="btn btn--primary btn--lg" disabled style="width: 100%;">Send request</button>
-              <p class="cart-hint caption" style="text-align: center; margin-top: var(--space-md);">Available products ship quickly. Request-only items are queued, priced, and scheduled by the seller.</p>
-            </div>
-
-            <aside class="shop-guide card">
-              <h3 class="heading-md">How this store works</h3>
-              <ul style="display: grid; gap: var(--space-md);">
-                <li class="body" style="display: flex; gap: var(--space-md); align-items: flex-start;">
-                  <span style="flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: rgba(45, 90, 61, 0.1); display: grid; place-items: center; color: var(--color-accent); font-weight: 700; font-size: 0.75rem;">1</span>
-                  <span>Browse curated products and open an item to review details.</span>
-                </li>
-                <li class="body" style="display: flex; gap: var(--space-md); align-items: flex-start;">
-                  <span style="flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: rgba(45, 90, 61, 0.1); display: grid; place-items: center; color: var(--color-accent); font-weight: 700; font-size: 0.75rem;">2</span>
-                  <span>Add one or several items to your request cart.</span>
-                </li>
-                <li class="body" style="display: flex; gap: var(--space-md); align-items: flex-start;">
-                  <span style="flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: rgba(45, 90, 61, 0.1); display: grid; place-items: center; color: var(--color-accent); font-weight: 700; font-size: 0.75rem;">3</span>
-                  <span>Submit the cart and the seller will confirm pricing, availability and schedule fulfillment.</span>
-                </li>
-              </ul>
-              <div class="shop-schedule card" style="margin-top: var(--space-lg); padding: var(--space-lg); background: var(--color-surface); border: 1px solid var(--color-border);">
-                <p class="body"><strong>Made-to-order scheduling:</strong> Custom and request-only items are prepared after your order is received and priced. We keep each request in a structured queue until shipment.</p>
-              </div>
-            </aside>
-          </div>
-        </section>
-
-        <section class="custom-request section">
-          <div class="section-heading reveal">
-            <p class="eyebrow">Custom design</p>
-            <h2 class="display-md">Create a bespoke product request with fragrance and formula direction.</h2>
-          </div>
-          <p class="shop-intro body-lg reveal stagger-1">Tell us what you want, choose your fragrance family, and share the texture or ritual you have in mind. The seller will confirm a price and schedule production once your request is accepted.</p>
-          <form id="custom-request-form" class="custom-request-form card" style="padding: var(--space-xl); max-width: 720px;">
-            <div class="form-group">
-              <label class="form-label" for="custom-name">Full name</label>
-              <input type="text" id="custom-name" name="name" class="form-input" placeholder="Amina Njeri" required />
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="custom-email">Email address</label>
-              <input type="email" id="custom-email" name="email" class="form-input" placeholder="hello@brand.com" required />
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="custom-product-type">Product type</label>
-              <select id="custom-product-type" name="productType" class="form-select" required>
-                <option value="Body butter">Body butter</option>
-                <option value="Body oil">Body oil</option>
-                <option value="Haircare">Haircare serum</option>
-                <option value="Fragrance">Fragrance blend</option>
-                <option value="Gift set">Gift set</option>
-              </select>
-            </div>
-            <fieldset class="form-group fragrance-options" style="border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-lg); background: var(--color-surface);">
-              <legend class="form-label" style="margin-bottom: var(--space-sm);">Preferred fragrance notes</legend>
-              <div style="display: flex; flex-wrap: wrap; gap: var(--space-sm);">
-                <label class="form-check"><input type="checkbox" name="notes" value="Lavender" /> Lavender</label>
-                <label class="form-check"><input type="checkbox" name="notes" value="Rose" /> Rose</label>
-                <label class="form-check"><input type="checkbox" name="notes" value="Vanilla" /> Vanilla</label>
-                <label class="form-check"><input type="checkbox" name="notes" value="Peppermint" /> Peppermint</label>
-                <label class="form-check"><input type="checkbox" name="notes" value="Oak & Amber" /> Oak & Amber</label>
-                <label class="form-check"><input type="checkbox" name="notes" value="Citrus" /> Citrus</label>
-                <label class="form-check"><input type="checkbox" name="notes" value="Cedarwood" /> Cedarwood</label>
-              </div>
-            </fieldset>
-            <div class="form-group">
-              <label class="form-label" for="custom-details">Describe your request</label>
-              <textarea id="custom-details" name="details" class="form-textarea" placeholder="Tell us the texture, scent, finish or purpose you want." required></textarea>
-            </div>
-            <button class="btn btn--primary btn--lg" type="submit">Request custom product</button>
-            <p class="form-status" id="custom-request-status" role="status" aria-live="polite"></p>
-          </form>
-        </section>
-
-        <section class="shop-collections section">
-          <div class="section-heading reveal">
-            <p class="eyebrow">Discover more</p>
-            <h2 class="display-md">Browse our full categories for wholesale, gift sets and signature collections.</h2>
-          </div>
-          <div id="shop-collections" class="shop-collections-grid grid grid--3"></div>
-        </section>
-
-        <div id="product-modal" class="modal-overlay hidden" aria-hidden="true" role="dialog" aria-modal="true">
-          <div class="modal-card">
-            <div class="modal-header">
-              <h2 id="modal-title" class="heading-lg"></h2>
-              <button id="modal-close" class="modal-close" aria-label="Close product details">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-              </button>
-            </div>
-            <div class="modal-body">
-              <img id="modal-image" class="modal-image" src="" alt="" />
-              <p id="modal-description" class="modal-description body"></p>
-              <p id="modal-details" class="modal-details caption" style="font-weight: 600; color: var(--color-accent-2);"></p>
-            </div>
-            <div class="modal-footer">
-              <button id="modal-action" class="btn btn--primary" type="button">Add to cart</button>
-            </div>
-          </div>
-        </div>
-      </main>
-
-      <footer class="site-footer">
-        <div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shop &mdash; Essenshea | Natural luxury for everyday ritual</title>
+  <meta name="description" content="Shop Essenshea's signature butters, oils, haircare and fragrance-led essentials. Request-based ordering for retail and wholesale." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" href="assets/images/star-mark.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/css/style-new.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Essenshea home">
+        <img class="brand-logo" src="assets/images/essenshea-logo.svg" alt="Essenshea logo" />
+        <span class="brand-text">
           <strong>Essenshea</strong>
-          <p class="body">Organic luxury for skin, scent and ritual — built to support retail, gifting and wholesale customers with premium presentation.</p>
-        </div>
-        <div class="footer-links">
-          <a href="/catalog">Catalog</a>
-          <a href="/shop">Shop</a>
-          <a href="/about">About</a>
-          <a href="/#contact">Contact</a>
-        </div>
-        <div class="footer-contact">
-          <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;margin-right:8px;vertical-align:middle"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>+254 727 349 749</p>
-          <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;margin-right:8px;vertical-align:middle"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>WhatsApp: +254 727 349 749</p>
-          <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;margin-right:8px;vertical-align:middle"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>M-Pesa Till: 9402567</p>
-        </div>
-      </footer>
-    </div>
-    <script src="assets/js/agent-config.js"></script>
-    <script src="assets/js/agent.js"></script>
-    <script src="assets/js/shop.js"></script>
-  </body>
-</html>
+          <small>Perfect for skin and hair</small>
+        </span>
+      </a>
+      <button class="nav-toggle" aria-label="Open navigation" aria-expanded="false" onclick="document.querySelector('.topnav').classList.toggle('is-open'); this.setAttribute('aria-expanded', document.querySelector('.topnav').classList.contains('is-open'))">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
+      </button>
+      <nav class="topnav" aria-label="Primary navigation">
+        <a href="/catalog">Catalog</a>
+        <a href="/shop" aria-current="page">Shop</a>
+        <a href="/about">About</a>
+        <a href="/#contact">Contact</a>
+      </nav>
+    </header>
 
+    <main>
+      <!-- ── Hero ── -->
+      <section class="shop-hero">
+        <span class="label">Shop essentials</span>
+        <h1 class="display-lg">Curated rituals for skin, scent and self-care.</h1>
+        <p class="body-lg">Browse the Essenshea range for body care, nourishing oils, hair rituals and bespoke requests&thinsp;&mdash;&thinsp;all available through our simple request-based ordering.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px">
+          <a class="btn btn--primary" href="#shop-products">Browse products</a>
+          <a class="btn btn--ghost" href="/#contact">Wholesale inquiry</a>
+        </div>
+      </section>
+
+      <!-- ── Product Grid ── -->
+      <section class="shop-section" id="shop-products">
+        <span class="label">Storefront</span>
+        <h2 class="display-md">Select products, submit a request, and we will confirm your order.</h2>
+        <p class="body" style="margin-bottom:20px;max-width:640px">Open a product to view details, then add it to your request list. Some items are available now; others are made to order.</p>
+        <div id="shop-products-grid" class="shop-product-grid"></div>
+      </section>
+
+      <!-- ── Request Cart + Guide ── -->
+      <section class="shop-section section--divider">
+        <div class="shop-layout">
+          <div class="cart-panel">
+            <div>
+              <span class="label">Your request list</span>
+              <h2 class="display-md" style="margin:4px 0 0">Selected products and request queue</h2>
+            </div>
+            <div id="cart-items" class="cart-items">
+              <p class="cart-empty">Your request list is empty. Open a product to add it.</p>
+            </div>
+            <div class="cart-summary">
+              <span id="cart-count">0 items</span>
+              <span id="cart-note">Ready to request when you are.</span>
+            </div>
+            <button id="checkout-button" class="btn btn--primary" disabled>Send request</button>
+            <p class="cart-hint">Available products are shipped quickly. Request-only items are queued, priced, and scheduled by the seller. You will receive a confirmation within 24 hours.</p>
+          </div>
+          <aside class="shop-guide">
+            <h3>How request ordering works</h3>
+            <ul>
+              <li>Browse products and open an item to review details and pricing.</li>
+              <li>Add one or several items to your request list.</li>
+              <li>Submit the list and we will confirm pricing, availability and schedule fulfilment.</li>
+            </ul>
+            <div style="padding:16px;border-radius:12px;background:var(--white);border:1px solid var(--ink-border)">
+              <p class="body-sm"><strong>Made to order:</strong> Custom and request-only items are prepared after your order is received. We keep each request in a structured queue until shipment.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ── Custom Formulation ── -->
+      <section class="shop-section section--divider">
+        <div class="custom-form-wrap">
+          <span class="label">Custom design</span>
+          <h2 class="display-md">Create a bespoke product.</h2>
+          <p class="body-lg">Tell us what you want, choose your fragrance family, and describe the texture or ritual you have in mind. We will confirm a price and schedule production once your request is received.</p>
+        </div>
+        <form id="custom-request-form" class="form-wrap" style="margin-top:24px;max-width:640px">
+          <div class="form-group">
+            <label class="form-label" for="custom-name">Full name</label>
+            <input type="text" id="custom-name" name="name" class="form-input" placeholder="Amina Njeri" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="custom-email">Email address</label>
+            <input type="email" id="custom-email" name="email" class="form-input" placeholder="hello@brand.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="custom-type">Product type</label>
+            <select id="custom-type" name="productType" class="form-select" required>
+              <option value="">Select one...</option>
+              <option value="Body butter">Body butter</option>
+              <option value="Body oil">Body oil</option>
+              <option value="Haircare">Haircare serum</option>
+              <option value="Fragrance">Fragrance blend</option>
+              <option value="Gift set">Gift set</option>
+            </select>
+          </div>
+          <fieldset class="fragrance-options">
+            <legend>Preferred fragrance notes</legend>
+            <label><input type="checkbox" name="notes" value="Lavender" /> Lavender</label>
+            <label><input type="checkbox" name="notes" value="Rose" /> Rose</label>
+            <label><input type="checkbox" name="notes" value="Vanilla" /> Vanilla</label>
+            <label><input type="checkbox" name="notes" value="Peppermint" /> Peppermint</label>
+            <label><input type="checkbox" name="notes" value="Oak & Amber" /> Oak &amp; Amber</label>
+            <label><input type="checkbox" name="notes" value="Citrus" /> Citrus</label>
+            <label><input type="checkbox" name="notes" value="Cedarwood" /> Cedarwood</label>
+          </fieldset>
+          <div class="form-group">
+            <label class="form-label" for="custom-details">Describe your request</label>
+            <textarea id="custom-details" name="details" class="form-textarea" placeholder="Tell us the texture, scent, finish or purpose you have in mind." required></textarea>
+          </div>
+          <button class="btn btn--primary btn--lg" type="submit" id="custom-submit">Request custom product</button>
+          <p class="form-status" id="custom-request-status" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <!-- ── Discover More ── -->
+      <section class="shop-section section--divider">
+        <span class="label">Discover more</span>
+        <h2 class="display-md">Browse our full categories for wholesale, gift sets and signature collections.</h2>
+        <div id="shop-collections" class="discover-grid"></div>
+      </section>
+    </main>
+
+    <!-- ── Product Modal ── -->
+    <div id="product-modal" class="modal-overlay hidden" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 id="modal-title"></h2>
+          <button id="modal-close" class="modal-close" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <img id="modal-image" class="modal-image" src="" alt="" />
+          <p id="modal-description" class="modal-description"></p>
+          <p id="modal-details" class="modal-details"></p>
+        </div>
+        <div class="modal-footer">
+          <button id="modal-action" class="btn btn--primary" type="button">Add to request</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      <div class="site-footer__brand">
+        <strong>Essenshea</strong>
+        <p>Natural luxury, rooted in ritual&thinsp;&mdash;&thinsp;crafted for retail, gifting and wholesale with elevated presentation.</p>
+        <p class="footer-legal">&copy; 2026 Essenshea. All rights reserved.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <a href="/catalog">Catalog</a>
+        <a href="/shop">Shop</a>
+        <a href="/about">About</a>
+        <a href="/#contact">Contact</a>
+      </nav>
+      <div class="footer-social">
+        <a href="https://instagram.com/essenshea.ke" target="_blank" rel="noreferrer" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17" cy="7" r="1.5" fill="currentColor" stroke="none"/></svg>
+        </a>
+        <a href="https://wa.me/254727349749" target="_blank" rel="noreferrer" aria-label="WhatsApp">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        </a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="assets/js/agent-config.js"></script>
+  <script src="assets/js/agent.js"></script>
+  <script src="assets/js/shop.js"></script>
+</body>
+</html>

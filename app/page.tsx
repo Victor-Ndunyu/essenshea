@@ -11,8 +11,8 @@ export default async function HomePage() {
         <head>
           <meta charSet="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <title>Essenshea - Natural Beauty Boutique</title>
-          <link rel="stylesheet" href="/assets/css/styles.css" />
+          <title>Essenshea &mdash; Natural Luxury for Skin and Ritual</title>
+          <link rel="stylesheet" href="/assets/css/style-new.css" />
         </head>
         <body dangerouslySetInnerHTML={{ __html: html }} />
       </html>

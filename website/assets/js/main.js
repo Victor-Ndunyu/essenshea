@@ -26,7 +26,7 @@ function renderCatalog(categories) {
               <span class="caption">${item.items} products</span>
               <span class="badge badge--accent">${item.tag}</span>
             </div>
-            <a class="btn btn--secondary" href="category.html?slug=${item.slug}">View products</a>
+            <a class="btn btn--secondary" href="/category/${item.slug}">View products</a>
           </div>
         </article>
       `

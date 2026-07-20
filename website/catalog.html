@@ -1,99 +1,176 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Essenshea Catalog | Full product collection</title>
-    <meta
-      name="description"
-      content="Explore the full Essenshea catalog of shea butters, body oils, haircare, fragrances and wellness essentials."
-    />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="assets/css/style-new.css" />
-  </head>
-  <body>
-    <div class="page-shell">
-      <header class="topbar">
-        <a class="brand" href="/" aria-label="Essenshea home">
-          <img class="brand-logo" src="assets/images/essenshea-logo.svg" alt="Essenshea logo" />
-          <span class="brand-text">
-            <strong>Essenshea</strong>
-            <small>Natural luxury, rooted in ritual</small>
-          </span>
-        </a>
-        <nav class="topnav" aria-label="Primary navigation">
-          <a href="/catalog">Catalog</a>
-          <a href="/shop">Shop</a>
-          <a href="/about">About</a>
-          <a href="/#contact">Contact</a>
-        </nav>
-        <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="topnav">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
-      </header>
-
-      <main>
-        <section class="hero hero--catalog">
-          <div class="hero__content">
-            <p class="eyebrow">Full catalogue</p>
-            <h1 class="display-lg">Discover the complete Essenshea collection.</h1>
-            <p class="hero__copy body-lg">
-              From rich body butters and botanical oils to fragrance-led essentials and wholesale-ready bundles, the catalogue is designed to feel as considered as the rituals it supports.
-            </p>
-            <div class="hero__actions">
-              <a class="btn btn--primary" href="#catalog-root">Browse the range</a>
-              <a class="btn btn--secondary" href="/#contact">Request wholesale pricing</a>
-            </div>
-          </div>
-        </section>
-
-        <section class="catalog-toolbar section">
-          <div class="filter-label">Browse by collection</div>
-          <div id="filter-pills" class="filter-pills"></div>
-        </section>
-
-        <section class="shop-intro section">
-          <div class="section-heading reveal">
-            <p class="eyebrow">How to shop</p>
-            <h2 class="display-md">Find the right ritual, whether you need bulk, gifts or a signature formula.</h2>
-          </div>
-          <p class="shop-intro__copy body-lg reveal stagger-1">Use the filters to refine the catalog and reach out from the homepage contact form when you're ready to place a wholesale inquiry.</p>
-        </section>
-
-        <section id="catalog-root" class="catalog-root section"></section>
-      </main>
-
-      <footer class="site-footer">
-        <div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catalog &mdash; Essenshea | Full product collection</title>
+  <meta name="description" content="Explore the full Essenshea catalog of shea butters, body oils, haircare, fragrances and wellness essentials." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" href="assets/images/star-mark.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/css/style-new.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Essenshea home">
+        <img class="brand-logo" src="assets/images/essenshea-logo.svg" alt="Essenshea logo" />
+        <span class="brand-text">
           <strong>Essenshea</strong>
-          <p class="body">Organic luxury for skin, scent and ritual — curated collections for everyday beauty and retail-ready gifting.</p>
-        </div>
-        <div class="footer-links">
-          <a href="/catalog">Catalog</a>
-          <a href="/shop">Shop</a>
-          <a href="/about">About</a>
-          <a href="/#contact">Contact</a>
-        </div>
-        <div class="footer-contact">
-          <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;margin-right:8px;vertical-align:middle"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>+254 727 349 749</p>
-          <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;margin-right:8px;vertical-align:middle"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>WhatsApp: +254 727 349 749</p>
-          <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;margin-right:8px;vertical-align:middle"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>M-Pesa Till: 9402567</p>
-        </div>
-      </footer>
-    </div>
+          <small>Perfect for skin and hair</small>
+        </span>
+      </a>
+      <button class="nav-toggle" aria-label="Open navigation" aria-expanded="false" onclick="document.querySelector('.topnav').classList.toggle('is-open'); this.setAttribute('aria-expanded', document.querySelector('.topnav').classList.contains('is-open'))">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
+      </button>
+      <nav class="topnav" aria-label="Primary navigation">
+        <a href="/catalog" aria-current="page">Catalog</a>
+        <a href="/shop">Shop</a>
+        <a href="/about">About</a>
+        <a href="/#contact">Contact</a>
+      </nav>
+    </header>
 
-    <script src="assets/js/agent-config.js"></script>
-    <script src="assets/js/agent.js"></script>
-    <script src="assets/js/catalog.js"></script>
-  </body>
+    <main>
+      <!-- ── Hero ── -->
+      <section class="catalog-hero">
+        <div>
+          <span class="label">Full catalogue</span>
+          <h1 class="display-lg">Discover the complete Essenshea collection.</h1>
+          <p class="body-lg" style="margin-bottom:24px">From rich body butters and botanical oils to fragrance-led essentials and gift sets&thinsp;&mdash;&thinsp;each product is crafted to feel as considered as the rituals it supports.</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <a class="btn btn--primary" href="#collections">Browse collections</a>
+            <a class="btn btn--ghost" href="/#contact">Request wholesale pricing</a>
+          </div>
+        </div>
+        <div class="catalog-hero__stats">
+          <div class="catalog-stat">
+            <strong>9+</strong>
+            <span>Collections</span>
+          </div>
+          <div class="catalog-stat">
+            <strong>100%</strong>
+            <span>Natural ingredients</span>
+          </div>
+          <div class="catalog-stat">
+            <strong>24/7</strong>
+            <span>Wholesale support</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Browse by Collection ── -->
+      <section class="section" id="collections">
+        <span class="label">Browse by collection</span>
+        <h2 class="display-md">Find your ritual, from body care to fragrance.</h2>
+        <div class="catalog-collections">
+          <a class="catalog-collection-card" href="/category/body-butters-and-balms">
+            <img src="../Essenshea_Catalogue/Body_Butters_and_Balms/images/bubblegum_whipped_shea_butter_250ml.jpg" alt="Body butters and balms" loading="lazy" />
+            <div class="catalog-collection-card__body">
+              <h3>Body Butters &amp; Balms</h3>
+              <span class="count">7 products</span>
+            </div>
+          </a>
+          <a class="catalog-collection-card" href="/category/body-oils-and-tonics">
+            <img src="../Essenshea_Catalogue/Body_Oils_and_Tonics/images/strawberry_shortcake_body_oil_150ml.jpg" alt="Body oils and tonics" loading="lazy" />
+            <div class="catalog-collection-card__body">
+              <h3>Body Oils &amp; Tonics</h3>
+              <span class="count">9 products</span>
+            </div>
+          </a>
+          <a class="catalog-collection-card" href="/category/carrier-oils">
+            <img src="../Essenshea_Catalogue/Carrier_Oils/images/jojoba_oil.jpg" alt="Carrier oils" loading="lazy" />
+            <div class="catalog-collection-card__body">
+              <h3>Carrier Oils</h3>
+              <span class="count">40 products</span>
+            </div>
+          </a>
+          <a class="catalog-collection-card" href="/category/essential-oils">
+            <img src="../Essenshea_Catalogue/Essential_Oils/images/rose_essential_oil.jpg" alt="Essential oils" loading="lazy" />
+            <div class="catalog-collection-card__body">
+              <h3>Essential Oils</h3>
+              <span class="count">16 products</span>
+            </div>
+          </a>
+          <a class="catalog-collection-card" href="/category/fragrances">
+            <img src="../Essenshea_Catalogue/Fragrances/images/vanilla_bean_fragrance.jpg" alt="Fragrances" loading="lazy" />
+            <div class="catalog-collection-card__body">
+              <h3>Fragrances</h3>
+              <span class="count">6 products</span>
+            </div>
+          </a>
+          <a class="catalog-collection-card" href="/category/gels-and-hydrosols">
+            <img src="../Essenshea_Catalogue/Gels_and_Hydrosols/images/aloe_vera_gel.jpg" alt="Gels and hydrosols" loading="lazy" />
+            <div class="catalog-collection-card__body">
+              <h3>Gels &amp; Hydrosols</h3>
+              <span class="count">1 product</span>
+            </div>
+          </a>
+          <a class="catalog-collection-card" href="/category/gift-sets">
+            <img src="../Essenshea_Catalogue/Gift_Sets/images/gift_set_3.jpg" alt="Gift sets" loading="lazy" />
+            <div class="catalog-collection-card__body">
+              <h3>Gift Sets</h3>
+              <span class="count">5 products</span>
+            </div>
+          </a>
+          <a class="catalog-collection-card" href="/category/haircare">
+            <img src="../Essenshea_Catalogue/Haircare/images/beard_elixir_for_men_50ml.jpg" alt="Haircare" loading="lazy" />
+            <div class="catalog-collection-card__body">
+              <h3>Haircare</h3>
+              <span class="count">3 products</span>
+            </div>
+          </a>
+          <a class="catalog-collection-card" href="/category/raw-butters">
+            <img src="../Essenshea_Catalogue/Raw_Butters/images/raw_ghana_shea_butter.jpg" alt="Raw butters" loading="lazy" />
+            <div class="catalog-collection-card__body">
+              <h3>Raw Butters</h3>
+              <span class="count">4 products</span>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <!-- ── How to Shop ── -->
+      <section class="section section--divider">
+        <div class="how-to-shop">
+          <span class="label">How to shop</span>
+          <h2 class="display-md">Request-based ordering, made simple.</h2>
+          <p class="body-lg">Essenshea operates on a request model&thinsp;&mdash;&thinsp;not a traditional checkout. Here is how it works:</p>
+          <ol>
+            <li><strong>Browse</strong> our catalog or shop page and find what you need.</li>
+            <li><strong>Add items</strong> to your request cart. Some products are available now; others are made to order.</li>
+            <li><strong>Submit your request</strong> and we will confirm pricing, availability and a fulfilment schedule within 24 hours.</li>
+            <li><strong>We handle the rest</strong>&thinsp;&mdash;&thinsp;whether it is a single jar or a wholesale pallet.</li>
+          </ol>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__brand">
+        <strong>Essenshea</strong>
+        <p>Natural luxury, rooted in ritual&thinsp;&mdash;&thinsp;crafted for retail, gifting and wholesale with elevated presentation.</p>
+        <p class="footer-legal">&copy; 2026 Essenshea. All rights reserved.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <a href="/catalog">Catalog</a>
+        <a href="/shop">Shop</a>
+        <a href="/about">About</a>
+        <a href="/#contact">Contact</a>
+      </nav>
+      <div class="footer-social">
+        <a href="https://instagram.com/essenshea.ke" target="_blank" rel="noreferrer" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17" cy="7" r="1.5" fill="currentColor" stroke="none"/></svg>
+        </a>
+        <a href="https://wa.me/254727349749" target="_blank" rel="noreferrer" aria-label="WhatsApp">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        </a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="assets/js/agent-config.js"></script>
+  <script src="assets/js/agent.js"></script>
+</body>
 </html>
-

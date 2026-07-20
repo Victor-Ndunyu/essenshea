@@ -1,8 +1,7 @@
-const shopProductsRoot = document.getElementById('shop-products');
+const shopProductsRoot = document.getElementById('shop-products-grid');
 const shopCollectionsRoot = document.getElementById('shop-collections');
 const cartItemsRoot = document.getElementById('cart-items');
 const cartCount = document.getElementById('cart-count');
-const cartTotal = document.getElementById('cart-total');
 const cartNote = document.getElementById('cart-note');
 const checkoutButton = document.getElementById('checkout-button');
 const productModal = document.getElementById('product-modal');
@@ -25,14 +24,10 @@ function createProductId(value) {
     .replace(/(^-|-$)/g, '');
 }
 
-function formatPrice(value) {
-  return `KES ${value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
-}
-
 function excerpt(text, length = 90) {
   if (!text) return '';
   const sanitized = text.replace(/\s+/g, ' ').trim();
-  return sanitized.length <= length ? sanitized : `${sanitized.slice(0, length).trim()}…`;
+  return sanitized.length <= length ? sanitized : sanitized.slice(0, length).trim() + '…';
 }
 
 function mapAvailability(product) {
@@ -52,8 +47,8 @@ async function loadShopData() {
     categories.forEach((category) => {
       shopCollections.push({
         title: category.title,
-        copy: category.description || 'Discover premium Essenshea products and request-only items.',
-        link: `category.html?slug=${category.slug}`,
+        copy: category.description || 'Discover premium Essenshea products.',
+        link: '/category/' + category.slug,
       });
 
       (category.products || []).forEach((product) => {
@@ -65,7 +60,7 @@ async function loadShopData() {
         });
 
         shopProducts.push({
-          id: createProductId(`${category.title}-${title}`),
+          id: createProductId(category.title + '-' + title),
           title,
           category: category.title,
           priceText: product.price || 'Price on request',
@@ -75,12 +70,12 @@ async function loadShopData() {
           image: product.image,
           available,
           stock: product.stock ?? null,
-          stockText: typeof product.stock === 'number' ? `In stock: ${product.stock}` : 'Stock pending',
+          stockText: typeof product.stock === 'number' ? 'In stock: ' + product.stock : '',
           note: /custom/i.test(title)
-            ? 'Custom and request-only product. The seller will confirm price and schedule production.'
+            ? 'Custom product. We will confirm price and schedule production after your request.'
             : available
-            ? 'Request this item and the seller will confirm availability and pricing.'
-            : 'Request-only item; seller will confirm price and schedule production.',
+            ? 'Available now. Add to your request list and we will confirm availability.'
+            : 'Made to order. We will confirm price and schedule production after your request.',
         });
       });
     });
@@ -89,7 +84,7 @@ async function loadShopData() {
     renderShopProducts();
   } catch (error) {
     if (shopProductsRoot) {
-      shopProductsRoot.innerHTML = '<p class="empty-cart">The product list is being prepared. Please refresh shortly.</p>';
+      shopProductsRoot.innerHTML = '<p class="cart-empty">The product list is being prepared. Please refresh shortly.</p>';
     }
     console.error('Unable to load shop product data', error);
   }
@@ -100,38 +95,33 @@ const cart = [];
 function renderShopCollections() {
   if (!shopCollectionsRoot) return;
   shopCollectionsRoot.innerHTML = shopCollections
-    .map(
-      (item) => `
-        <article class="shop-collection-card card">
-          <h3 class="heading-md">${item.title}</h3>
-          <p class="body">${item.copy}</p>
-          <a class="btn btn--secondary" href="${item.link}">Discover</a>
-        </article>
-      `
-    )
+    .map(function(item) {
+      return '<article class="discover-card">'
+        + '<h3>' + item.title + '</h3>'
+        + '<p>' + item.copy + '</p>'
+        + '<a href="' + item.link + '">Browse collection</a>'
+        + '</article>';
+    })
     .join('');
 }
 
 function renderShopProducts() {
   if (!shopProductsRoot) return;
   shopProductsRoot.innerHTML = shopProducts
-    .map(
-      (product) => `
-        <article class="product-card card" data-id="${product.id}">
-          <img src="${product.image}" alt="${product.title}" class="product-card__image" />
-          <div class="product-card__content">
-            <span class="product-flag badge ${product.available ? 'badge--success' : 'badge--warning'}">${product.available ? 'Available' : 'Request only'}</span>
-            <h3 class="heading-md">${product.title}</h3>
-            <p class="body">${product.descriptionExcerpt}</p>
-            <div class="product-card__meta">
-              <span class="product-price heading-md" style="color: var(--color-accent-2);">${product.priceText}</span>
-              <span class="product-stock caption">${product.stockText}</span>
-              <button class="btn btn--secondary btn--sm product-open" data-id="${product.id}">View</button>
-            </div>
-          </div>
-        </article>
-      `
-    )
+    .map(function(product) {
+      return '<article class="product-card" data-id="' + product.id + '">'
+        + '<img src="' + product.image + '" alt="' + product.title + '" loading="lazy" />'
+        + '<div class="product-card__content">'
+        + '<h3>' + product.title + '</h3>'
+        + '<p>' + product.descriptionExcerpt + '</p>'
+        + '</div>'
+        + '<div class="product-card__meta">'
+        + '<span class="product-card__price">' + product.priceText + '</span>'
+        + '<span class="product-card__flag">' + (product.available ? 'Available' : 'Made to order') + '</span>'
+        + '<button class="btn btn--sm btn--secondary product-open" data-id="' + product.id + '">View</button>'
+        + '</div>'
+        + '</article>';
+    })
     .join('');
 }
 
@@ -139,56 +129,44 @@ function renderCart() {
   if (!cartItemsRoot || !cartCount || !cartNote || !checkoutButton) return;
 
   if (!cart.length) {
-    cartItemsRoot.innerHTML = '<p class="empty-cart body">Your request cart is empty. Open a product to add it.</p>';
-    cartCount.textContent = '0 items selected';
-    if (cartTotal) {
-      cartTotal.textContent = '';
-    }
-    cartNote.textContent = 'Ready to request when you are.';
+    cartItemsRoot.innerHTML = '<p class="cart-empty">Your request list is empty. Open a product to add it.</p>';
+    cartCount.textContent = '0 items';
+    if (cartNote) cartNote.textContent = 'Ready to request when you are.';
     checkoutButton.disabled = true;
     return;
   }
 
   cartItemsRoot.innerHTML = cart
-    .map(
-      (item) => `
-        <div class="cart-item">
-          <div>
-            <strong class="body">${item.quantity}× ${item.title}</strong>
-            <p class="caption">${item.available ? 'Available stock will be prepared for shipment.' : 'Requested item will be queued and scheduled.'}</p>
-          </div>
-          <button class="btn btn--ghost btn--sm cart-remove" data-id="${item.id}">Remove</button>
-        </div>
-      `
-    )
+    .map(function(item) {
+      return '<div class="cart-item">'
+        + '<div class="cart-item__info">'
+        + '<strong>' + item.quantity + 'x ' + item.title + '</strong>'
+        + '<span>' + (item.available ? 'Available &mdash; will be prepared for shipment.' : 'Made to order &mdash; will be queued and scheduled.') + '</span>'
+        + '</div>'
+        + '<button class="btn btn--sm btn--secondary cart-remove" data-id="' + item.id + '">Remove</button>'
+        + '</div>';
+    })
     .join('');
 
-  const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const hasAllPrices = cart.every((item) => typeof item.priceValue === 'number');
-  const totalValue = cart.reduce((sum, item) => sum + item.quantity * (item.priceValue || 0), 0);
+  const totalCount = cart.reduce(function(sum, item) { return sum + item.quantity; }, 0);
+  cartCount.textContent = totalCount + ' item' + (totalCount === 1 ? '' : 's');
 
-  cartCount.textContent = `${totalCount} item${totalCount === 1 ? '' : 's'} selected`;
-
-  if (cartTotal) {
-    cartTotal.textContent = hasAllPrices ? `Subtotal: ${formatPrice(totalValue)}` : 'Pricing will be confirmed by the seller after review.';
+  if (cartNote) {
+    cartNote.textContent = 'Ready to submit. We will confirm pricing and availability within 24 hours.';
   }
-
-  cartNote.textContent = hasAllPrices
-    ? 'Shipping and pickup options are confirmed once the seller replies with availability.'
-    : 'Cart pricing and fulfillment are confirmed after the seller reviews your request.';
   checkoutButton.disabled = false;
 }
 
 function openProductModal(productId) {
-  const product = shopProducts.find((item) => item.id === productId);
+  const product = shopProducts.find(function(item) { return item.id === productId; });
   if (!product || !productModal) return;
 
   modalTitle.textContent = product.title;
   modalImage.src = product.image;
   modalImage.alt = product.title;
   modalDescription.textContent = product.description;
-  modalDetails.textContent = `${product.priceText} · ${product.available ? 'Available now' : 'Request only'} · ${product.stockText} · ${product.note}`;
-  modalAction.textContent = product.available ? 'Add to cart' : 'Request this item';
+  modalDetails.textContent = product.priceText + ' &middot; ' + (product.available ? 'Available now' : 'Made to order') + (product.stockText ? ' &middot; ' + product.stockText : '') + ' &middot; ' + product.note;
+  modalAction.textContent = 'Add to request';
   modalAction.dataset.id = product.id;
   productModal.classList.remove('hidden');
   productModal.setAttribute('aria-hidden', 'false');
@@ -201,10 +179,10 @@ function closeProductModal() {
 }
 
 function addToCart(productId) {
-  const product = shopProducts.find((item) => item.id === productId);
+  const product = shopProducts.find(function(item) { return item.id === productId; });
   if (!product) return;
 
-  const existing = cart.find((item) => item.id === productId);
+  const existing = cart.find(function(item) { return item.id === productId; });
   if (existing) {
     existing.quantity += 1;
   } else {
@@ -216,7 +194,7 @@ function addToCart(productId) {
 }
 
 function removeFromCart(productId) {
-  const index = cart.findIndex((item) => item.id === productId);
+  const index = cart.findIndex(function(item) { return item.id === productId; });
   if (index === -1) return;
   cart.splice(index, 1);
   renderCart();
@@ -225,27 +203,20 @@ function removeFromCart(productId) {
 async function submitCartRequest() {
   if (!cart.length) return;
 
-  const checkoutButton = document.getElementById('checkout-button');
-  if (checkoutButton) {
-    checkoutButton.disabled = true;
-    checkoutButton.textContent = 'Sending…';
-  }
+  checkoutButton.disabled = true;
+  checkoutButton.textContent = 'Sending…';
 
   const customerName = prompt('Your name:');
   if (!customerName || !customerName.trim()) {
-    if (checkoutButton) {
-      checkoutButton.disabled = false;
-      checkoutButton.textContent = 'Submit request';
-    }
+    checkoutButton.disabled = false;
+    checkoutButton.textContent = 'Send request';
     return;
   }
 
   const customerContact = prompt('Phone number or email:');
   if (!customerContact || !customerContact.trim()) {
-    if (checkoutButton) {
-      checkoutButton.disabled = false;
-      checkoutButton.textContent = 'Submit request';
-    }
+    checkoutButton.disabled = false;
+    checkoutButton.textContent = 'Send request';
     return;
   }
 
@@ -254,11 +225,13 @@ async function submitCartRequest() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        items: cart.map((item) => ({
-          title: item.title,
-          quantity: item.quantity,
-          priceText: item.priceText,
-        })),
+        items: cart.map(function(item) {
+          return {
+            title: item.title,
+            quantity: item.quantity,
+            priceText: item.priceText,
+          };
+        }),
         customer: {
           name: customerName.trim(),
           contact: customerContact.trim(),
@@ -274,15 +247,13 @@ async function submitCartRequest() {
       cart.length = 0;
       renderCart();
     } else {
-      alert(`Failed to submit: ${result.error || 'Unknown error'}`);
+      alert('Failed to submit: ' + (result.error || 'Unknown error'));
     }
   } catch (error) {
-    alert(`Failed to submit request: ${error.message}`);
+    alert('Failed to submit request: ' + error.message);
   } finally {
-    if (checkoutButton) {
-      checkoutButton.disabled = false;
-      checkoutButton.textContent = 'Submit request';
-    }
+    checkoutButton.disabled = false;
+    checkoutButton.textContent = 'Send request';
   }
 }
 
@@ -294,6 +265,7 @@ async function handleCustomRequestSubmit(event) {
   const productType = formData.get('productType');
   const details = formData.get('details').trim();
   const notes = formData.getAll('notes');
+  const submitBtn = document.getElementById('custom-submit');
 
   if (!name || !email || !details) {
     customRequestStatus.textContent = 'Please complete your name, email and request details.';
@@ -301,6 +273,7 @@ async function handleCustomRequestSubmit(event) {
   }
 
   customRequestStatus.textContent = 'Sending your request…';
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending…'; }
 
   try {
     const response = await fetch('/api/orders', {
@@ -309,16 +282,16 @@ async function handleCustomRequestSubmit(event) {
       body: JSON.stringify({
         items: [
           {
-            title: `Custom request: ${productType || 'Unspecified'}`,
+            title: 'Custom request: ' + (productType || 'Unspecified'),
             quantity: 1,
             priceText: 'Price on request',
           },
         ],
         customer: {
-          name,
+          name: name,
           contact: email,
-          email,
-          notes: `${details}${notes.length ? ' | Fragrance notes: ' + notes.join(', ') : ''}`,
+          email: email,
+          notes: details + (notes.length ? ' | Fragrance notes: ' + notes.join(', ') : ''),
         },
         type: 'custom',
       }),
@@ -330,17 +303,19 @@ async function handleCustomRequestSubmit(event) {
       customRequestStatus.textContent = result.message;
       customRequestForm.reset();
     } else {
-      customRequestStatus.textContent = `Failed to send: ${result.error || 'Unknown error'}`;
+      customRequestStatus.textContent = 'Failed to send: ' + (result.error || 'Unknown error');
     }
   } catch (error) {
-    customRequestStatus.textContent = `Failed to send request: ${error.message}`;
+    customRequestStatus.textContent = 'Failed to send request: ' + error.message;
+  } finally {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Request custom product'; }
   }
 }
 
 renderCart();
 loadShopData();
 
-document.addEventListener('click', (event) => {
+document.addEventListener('click', function(event) {
   const button = event.target.closest('button');
   if (!button) return;
 
