@@ -9,8 +9,8 @@ export const dynamic = 'force-dynamic';
 
 const AGENT_API_KEY = process.env.AGENT_API_KEY || process.env.NVIDIA_AGENT_API_KEY || '';
 const AGENT_BASE_URL = process.env.AGENT_BASE_URL || 'https://integrate.api.nvidia.com/v1';
-const preferredModel = process.env.AGENT_MODEL || 'meta/llama-3.3-70b-instruct';
-const fallbackModel = process.env.AGENT_FALLBACK_MODEL || 'meta/llama-3.1-8b-instruct';
+const preferredModel = process.env.AGENT_MODEL || 'meta/llama-3.1-8b-instruct';
+const fallbackModel = process.env.AGENT_FALLBACK_MODEL || 'meta/llama-3.3-70b-instruct';
 const MAX_MESSAGE_LENGTH = 2_000;
 
 const assistantPersona = `You are Essenshea's customer care assistant.
