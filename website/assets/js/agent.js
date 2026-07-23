@@ -206,6 +206,7 @@ function createCartWidgetMarkup() {
     + '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>'
     + '<span id="cart-badge" class="cart-widget__badge">0</span>'
     + '</button>'
+    + '<div id="site-notice" class="site-notice hidden" role="status" aria-live="polite"></div>'
     + '<aside id="cart-popup" class="cart-popup hidden" aria-hidden="true">'
     + '<div class="cart-popup-header">'
     + '<h2>Your request list</h2>'
@@ -219,12 +220,39 @@ function createCartWidgetMarkup() {
     + '<span id="cart-popup-count">0 items</span>'
     + '<span id="cart-popup-note">Ready to request when you are.</span>'
     + '</div>'
-    + '<button id="cart-popup-checkout" class="btn btn--primary" disabled>Send request</button>'
+    + '<form id="cart-popup-form" class="cart-popup-form">'
+    + '<label for="cart-customer-name">Full name</label>'
+    + '<input id="cart-customer-name" name="name" type="text" autocomplete="name" maxlength="120" required />'
+    + '<label for="cart-customer-phone">Phone or WhatsApp number</label>'
+    + '<input id="cart-customer-phone" name="phone" type="tel" autocomplete="tel" maxlength="40" required />'
+    + '<label for="cart-fulfilment">How should we fulfil this request?</label>'
+    + '<select id="cart-fulfilment" name="fulfilmentMethod">'
+    + '<option value="delivery">Delivery</option>'
+    + '<option value="pickup">Pickup</option>'
+    + '<option value="discuss">Discuss with me</option>'
+    + '</select>'
+    + '<div id="cart-location-group">'
+    + '<label for="cart-delivery-location">Delivery town or area</label>'
+    + '<input id="cart-delivery-location" name="deliveryLocation" type="text" autocomplete="address-level2" maxlength="200" required />'
+    + '</div>'
+    + '<label class="consent-check"><input name="ecoRewardsOptIn" type="checkbox" /> <span>Keep my purchase history for four months so Essenshea can check Eco-Rewards refill eligibility.</span></label>'
+    + '<div class="form-honeypot" aria-hidden="true"><input name="companyWebsite" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" /></div>'
+    + '<button id="cart-popup-checkout" class="btn btn--primary" type="submit" disabled>Send request</button>'
+    + '<p id="cart-popup-status" class="form-status" role="status" aria-live="polite"></p>'
+    + '</form>'
     + '</div>'
     + '</aside>';
   while (wrapper.firstChild) {
     document.body.appendChild(wrapper.firstChild);
   }
+}
+
+function showSiteNotice(message) {
+  var notice = document.getElementById('site-notice');
+  if (!notice) return;
+  notice.textContent = message;
+  notice.classList.remove('hidden');
+  window.setTimeout(function() { notice.classList.add('hidden'); }, 12000);
 }
 
 function updateCartWidget() {
@@ -275,51 +303,61 @@ function renderCartPopup() {
 
   var total = cart.reduce(function(s, i) { return s + i.quantity; }, 0);
   if (count) count.textContent = total + ' item' + (total === 1 ? '' : 's');
-  if (note) note.textContent = 'Ready to submit. We will confirm pricing and availability within 24 hours.';
+  if (note) note.textContent = 'Ready to submit. We will contact you to confirm pricing and availability.';
   if (checkout) checkout.disabled = false;
 }
 
-function submitCartPopup() {
+function submitCartPopup(event) {
+  event.preventDefault();
   var cart = loadCartFromStorage();
   if (!cart.length) return;
+  var form = document.getElementById('cart-popup-form');
   var checkout = document.getElementById('cart-popup-checkout');
+  var status = document.getElementById('cart-popup-status');
+  if (!form || !form.reportValidity()) return;
+  var formData = new FormData(form);
+  if (formData.get('companyWebsite')) return;
   if (checkout) { checkout.disabled = true; checkout.textContent = 'Sending\u2026'; }
-
-  var name = prompt('Your name:');
-  if (!name || !name.trim()) {
-    if (checkout) { checkout.disabled = false; checkout.textContent = 'Send request'; }
-    return;
-  }
-  var contact = prompt('Phone number or email:');
-  if (!contact || !contact.trim()) {
-    if (checkout) { checkout.disabled = false; checkout.textContent = 'Send request'; }
-    return;
-  }
+  if (status) status.textContent = 'Saving your request and alerting Essenshea\u2026';
 
   fetch('/api/orders', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      items: cart.map(function(i) { return { title: i.title, quantity: i.quantity, priceText: i.priceText }; }),
-      customer: { name: name.trim(), contact: contact.trim() },
+      items: cart.map(function(i) {
+        return {
+          productSlug: i.id,
+          title: i.title,
+          quantity: i.quantity,
+          priceText: i.priceText,
+        };
+      }),
+      customer: {
+        name: String(formData.get('name') || '').trim(),
+        phone: String(formData.get('phone') || '').trim(),
+        preferredContact: 'whatsapp',
+        fulfilmentMethod: String(formData.get('fulfilmentMethod') || 'discuss'),
+        deliveryLocation: String(formData.get('deliveryLocation') || '').trim(),
+        ecoRewardsOptIn: formData.get('ecoRewardsOptIn') === 'on',
+      },
       type: 'cart',
+      source: 'website_cart',
     }),
   })
   .then(function(r) { return r.json(); })
   .then(function(result) {
     if (result.success) {
-      alert(result.message);
+      showSiteNotice(result.message);
       localStorage.removeItem(CART_STORAGE_KEY);
       updateCartWidget();
       renderCartPopup();
-      var p = document.getElementById('cart-popup');
-      if (p) { p.classList.add('hidden'); p.setAttribute('aria-hidden', 'true'); }
+      form.reset();
     } else {
-      alert('Failed to submit: ' + (result.error || 'Unknown error'));
+      if (status) status.textContent = (result.error || 'We could not submit the request.');
     }
   })
   .catch(function(error) {
-    alert('Failed to submit request: ' + error.message);
+    if (status) status.textContent = 'Connection failed. Your request list is still saved; please try again.';
   })
   .finally(function() {
     if (checkout) { checkout.disabled = false; checkout.textContent = 'Send request'; }
@@ -389,8 +427,20 @@ function initializeCartWidget() {
   });
 
   var checkoutBtn = document.getElementById('cart-popup-checkout');
-  if (checkoutBtn) {
-    checkoutBtn.addEventListener('click', submitCartPopup);
+  var checkoutForm = document.getElementById('cart-popup-form');
+  var fulfilmentSelect = document.getElementById('cart-fulfilment');
+  var locationInput = document.getElementById('cart-delivery-location');
+  var locationGroup = document.getElementById('cart-location-group');
+  if (checkoutForm) {
+    checkoutForm.addEventListener('submit', submitCartPopup);
+  }
+  if (fulfilmentSelect && locationInput && locationGroup) {
+    fulfilmentSelect.addEventListener('change', function() {
+      var delivery = fulfilmentSelect.value === 'delivery';
+      locationGroup.hidden = !delivery;
+      locationInput.required = delivery;
+      if (!delivery) locationInput.value = '';
+    });
   }
 }
 
