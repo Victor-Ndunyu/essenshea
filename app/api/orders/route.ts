@@ -81,9 +81,6 @@ export async function POST(req: NextRequest) {
 
   const supabase = getSupabaseAdmin();
   const reference = createOrderReference();
-  const retentionDate = new Date();
-  retentionDate.setUTCMonth(retentionDate.getUTCMonth() + 4);
-
   const { data: storedOrder, error: orderError } = await supabase
     .from('orders')
     .insert({
@@ -100,10 +97,8 @@ export async function POST(req: NextRequest) {
       delivery_location: order.customer.deliveryLocation,
       customer_notes: order.customer.notes,
       eco_rewards_opt_in: order.customer.ecoRewardsOptIn,
-      eco_rewards_eligible_until: order.customer.ecoRewardsOptIn
-        ? retentionDate.toISOString()
-        : null,
-      data_retention_until: retentionDate.toISOString(),
+      eco_rewards_eligible_until: null,
+      data_retention_until: null,
       notification_status: 'pending',
     })
     .select('id, reference')

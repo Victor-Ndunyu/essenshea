@@ -32,6 +32,8 @@ const PAGE_ROUTES: Record<string, string> = {
   'catalog': 'catalog.html',
   'category': 'category.html',
   'about': 'about.html',
+  'eco-rewards': 'eco-rewards.html',
+  'eco-rewards-admin': 'eco-rewards-admin.html',
 };
 
 function esc(s: any): string {

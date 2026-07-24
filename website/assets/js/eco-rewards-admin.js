@@ -1,0 +1,154 @@
+let ownerKey = '';
+let selectedAccount = null;
+const byId = (id) => document.getElementById(id);
+
+async function adminRequest(url = '/api/eco-rewards/admin', options = {}) {
+  const response = await fetch(url, {
+    ...options,
+    headers: { 'Content-Type': 'application/json', 'x-eco-admin-key': ownerKey, ...(options.headers || {}) },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+function safeNode(tag, text, className) {
+  const node = document.createElement(tag);
+  if (text !== undefined) node.textContent = text;
+  if (className) node.className = className;
+  return node;
+}
+
+async function loadAccounts() {
+  const search = byId('account-search').value.trim();
+  const data = await adminRequest(`/api/eco-rewards/admin?search=${encodeURIComponent(search)}`);
+  const list = byId('account-list');
+  list.replaceChildren();
+  data.accounts.forEach((account) => {
+    const button = safeNode('button', '', 'eco-admin-account');
+    button.type = 'button';
+    button.append(safeNode('strong', account.customer_name));
+    button.append(safeNode('span', `${account.phone} · ${account.current_punches}/8 punches`));
+    button.addEventListener('click', () => openAccount(account.id));
+    list.append(button);
+  });
+  if (!data.accounts.length) list.append(safeNode('p', 'No customers found.', 'body-sm'));
+}
+
+async function openAccount(id) {
+  const data = await adminRequest(`/api/eco-rewards/admin?accountId=${encodeURIComponent(id)}`);
+  selectedAccount = data.account;
+  const detail = byId('account-detail');
+  detail.classList.remove('hidden');
+  detail.replaceChildren();
+  const heading = safeNode('div', '', 'eco-admin-detail__heading');
+  heading.append(safeNode('h2', `${data.account.customer_name} · ${data.account.current_punches}/8 punches`, 'display-md'));
+  heading.append(safeNode('span', data.account.phone, 'body'));
+  detail.append(heading);
+
+  const form = safeNode('div', '', 'form-wrap');
+  form.innerHTML = `
+    <h3 class="heading-md">Record container inspection and refill</h3>
+    <div class="eco-admin-fields">
+      <label>Containers submitted<input class="form-input" id="refill-submitted" type="number" min="1" max="25" value="1"></label>
+      <label>Containers accepted<input class="form-input" id="refill-accepted" type="number" min="0" max="25" value="1"></label>
+      <label>Refill product<input class="form-input" id="refill-product" placeholder="Product being refilled"></label>
+      <label>Fulfilment<select class="form-select" id="refill-fulfilment"><option value="pickup">Pick up</option><option value="delivery">Delivery</option></select></label>
+      <label>Rejection reason<select class="form-select" id="refill-reason"><option value="">Not rejected</option><option value="damaged">Damaged</option><option value="missing_label">Missing label</option><option value="not_eligible">Not refillable</option><option value="other">Other</option></select></label>
+      <label class="consent-check"><input id="refill-paid" type="checkbox"><span>Payment confirmed</span></label>
+    </div>
+    <textarea class="form-textarea" id="refill-notes" placeholder="Optional notes"></textarea>
+    <button class="btn btn--primary" id="record-refill" type="button">Save inspection</button>
+    <p class="form-status" id="refill-status"></p>`;
+  detail.append(form);
+  byId('record-refill').addEventListener('click', recordRefill);
+
+  const benefits = safeNode('div', '', 'eco-admin-benefits');
+  benefits.append(safeNode('h3', 'Rewards', 'heading-md'));
+  data.benefits.forEach((reward) => {
+    const row = safeNode('div', '', 'eco-benefit');
+    row.append(safeNode('strong', reward.reward_type.replaceAll('_', ' ')));
+    row.append(safeNode('span', reward.status));
+    if (reward.status === 'available') {
+      const redeem = safeNode('button', 'Redeem', 'btn btn--sm btn--secondary');
+      redeem.type = 'button';
+      redeem.addEventListener('click', () => redeemReward(reward.id));
+      row.append(redeem);
+    }
+    benefits.append(row);
+  });
+  detail.append(benefits);
+}
+
+async function recordRefill() {
+  const status = byId('refill-status');
+  status.textContent = 'Saving…';
+  try {
+    const data = await adminRequest('/api/eco-rewards/admin', {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'record_refill',
+        accountId: selectedAccount.id,
+        submittedContainers: Number(byId('refill-submitted').value),
+        acceptedContainers: Number(byId('refill-accepted').value),
+        productName: byId('refill-product').value,
+        fulfilmentMethod: byId('refill-fulfilment').value,
+        rejectionReason: byId('refill-reason').value,
+        paymentConfirmed: byId('refill-paid').checked,
+        notes: byId('refill-notes').value,
+      }),
+    });
+    status.textContent = `Saved. Card now has ${data.result.current_punches}/8 punches.`;
+    await openAccount(selectedAccount.id);
+    await loadAccounts();
+  } catch (error) {
+    status.textContent = error.message;
+  }
+}
+
+async function redeemReward(rewardId) {
+  const productName = window.prompt('Which refill product is this reward being used on?');
+  if (!productName) return;
+  await adminRequest('/api/eco-rewards/admin', {
+    method: 'POST',
+    body: JSON.stringify({ action: 'redeem_reward', rewardId, productName }),
+  });
+  await openAccount(selectedAccount.id);
+}
+
+byId('admin-login').addEventListener('click', async () => {
+  ownerKey = byId('admin-key').value;
+  try {
+    await loadAccounts();
+    byId('eco-admin-login').classList.add('hidden');
+    byId('eco-admin-workspace').classList.remove('hidden');
+  } catch (error) {
+    byId('admin-login-status').textContent = error.message;
+  }
+});
+byId('search-accounts').addEventListener('click', () => loadAccounts().catch((error) => { byId('admin-login-status').textContent = error.message; }));
+byId('create-account').addEventListener('click', async () => {
+  const status = byId('create-status');
+  try {
+    const data = await adminRequest('/api/eco-rewards/admin', {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'create_account',
+        customerName: byId('new-name').value,
+        phone: byId('new-phone').value,
+        consent: byId('new-consent').checked,
+        consentSource: 'shop',
+      }),
+    });
+    const whatsappText = encodeURIComponent(`Welcome to Essenshea Eco-Rewards. Your private access code is ${data.accessCode}. View your card at https://essenshea.vercel.app/eco-rewards`);
+    status.replaceChildren(safeNode('span', `Account created. Access code: ${data.accessCode} · `));
+    const link = safeNode('a', 'Send securely on WhatsApp');
+    link.href = `https://wa.me/${data.account.phone}?text=${whatsappText}`;
+    link.target = '_blank';
+    link.rel = 'noreferrer';
+    status.append(link);
+    await loadAccounts();
+  } catch (error) {
+    status.textContent = error.message;
+  }
+});

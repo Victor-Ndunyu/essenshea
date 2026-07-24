@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eco-Rewards Owner Desk — Essenshea</title>
+  <link rel="stylesheet" href="/assets/css/style-new.css" />
+</head>
+<body>
+  <main class="eco-admin">
+    <header><div><span class="label">Private owner desk</span><h1 class="display-lg">Eco-Rewards Club</h1></div><a class="btn btn--secondary" href="/eco-rewards">View customer page</a></header>
+    <section class="form-wrap" id="eco-admin-login">
+      <label class="form-label" for="admin-key">Owner access key</label>
+      <input class="form-input" id="admin-key" type="password" autocomplete="current-password" />
+      <button class="btn btn--primary" id="admin-login" type="button">Open owner desk</button>
+      <p class="form-status" id="admin-login-status"></p>
+    </section>
+    <div class="hidden" id="eco-admin-workspace">
+      <div class="eco-admin-grid">
+        <section class="form-wrap">
+          <h2 class="heading-md">Enrol a customer</h2>
+          <input class="form-input" id="new-name" placeholder="Customer name" />
+          <input class="form-input" id="new-phone" type="tel" placeholder="Phone number" />
+          <label class="consent-check"><input id="new-consent" type="checkbox" /><span>The customer consented to loyalty tracking and refill communication.</span></label>
+          <button class="btn btn--primary" id="create-account" type="button">Create loyalty card</button>
+          <p class="form-status" id="create-status"></p>
+        </section>
+        <section class="form-wrap">
+          <label class="form-label" for="account-search">Find a customer</label>
+          <div class="eco-admin-search"><input class="form-input" id="account-search" placeholder="Name or phone" /><button class="btn btn--secondary" id="search-accounts" type="button">Search</button></div>
+          <div id="account-list" class="eco-admin-list"></div>
+        </section>
+      </div>
+      <section class="eco-admin-detail hidden" id="account-detail"></section>
+    </div>
+  </main>
+  <script src="/assets/js/eco-rewards-admin.js"></script>
+</body>
+</html>

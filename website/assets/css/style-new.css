@@ -1698,6 +1698,148 @@ a { color: inherit; text-decoration: none; }
   }
 }
 
+/* Eco-Rewards Club */
+.hidden { display: none !important; }
+
+.eco-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: center;
+  padding: 48px 0 72px;
+}
+
+.eco-hero__copy { max-width: 590px; }
+
+.eco-cycle {
+  background: var(--olive);
+  color: var(--ivory);
+  border-radius: 34px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  overflow: hidden;
+}
+
+.eco-cycle div {
+  min-height: 190px;
+  padding: 28px;
+  border: 1px solid rgba(253,252,250,.14);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.eco-cycle span {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  color: var(--gold-light);
+  margin-bottom: auto;
+}
+
+.eco-cycle strong { font-family: var(--font-display); font-size: 1.55rem; }
+.eco-cycle small { color: rgba(253,252,250,.72); line-height: 1.5; margin-top: 6px; }
+
+.eco-heading,
+.eco-terms,
+.eco-lookup {
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: 56px;
+  align-items: start;
+}
+
+.eco-milestones {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 18px;
+  margin-top: 36px;
+}
+
+.eco-milestones article {
+  min-height: 270px;
+  padding: 28px;
+  border-radius: var(--radius);
+  background: var(--card);
+  border: 1px solid var(--ink-border);
+  display: flex;
+  flex-direction: column;
+}
+
+.eco-milestone__number {
+  font-family: var(--font-display);
+  font-size: 3.4rem;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.eco-milestones h3 { font-family: var(--font-display); font-size: 1.55rem; margin: auto 0 8px; }
+.eco-milestones p, .eco-term-list p { color: var(--ink-soft); line-height: 1.65; margin: 0; }
+.eco-term-list { display: grid; gap: 18px; }
+.eco-term-list p { padding-bottom: 18px; border-bottom: 1px solid var(--ink-border); }
+
+.eco-account {
+  margin-top: 32px;
+  padding: 32px;
+  border-radius: var(--radius);
+  background: var(--olive);
+  color: var(--ivory);
+}
+
+.eco-account__heading { display: flex; justify-content: space-between; gap: 20px; align-items: flex-start; }
+.eco-account .label { color: var(--gold-light); }
+.eco-next { border: 1px solid rgba(255,255,255,.2); padding: 9px 14px; border-radius: 999px; font-size: .82rem; }
+.eco-punches { display: grid; grid-template-columns: repeat(8,1fr); gap: 10px; margin: 28px 0; }
+.eco-punches span {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.24);
+  display: grid;
+  place-items: center;
+  color: rgba(255,255,255,.5);
+}
+.eco-punches span.is-earned { background: var(--gold-light); border-color: var(--gold-light); color: var(--ink); }
+.eco-account__section { margin-top: 24px; display: grid; gap: 10px; }
+.eco-account__section h4 { font-family: var(--font-display); font-size: 1.25rem; margin: 0; }
+.eco-account .body-sm { color: rgba(255,255,255,.72); }
+.eco-benefit, .eco-history {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,.08);
+  border-radius: 10px;
+}
+.eco-benefit span, .eco-history span { font-size: .82rem; opacity: .7; }
+
+.eco-admin { max-width: 1180px; margin: 0 auto; padding: 36px 24px 80px; }
+.eco-admin > header { display: flex; justify-content: space-between; gap: 24px; align-items: center; margin-bottom: 32px; }
+.eco-admin-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 24px; }
+.eco-admin-search { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.eco-admin-list { display: grid; gap: 8px; max-height: 430px; overflow-y: auto; }
+.eco-admin-account {
+  border: 1px solid var(--ink-border); background: var(--white); padding: 14px;
+  border-radius: 10px; text-align: left; cursor: pointer; display: grid; gap: 3px;
+}
+.eco-admin-account span { color: var(--ink-soft); font-size: .82rem; }
+.eco-admin-detail { margin-top: 28px; display: grid; gap: 24px; }
+.eco-admin-detail__heading { display: flex; justify-content: space-between; gap: 20px; align-items: baseline; }
+.eco-admin-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.eco-admin-fields label { display: grid; gap: 5px; font-size: .82rem; color: var(--ink-soft); }
+.eco-admin-benefits { display: grid; gap: 10px; }
+.eco-admin-benefits .eco-benefit { background: var(--card); }
+
+@media (max-width: 768px) {
+  .eco-hero, .eco-heading, .eco-terms, .eco-lookup, .eco-admin-grid { grid-template-columns: 1fr; gap: 28px; }
+  .eco-milestones { grid-template-columns: 1fr; }
+  .eco-milestones article { min-height: 210px; }
+  .eco-punches { grid-template-columns: repeat(4,1fr); }
+  .eco-account__heading, .eco-admin > header, .eco-admin-detail__heading { flex-direction: column; }
+  .eco-admin-fields { grid-template-columns: 1fr; }
+}
+
 /* ── Cart Widget ── */
 .cart-widget {
   position: fixed;
