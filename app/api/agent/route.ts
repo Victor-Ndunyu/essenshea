@@ -1,10 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  getClientAddress,
-  checkRateLimit,
-} from '../../../lib/rate-limit';
+import { getClientAddress, checkRateLimit } from '../../../lib/rate-limit';
 import { checkMemoryRateLimit } from '../../../lib/memory-rate-limit';
 import { sendOperationalAlert } from '../../../lib/notifications';
 import {
