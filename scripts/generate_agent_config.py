@@ -6,10 +6,7 @@ env_paths = [root / '.env', root / '.env.local']
 out_path = root / 'website' / 'assets' / 'js' / 'agent-config.js'
 
 config = {
-    'brainProvider': 'google',
-    'apiUrl': 'http://localhost:3000/api/agent',
-    'model': 'google/gemini-2.5-flash',
-    'fallbackModel': 'groq/llama-3.3-70b-versatile',
+    'apiUrl': '/api/agent',
     'telegramWebhookUrl': '',
     'allowStockEdits': True,
     'stockEditScope': 'stock-only',
@@ -29,12 +26,6 @@ for env_path in env_paths:
         value = value.strip()
         if key == 'AGENT_API_URL':
             config['apiUrl'] = value
-        elif key == 'AGENT_PROVIDER' and value:
-            config['brainProvider'] = value
-        elif key == 'AGENT_MODEL' and value:
-            config['model'] = value
-        elif key == 'AGENT_FALLBACK_MODEL' and value:
-            config['fallbackModel'] = value
         elif key == 'TELEGRAM_WEBHOOK_URL':
             config['telegramWebhookUrl'] = value
         elif key == 'STOCK_EDIT_SCOPE' and value:

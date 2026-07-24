@@ -1726,6 +1726,26 @@ a { color: inherit; text-decoration: none; }
   box-shadow: 0 12px 40px rgba(169, 137, 90, 0.4);
 }
 
+.site-notice {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(520px, calc(100% - 32px));
+  z-index: 70;
+  padding: 14px 18px;
+  border: 1px solid var(--ink-border);
+  border-radius: 10px;
+  background: var(--ivory);
+  color: var(--ink);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+
+.site-notice.hidden {
+  display: none;
+}
+
 .cart-widget__badge {
   position: absolute;
   top: -4px;
@@ -1811,6 +1831,53 @@ a { color: inherit; text-decoration: none; }
   border-top: 1px solid var(--ink-border);
   display: grid;
   gap: 12px;
+}
+
+.cart-popup-form {
+  display: grid;
+  gap: 8px;
+}
+
+.cart-popup-form label {
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.cart-popup-form input,
+.cart-popup-form select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--ink-border);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--ink);
+  font: inherit;
+  padding: 9px 11px;
+}
+
+.consent-check {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 8px;
+  margin: 4px 0;
+  line-height: 1.45;
+}
+
+.consent-check input {
+  width: 17px;
+  min-height: 17px;
+  margin-top: 2px;
+}
+
+.form-honeypot {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
 }
 
 :focus-visible {

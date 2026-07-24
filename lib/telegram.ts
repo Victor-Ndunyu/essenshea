@@ -30,8 +30,8 @@ export async function sendTelegramMessage(chatId: number, text: string): Promise
       body: JSON.stringify({
         chat_id: chatId,
         text: truncatedText,
-        parse_mode: 'Markdown',
       }),
+      signal: AbortSignal.timeout(10_000),
     }
   );
 
@@ -50,6 +50,7 @@ export async function sendTypingIndicator(chatId: number): Promise<void> {
       chat_id: chatId,
       action: 'typing',
     }),
+    signal: AbortSignal.timeout(5_000),
   }).catch((err) => console.error('Failed to send typing indicator:', err));
 }
 
@@ -63,6 +64,7 @@ export async function callBusinessAgent(message: string, sessionId: string): Pro
       sessionId,
       source: 'telegram',
     }),
+    signal: AbortSignal.timeout(25_000),
   });
 
   if (!response.ok) {
