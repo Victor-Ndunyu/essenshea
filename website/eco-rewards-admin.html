@@ -1,38 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Eco-Rewards Owner Desk — Essenshea</title>
+  <meta name="description" content="Private Essenshea Eco-Rewards workspace for customer cards, refill approvals and reward redemptions." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" href="/assets/images/star-mark.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/assets/css/style-new.css" />
 </head>
-<body>
-  <main class="eco-admin">
-    <header><div><span class="label">Private owner desk</span><h1 class="display-lg">Eco-Rewards Club</h1></div><a class="btn btn--secondary" href="/eco-rewards">View customer page</a></header>
-    <section class="form-wrap" id="eco-admin-login">
-      <label class="form-label" for="admin-key">Owner access key</label>
-      <input class="form-input" id="admin-key" type="password" autocomplete="current-password" />
-      <button class="btn btn--primary" id="admin-login" type="button">Open owner desk</button>
-      <p class="form-status" id="admin-login-status"></p>
-    </section>
-    <div class="hidden" id="eco-admin-workspace">
-      <div class="eco-admin-grid">
-        <section class="form-wrap">
-          <h2 class="heading-md">Enrol a customer</h2>
-          <input class="form-input" id="new-name" placeholder="Customer name" />
-          <input class="form-input" id="new-phone" type="tel" placeholder="Phone number" />
-          <label class="consent-check"><input id="new-consent" type="checkbox" /><span>The customer consented to loyalty tracking and refill communication.</span></label>
-          <button class="btn btn--primary" id="create-account" type="button">Create loyalty card</button>
-          <p class="form-status" id="create-status"></p>
-        </section>
-        <section class="form-wrap">
-          <label class="form-label" for="account-search">Find a customer</label>
-          <div class="eco-admin-search"><input class="form-input" id="account-search" placeholder="Name or phone" /><button class="btn btn--secondary" id="search-accounts" type="button">Search</button></div>
-          <div id="account-list" class="eco-admin-list"></div>
-        </section>
+<body class="eco-admin-page">
+  <div class="eco-admin-shell">
+    <header class="eco-admin-topbar">
+      <a class="brand" href="/" aria-label="Essenshea home">
+        <img class="brand-logo" src="/assets/images/essenshea-logo.svg" alt="Essenshea logo" />
+        <span class="brand-text"><strong>Essenshea</strong><small>Owner workspace</small></span>
+      </a>
+      <a class="eco-admin-public-link" href="/eco-rewards">View customer page <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main class="eco-admin">
+      <header class="eco-admin-intro">
+        <div><span class="label">Private owner desk</span><h1 class="display-lg">Eco-Rewards Club</h1></div>
+        <p>Approve returned containers, follow each customer’s refill card and redeem rewards from one clear workspace.</p>
+      </header>
+
+      <section class="eco-admin-login" id="eco-admin-login">
+        <div class="eco-admin-login__copy">
+          <span class="label label--light">Protected workspace</span>
+          <h2>Welcome back.</h2>
+          <p>Enter the private owner key to open customer records and refill tools.</p>
+        </div>
+        <div class="eco-admin-login__form">
+          <label class="form-label" for="admin-key">Owner access key</label>
+          <input class="form-input" id="admin-key" type="password" autocomplete="current-password" />
+          <button class="btn btn--primary" id="admin-login" type="button">Open owner desk</button>
+          <p class="form-status" id="admin-login-status" role="status" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <div class="hidden" id="eco-admin-workspace">
+        <div class="eco-admin-grid">
+          <section class="form-wrap eco-admin-panel">
+            <div class="eco-admin-panel__heading"><span class="eco-admin-step">01</span><div><h2 class="heading-md">Enrol a customer</h2><p>Create a secure digital loyalty card.</p></div></div>
+            <input class="form-input" id="new-name" placeholder="Customer name" />
+            <input class="form-input" id="new-phone" type="tel" placeholder="Phone number" />
+            <label class="consent-check"><input id="new-consent" type="checkbox" /><span>The customer consented to loyalty tracking and refill communication.</span></label>
+            <button class="btn btn--primary" id="create-account" type="button">Create loyalty card</button>
+            <p class="form-status" id="create-status" role="status" aria-live="polite"></p>
+          </section>
+          <section class="form-wrap eco-admin-panel eco-admin-panel--customers">
+            <div class="eco-admin-panel__heading"><span class="eco-admin-step">02</span><div><h2 class="heading-md">Find a customer</h2><p>Search by their name or registered phone.</p></div></div>
+            <label class="form-label" for="account-search">Customer search</label>
+            <div class="eco-admin-search"><input class="form-input" id="account-search" placeholder="Name or phone" /><button class="btn btn--secondary" id="search-accounts" type="button">Search</button></div>
+            <div id="account-list" class="eco-admin-list"></div>
+          </section>
+        </div>
+        <section class="eco-admin-detail hidden" id="account-detail"></section>
       </div>
-      <section class="eco-admin-detail hidden" id="account-detail"></section>
-    </div>
-  </main>
+    </main>
+  </div>
   <script src="/assets/js/eco-rewards-admin.js"></script>
 </body>
 </html>

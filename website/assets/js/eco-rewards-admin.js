@@ -27,6 +27,8 @@ async function loadAccounts() {
   data.accounts.forEach((account) => {
     const button = safeNode('button', '', 'eco-admin-account');
     button.type = 'button';
+    button.dataset.accountId = account.id;
+    button.classList.toggle('is-selected', selectedAccount?.id === account.id);
     button.append(safeNode('strong', account.customer_name));
     button.append(safeNode('span', `${account.phone} · ${account.current_punches}/8 punches`));
     button.addEventListener('click', () => openAccount(account.id));
@@ -38,6 +40,9 @@ async function loadAccounts() {
 async function openAccount(id) {
   const data = await adminRequest(`/api/eco-rewards/admin?accountId=${encodeURIComponent(id)}`);
   selectedAccount = data.account;
+  document.querySelectorAll('.eco-admin-account').forEach((button) => {
+    button.classList.toggle('is-selected', button.dataset.accountId === id);
+  });
   const detail = byId('account-detail');
   detail.classList.remove('hidden');
   detail.replaceChildren();
