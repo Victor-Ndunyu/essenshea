@@ -32,7 +32,8 @@ function createAgentMarkup() {
   wrapper.id = 'agent-widget';
   wrapper.innerHTML = `
     <button id="agent-launcher" class="agent-launcher" aria-label="Toggle Essenshea assistant">
-      <span class="agent-launcher-icon">Ask</span>
+      <span class="agent-launcher-mark" aria-hidden="true">&#10022;</span>
+      <span class="agent-launcher-text">Ask Essenshea</span>
     </button>
     <aside id="agent-panel" class="agent-panel hidden" aria-hidden="true">
       <div class="agent-header">
@@ -284,7 +285,7 @@ async function initializeAgent() {
   });
 
   try {
-    const response = await fetch('/data/catalog.json');
+    const response = await fetch('/api/catalog');
     const catalogData = await response.json();
     AGENT_DATA.catalog = catalogData;
     const siteProducts = getSiteProducts(catalogData);

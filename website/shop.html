@@ -50,7 +50,11 @@
         <span class="label">Storefront</span>
         <h2 class="display-md">Select products, submit a request, and we will confirm your order.</h2>
         <p class="body" style="margin-bottom:20px;max-width:640px">Open a product to view details, then add it to your request list. Some items are available now; others are made to order.</p>
-        <div class="shop-discovery" aria-label="Product discovery">
+        <button id="shop-search-toggle" class="shop-search-toggle" type="button" aria-expanded="false" aria-controls="shop-discovery-panel">
+          <span aria-hidden="true">?</span>
+          <span>Find by name, ingredient or goal</span>
+        </button>
+        <div id="shop-discovery-panel" class="shop-discovery is-collapsed" aria-label="Product discovery">
           <label class="shop-search">
             <span class="form-label">Search by product, ingredient or goal</span>
             <input id="shop-search" class="form-input" type="search" placeholder="Try hair growth, shea, peppermint, men, glow..." />
@@ -154,6 +158,7 @@
 
     <footer class="site-footer">
       <div class="site-footer__brand">
+        <img class="site-footer__logo" src="/assets/images/essenshea-logo.jpg" alt="Essenshea logo" />
         <strong>Essenshea</strong>
         <p>Natural luxury, rooted in intention&thinsp;&mdash;&thinsp;crafted for retail, gifting and wholesale with elevated presentation.</p>
         <p>Kimathi House, 3rd Floor, Suite 303, KIKAO. Open Monday to Saturday, 8am-5pm.</p>

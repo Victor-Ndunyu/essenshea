@@ -2576,3 +2576,214 @@ a { color: inherit; text-decoration: none; }
   .eco-admin-search, .eco-admin-fields { grid-template-columns: 1fr; }
   .eco-admin-detail { padding: 22px 16px; }
 }
+
+/* Phase 4 owner-agent and premium polish overrides */
+.testimonial-strip {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(14px, 2vw, 22px);
+  padding-bottom: 22px;
+}
+
+.testimonial-card {
+  min-height: auto;
+  flex: 0 0 clamp(280px, 31vw, 420px);
+  align-content: start;
+  gap: 20px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.74), rgba(247,241,229,.92)),
+    radial-gradient(circle at 84% 8%, rgba(169,137,90,.18), transparent 34%);
+}
+
+.testimonial-card--compact { flex-basis: clamp(250px, 24vw, 330px); }
+.testimonial-card--wide { flex-basis: clamp(340px, 42vw, 560px); }
+.testimonial-card--tall { flex-basis: clamp(320px, 36vw, 480px); }
+
+.shop-search-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0 16px;
+  border: 1px solid rgba(169,137,90,.28);
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--ink);
+  padding: 11px 16px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(70,58,35,.07);
+  transition: transform var(--transition), border-color var(--transition), background var(--transition);
+}
+
+.shop-search-toggle:hover {
+  transform: translateY(-1px);
+  border-color: rgba(169,137,90,.55);
+  background: var(--card);
+}
+
+.shop-search-toggle span:first-child {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--white);
+  font-size: 1.05rem;
+}
+
+.shop-discovery {
+  overflow: hidden;
+  transform-origin: top;
+  transition: max-height 260ms ease, opacity 220ms ease, margin 220ms ease, padding 220ms ease;
+}
+
+.shop-discovery.is-collapsed {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  margin-bottom: 10px;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-color: transparent;
+  pointer-events: none;
+}
+
+.agent-launcher {
+  width: auto;
+  min-width: 64px;
+  height: 58px;
+  padding: 0 16px 0 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  gap: 9px;
+  background: linear-gradient(135deg, var(--gold), #7f6a3c);
+}
+
+.agent-launcher-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.2);
+  color: var(--white);
+}
+
+.agent-launcher-text {
+  white-space: nowrap;
+}
+
+.cart-popup {
+  width: min(720px, calc(100% - 48px));
+  max-height: min(760px, calc(100dvh - 96px));
+  grid-template-rows: auto minmax(180px, 1fr) auto;
+}
+
+.cart-popup-body {
+  max-height: none;
+  padding: 18px 22px;
+}
+
+.cart-popup-footer {
+  display: grid;
+  grid-template-columns: minmax(220px, .72fr) minmax(280px, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.cart-popup-form {
+  max-height: min(46dvh, 430px);
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.site-footer {
+  align-items: start;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(169,137,90,.18), transparent 28%),
+    var(--card);
+}
+
+.site-footer__logo {
+  width: 62px;
+  height: 62px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid rgba(169,137,90,.28);
+  margin-bottom: 12px;
+}
+
+.footer-nav {
+  gap: 12px 18px;
+}
+
+.footer-nav a,
+.footer-social a {
+  text-decoration: none;
+  color: var(--ink-soft);
+  transition: color var(--transition), transform var(--transition);
+}
+
+.footer-nav a:hover,
+.footer-social a:hover {
+  color: var(--gold);
+  transform: translateY(-1px);
+}
+
+.reveal,
+.collection-tile,
+.product-card,
+.testimonial-card {
+  animation: essenshea-rise 520ms ease both;
+  animation-timeline: view();
+  animation-range: entry 0% cover 24%;
+}
+
+@keyframes essenshea-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .collection-tile,
+  .product-card,
+  .testimonial-card {
+    animation: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .agent-launcher {
+    right: 14px;
+    bottom: 14px;
+    height: 54px;
+    padding-right: 13px;
+  }
+
+  .agent-launcher-text {
+    display: none;
+  }
+
+  .cart-popup {
+    left: 10px;
+    right: 10px;
+    width: auto;
+    bottom: 84px;
+    max-height: calc(100dvh - 100px);
+  }
+
+  .cart-popup-footer {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-popup-form {
+    max-height: 42dvh;
+  }
+
+  .site-footer {
+    grid-template-columns: 1fr;
+  }
+}

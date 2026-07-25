@@ -17,6 +17,8 @@ const customFragranceOptions = document.getElementById('custom-fragrance-options
 const shopSearchInput = document.getElementById('shop-search');
 const shopConcernChips = document.getElementById('shop-concern-chips');
 const shopResultsCount = document.getElementById('shop-results-count');
+const shopSearchToggle = document.getElementById('shop-search-toggle');
+const shopDiscoveryPanel = document.getElementById('shop-discovery-panel');
 
 const shopCollections = [];
 const shopProducts = [];
@@ -94,7 +96,7 @@ function mapAvailability(product) {
 
 async function loadShopData() {
   try {
-    const response = await fetch('/data/catalog.json');
+    const response = await fetch('/api/catalog');
     const data = await response.json();
     const categories = data.categories || [];
 
@@ -222,7 +224,7 @@ function renderShopProducts() {
         + '</div>'
         + '<div class="product-card__meta">'
         + '<span class="product-card__price">' + product.priceText + '</span>'
-        + '<span class="product-card__flag">' + (product.available ? 'Available' : 'Made to order') + '</span>'
+        + '<span class="product-card__flag">' + (product.available ? 'Available' : product.availableByOrder ? 'By order' : 'Made to order') + '</span>'
         + '<button class="btn btn--sm btn--secondary product-open" data-id="' + product.id + '">View</button>'
         + '</div>'
         + '</article>';
@@ -508,6 +510,14 @@ if (customRequestForm) {
 
 if (shopSearchInput) {
   shopSearchInput.addEventListener('input', renderShopProducts);
+}
+
+if (shopSearchToggle && shopDiscoveryPanel) {
+  shopSearchToggle.addEventListener('click', function() {
+    const collapsed = shopDiscoveryPanel.classList.toggle('is-collapsed');
+    shopSearchToggle.setAttribute('aria-expanded', String(!collapsed));
+    if (!collapsed && shopSearchInput) window.setTimeout(function() { shopSearchInput.focus(); }, 120);
+  });
 }
 
 if (shopConcernChips) {

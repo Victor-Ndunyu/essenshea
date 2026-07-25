@@ -80,6 +80,7 @@
 
     <footer class="site-footer">
       <div class="site-footer__brand">
+        <img class="site-footer__logo" src="/assets/images/essenshea-logo.jpg" alt="Essenshea logo" />
         <strong>Essenshea</strong>
         <p>Natural luxury, rooted in intention&thinsp;&mdash;&thinsp;crafted for retail, gifting and wholesale with elevated presentation.</p>
         <p>Kimathi House, 3rd Floor, Suite 303, KIKAO. Open Monday to Saturday, 8am-5pm.</p>
@@ -172,7 +173,7 @@ async function loadCategoryPage() {
     return;
   }
   try {
-    var response = await fetch('/data/catalog.json');
+    var response = await fetch('/api/catalog');
     var data = await response.json();
     var category = (data.categories || []).find(function(item) { return item.slug === slug; });
     if (!category) {

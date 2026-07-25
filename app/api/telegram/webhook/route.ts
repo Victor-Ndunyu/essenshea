@@ -6,6 +6,7 @@ import {
   callBusinessAgent,
 } from '../../../../lib/telegram';
 import { getOrCreateSession } from '../../../../lib/telegram-sessions';
+import { handleOwnerTelegramCommand } from '../../../../lib/owner-agent';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,15 +27,16 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const message = body?.message;
-    if (!message?.text || typeof message.chat?.id !== 'number') {
+    if (typeof message?.chat?.id !== 'number') {
       return NextResponse.json({ ok: true });
     }
 
     const chatId = message.chat.id;
-    const userMessage = String(message.text).trim().slice(0, 2_000);
-    if (!userMessage) return NextResponse.json({ ok: true });
+    const userMessage = String(message.text || message.caption || '').trim().slice(0, 2_000);
+    const photos = Array.isArray(message.photo) ? message.photo : [];
+    if (!userMessage && photos.length === 0) return NextResponse.json({ ok: true });
 
-    await handleMessage(chatId, userMessage);
+    await handleMessage(chatId, userMessage, photos);
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error('Telegram webhook failed:', error);
@@ -42,9 +44,15 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function handleMessage(chatId: number, userMessage: string) {
+async function handleMessage(chatId: number, userMessage: string, photos: Array<{ file_id: string; file_size?: number; width?: number; height?: number }> = []) {
   try {
     await sendTypingIndicator(chatId);
+    const ownerResult = await handleOwnerTelegramCommand({ chatId, text: userMessage, photos });
+    if (ownerResult.handled) {
+      await sendTelegramMessage(chatId, ownerResult.response);
+      return;
+    }
+
     const sessionId = await getOrCreateSession(chatId);
     const agentResponse = await callBusinessAgent(userMessage, sessionId);
     await sendTelegramMessage(chatId, agentResponse);
