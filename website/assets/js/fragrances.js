@@ -38,11 +38,11 @@ function renderFragranceGrid() {
 
   fragranceGrid.innerHTML = items
     .map((item) => {
-      const prices = item.sizes.map((size) => `${size.size} ${size.price}`).join(' · ');
       return `<article class="fragrance-note-card">
         <span>${item.title}</span>
         <h3>${item.note}</h3>
-        <p>${prices}</p>
+        <p>Use this scent in a custom body oil, butter, balm or fragrance-led product.</p>
+        <a class="btn btn--sm btn--secondary" href="/shop?fragrance=${encodeURIComponent(item.note)}#custom-care">Choose this scent</a>
       </article>`;
     })
     .join('');

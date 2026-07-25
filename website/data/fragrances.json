@@ -3,7 +3,7 @@
     {
       "title": "Exotic fragrances",
       "slug": "exotic-fragrances",
-      "image": "/assets/images/fragrances-exotic.jpg",
+      "image": "/assets/images/fragrances-exotic-cropped.jpg",
       "sizes": [
         { "size": "30ml", "price": "Ksh 580" },
         { "size": "100ml", "price": "Ksh 1180" }
@@ -33,7 +33,7 @@
     {
       "title": "Fragrance oils",
       "slug": "fragrance-oils",
-      "image": "/assets/images/fragrances-oils.jpg",
+      "image": "/assets/images/fragrances-oils-cropped.jpg",
       "sizes": [
         { "size": "50ml", "price": "Ksh 600" },
         { "size": "100ml", "price": "Ksh 1000" }
@@ -67,7 +67,7 @@
     {
       "title": "Signature fragrance oils",
       "slug": "signature-fragrance-oils",
-      "image": "/assets/images/fragrance-oils-signature.jpg",
+      "image": "/assets/images/fragrance-oils-signature-cropped.jpg",
       "sizes": [
         { "size": "30ml", "price": "Ksh 650" },
         { "size": "100ml", "price": "Ksh 1100" }

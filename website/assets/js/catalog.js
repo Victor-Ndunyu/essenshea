@@ -64,6 +64,7 @@ function renderCatalog() {
             <article class="catalog-product card">
               <img src="${product.image}" alt="${product.name}" class="catalog-product__image" />
               <h3 class="catalog-product__title heading-sm">${product.name}</h3>
+              <a class="catalog-product__order" href="/shop?product=${encodeURIComponent(product.slug)}">Order this</a>
             </article>
           `
         )
@@ -80,7 +81,10 @@ function renderCatalog() {
           </div>
           <p class="catalog-section-card__copy body">${excerpt(category.description, 110)}</p>
           <div class="catalog-product-grid grid grid--3">${productsMarkup}</div>
-          <a class="btn btn--secondary" href="/category/${category.slug}">View all products</a>
+          <div class="catalog-section-card__actions">
+            <a class="btn btn--secondary" href="${category.slug === 'fragrances' ? '/fragrances' : '/category/' + category.slug}">View all products</a>
+            <a class="btn btn--ghost" href="/shop">Order from shop</a>
+          </div>
         </article>
       `;
     })

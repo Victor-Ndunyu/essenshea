@@ -27,7 +27,6 @@
       <nav class="topnav" aria-label="Primary navigation">
         <a href="/catalog">Catalog</a>
         <a href="/shop">Shop</a>
-        <a href="/fragrances">Fragrances</a>
         <a href="/eco-rewards">Eco-Rewards</a>
         <a href="/about">About</a>
         <a href="/#contact">Contact</a>
@@ -72,6 +71,7 @@
             <p id="category-modal-details" class="modal-details"></p>
           </div>
           <div class="modal-footer">
+            <a id="category-modal-order" class="btn btn--sm btn--primary" href="/shop">Order this product</a>
             <button id="category-modal-action" class="btn btn--sm btn--secondary" type="button">Close</button>
           </div>
         </div>
@@ -88,7 +88,6 @@
       <nav class="footer-nav" aria-label="Footer navigation">
         <a href="/catalog">Catalog</a>
         <a href="/shop">Shop</a>
-        <a href="/fragrances">Fragrances</a>
         <a href="/eco-rewards">Eco-Rewards</a>
         <a href="/about">About</a>
         <a href="/#contact">Contact</a>
@@ -113,8 +112,10 @@ var categoryModalImage = document.getElementById('category-modal-image');
 var categoryModalDescription = document.getElementById('category-modal-description');
 var categoryModalDetails = document.getElementById('category-modal-details');
 var categoryModalAction = document.getElementById('category-modal-action');
+var categoryModalOrder = document.getElementById('category-modal-order');
 var categoryModalClose = document.getElementById('category-modal-close');
 var categoryProductGrid = document.getElementById('category-product-grid');
+var currentCategory = null;
 
 function getCategorySlug() {
   var path = window.location.pathname.replace(/\/$/, '');
@@ -125,15 +126,70 @@ function getCategorySlug() {
   return new URLSearchParams(window.location.search).get('slug') || '';
 }
 
+function textExcerpt(text, length) {
+  if (!text) return '';
+  var clean = String(text).replace(/\s+/g, ' ').trim();
+  return clean.length <= length ? clean : clean.slice(0, length).trim() + '…';
+}
+
+function renderCategoryPage(category) {
+  currentCategory = category;
+  document.title = category.title + ' — Essenshea';
+  document.getElementById('category-title').textContent = category.title;
+  document.getElementById('category-description').textContent = category.description || 'Browse this Essenshea collection.';
+  document.getElementById('category-products-count').textContent = (category.products || []).length + ' products';
+  var image = document.getElementById('category-image');
+  if (image) {
+    image.src = category.image || '';
+    image.alt = category.title;
+  }
+  if (categoryProductGrid) {
+    categoryProductGrid.innerHTML = (category.products || []).map(function(product) {
+      var available = typeof product.priceValue === 'number';
+      return '<article class="category-product-card">'
+        + '<img src="' + product.image + '" alt="' + product.name + '" loading="lazy" />'
+        + '<div class="category-product-card__body">'
+        + '<h3>' + product.name + '</h3>'
+        + '<p>' + textExcerpt(product.description, 120) + '</p>'
+        + '<div class="category-product-card__meta">'
+        + '<span>' + (product.price || 'Price on request') + '</span>'
+        + '<span class="avail-flag">' + (available ? 'Available' : 'Request') + '</span>'
+        + '</div>'
+        + '<div class="category-product-card__actions">'
+        + '<button class="btn btn--sm btn--secondary category-product-open" data-product="' + product.slug + '" type="button">View details</button>'
+        + '<a class="btn btn--sm btn--primary" href="/shop?product=' + encodeURIComponent(product.slug) + '">Order this</a>'
+        + '</div>'
+        + '</div>'
+        + '</article>';
+    }).join('');
+  }
+}
+
+async function loadCategoryPage() {
+  var slug = getCategorySlug();
+  if (slug === 'fragrances') {
+    window.location.replace('/fragrances');
+    return;
+  }
+  try {
+    var response = await fetch('/data/catalog.json');
+    var data = await response.json();
+    var category = (data.categories || []).find(function(item) { return item.slug === slug; });
+    if (!category) {
+      document.getElementById('category-title').textContent = 'Collection not found';
+      document.getElementById('category-description').textContent = 'Please return to the catalog and choose another collection.';
+      return;
+    }
+    renderCategoryPage(category);
+  } catch (error) {
+    document.getElementById('category-title').textContent = 'Collection could not load';
+    document.getElementById('category-description').textContent = 'Please refresh the page or return to the catalog.';
+  }
+}
+
 function openCategoryProductModal(productSlug) {
   if (!categoryModal) return;
-  var data = window.EssensheaAgent && window.EssensheaAgent.data && window.EssensheaAgent.data.catalog;
-  if (!data) return;
-  var slug = getCategorySlug();
-  var cat = null;
-  for (var i = 0; i < (data.categories || []).length; i++) {
-    if (data.categories[i].slug === slug) { cat = data.categories[i]; break; }
-  }
+  var cat = currentCategory;
   if (!cat) return;
   var product = null;
   for (var i = 0; i < cat.products.length; i++) {
@@ -150,6 +206,7 @@ function openCategoryProductModal(productSlug) {
   var available = typeof product.priceValue === 'number';
   var stockText = typeof product.stock === 'number' ? 'In stock: ' + product.stock : 'Stock pending';
   categoryModalDetails.textContent = (product.price || 'Price on request') + ' \u00B7 ' + (available ? 'Available now' : 'Request only') + ' \u00B7 ' + stockText + ' \u00B7 ' + (available ? 'Seller will ship or confirm pickup options.' : 'Seller will review and confirm pricing and availability.');
+  if (categoryModalOrder) categoryModalOrder.href = '/shop?product=' + encodeURIComponent(product.slug);
   categoryModal.classList.remove('hidden');
   categoryModal.setAttribute('aria-hidden', 'false');
 }
@@ -176,6 +233,7 @@ function setupEvents() {
 }
 
 setupEvents();
+loadCategoryPage();
   </script>
 </body>
 </html>

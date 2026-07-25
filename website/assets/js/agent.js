@@ -19,7 +19,7 @@ function createAgentMarkup() {
   wrapper.id = 'agent-widget';
   wrapper.innerHTML = `
     <button id="agent-launcher" class="agent-launcher" aria-label="Toggle Essenshea assistant">
-      <span class="agent-launcher-icon">🧚</span>
+      <span class="agent-launcher-icon">Ask</span>
     </button>
     <aside id="agent-panel" class="agent-panel hidden" aria-hidden="true">
       <div class="agent-header">
@@ -35,6 +35,11 @@ function createAgentMarkup() {
       </div>
       <div class="agent-body">
         <div class="agent-chat-window" id="agent-chat-window"></div>
+        <div class="agent-quick-actions" aria-label="Assistant shortcuts">
+          <button type="button" data-agent-prompt="Show me body butters">Body butters</button>
+          <button type="button" data-agent-prompt="Help me make a custom order">Custom order</button>
+          <button type="button" data-agent-prompt="Show me fragrances">Fragrances</button>
+        </div>
         <form id="agent-send-form" class="agent-send-form">
           <input id="agent-input" type="text" placeholder="Type your question..." aria-label="Agent message input" />
           <button type="submit" class="btn btn--primary">Send</button>
@@ -74,14 +79,84 @@ function renderAgentMessages() {
     const text = document.createElement('p');
     text.textContent = message.text;
     item.append(role, text);
+    if (message.actions && message.actions.length) {
+      const actions = document.createElement('div');
+      actions.className = 'agent-message-actions';
+      message.actions.forEach((action) => {
+        const link = document.createElement('a');
+        link.className = 'btn btn--sm btn--secondary';
+        link.href = action.href;
+        link.textContent = action.label;
+        actions.appendChild(link);
+      });
+      item.appendChild(actions);
+    }
     chatWindow.appendChild(item);
   });
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
-function addAgentMessage(role, text) {
-  AGENT_DATA.messages.push({ role, text, timestamp: Date.now() });
+function addAgentMessage(role, text, actions) {
+  AGENT_DATA.messages.push({ role, text, actions: actions || [], timestamp: Date.now() });
   renderAgentMessages();
+}
+
+function normalizeAgentText(value) {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9\s]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function findAgentProductMatches(prompt) {
+  var cleanPrompt = normalizeAgentText(prompt);
+  if (!cleanPrompt || !AGENT_DATA.catalog) return [];
+  var scored = [];
+  Object.keys(AGENT_DATA.products || {}).forEach(function(slug) {
+    var product = AGENT_DATA.products[slug];
+    var haystack = normalizeAgentText([product.name, product.category, product.description].join(' '));
+    var words = cleanPrompt.split(' ').filter(function(word) { return word.length > 2; });
+    var score = words.reduce(function(total, word) { return total + (haystack.includes(word) ? 1 : 0); }, 0);
+    if (haystack.includes(cleanPrompt)) score += 4;
+    if (score > 0) scored.push({ product: product, score: score });
+  });
+  return scored.sort(function(a, b) { return b.score - a.score; }).slice(0, 4).map(function(item) { return item.product; });
+}
+
+function answerLocalAgentIntent(prompt) {
+  var cleanPrompt = normalizeAgentText(prompt);
+  if (!cleanPrompt) return false;
+
+  if (cleanPrompt.includes('custom') || cleanPrompt.includes('personalized') || cleanPrompt.includes('customised') || cleanPrompt.includes('customized')) {
+    addAgentMessage('assistant', 'Custom products are made after Essenshea reviews your ingredients, fragrance, texture, size and skin or hair goal. I can take you straight to the custom request form.', [
+      { label: 'Start custom order', href: '/shop?focus=custom#custom-care' },
+      { label: 'Browse fragrances', href: '/fragrances' },
+    ]);
+    return true;
+  }
+
+  if (cleanPrompt.includes('fragrance') || cleanPrompt.includes('scent') || cleanPrompt.includes('perfume')) {
+    addAgentMessage('assistant', 'The fragrance library is the best place to browse scent options. Pick a scent there and it will carry into the custom order form.', [
+      { label: 'Open fragrance library', href: '/fragrances' },
+      { label: 'Custom order', href: '/shop?focus=custom#custom-care' },
+    ]);
+    return true;
+  }
+
+  var matches = findAgentProductMatches(prompt);
+  if (matches.length) {
+    addAgentMessage('assistant', 'I found a few Essenshea products that match. Open one and the shop will take you directly to it.', matches.map(function(product) {
+      return { label: product.name, href: '/shop?product=' + encodeURIComponent(product.slug) };
+    }));
+    return true;
+  }
+
+  if (cleanPrompt.includes('order') || cleanPrompt.includes('buy') || cleanPrompt.includes('shop')) {
+    addAgentMessage('assistant', 'You can order from the shop, or browse the catalogue first and tap “Order this” on any product.', [
+      { label: 'Open shop', href: '/shop' },
+      { label: 'Browse catalogue', href: '/catalog' },
+    ]);
+    return true;
+  }
+
+  return false;
 }
 
 async function callBrainProvider(prompt) {
@@ -123,6 +198,12 @@ async function handleAgentSend(event) {
 
   addAgentMessage('user', value);
   input.value = '';
+
+  if (answerLocalAgentIntent(value)) {
+    input.focus();
+    return;
+  }
+
   input.disabled = true;
   const sendButton = event.currentTarget.querySelector('button[type="submit"]');
   if (sendButton) {
@@ -176,11 +257,12 @@ async function initializeAgent() {
   });
   document.getElementById('agent-send-form')?.addEventListener('submit', handleAgentSend);
   document.addEventListener('click', function (e) {
-    if (panel && !panel.classList.contains('hidden')) {
-      if (!panel.contains(e.target) && e.target !== launcher) {
-        setAgentPanelVisible(false);
-      }
-    }
+    var shortcut = e.target.closest('[data-agent-prompt]');
+    if (!shortcut) return;
+    e.preventDefault();
+    var input = document.getElementById('agent-input');
+    if (input) input.value = shortcut.dataset.agentPrompt;
+    document.getElementById('agent-send-form')?.requestSubmit();
   });
 
   try {
@@ -191,7 +273,7 @@ async function initializeAgent() {
     AGENT_DATA.products = siteProducts.products;
     AGENT_DATA.categories = siteProducts.categories;
     addAgentMessage('assistant', 'Hi there — how can I help you today?');
-    addAgentMessage('assistant', 'I can answer questions about Essenshea products, collections, availability, and how to request items.');
+    addAgentMessage('assistant', 'I can find products, open the right shop section, show fragrance options, and help you start a custom order.');
   } catch (error) {
     addAgentMessage('assistant', `Failed to load catalog data: ${error.message}`);
   }
@@ -255,7 +337,7 @@ function createCartWidgetMarkup() {
     + '<label for="cart-delivery-location">Delivery town or area</label>'
     + '<input id="cart-delivery-location" name="deliveryLocation" type="text" autocomplete="address-level2" maxlength="200" required />'
     + '</div>'
-    + '<label class="consent-check"><input name="ecoRewardsOptIn" type="checkbox" /> <span>Keep my purchase history for four months so Essenshea can check Eco-Rewards refill eligibility.</span></label>'
+    + '<label class="consent-check"><input name="ecoRewardsOptIn" type="checkbox" /> <span>Keep my purchase history so Essenshea can check Eco-Rewards refill eligibility.</span></label>'
     + '<div class="form-honeypot" aria-hidden="true"><input name="companyWebsite" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" /></div>'
     + '<button id="cart-popup-checkout" class="btn btn--primary" type="submit" disabled>Send request</button>'
     + '<p id="cart-popup-status" class="form-status" role="status" aria-live="polite"></p>'

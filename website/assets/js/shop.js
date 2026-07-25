@@ -49,7 +49,7 @@ async function loadShopData() {
       shopCollections.push({
         title: category.title,
         copy: category.description || 'Discover premium Essenshea products.',
-        link: '/category/' + category.slug,
+        link: category.slug === 'fragrances' ? '/fragrances' : '/category/' + category.slug,
       });
 
       (category.products || []).forEach((product) => {
@@ -62,6 +62,8 @@ async function loadShopData() {
 
         shopProducts.push({
           id: createProductId(category.title + '-' + title),
+          slug: product.slug,
+          categorySlug: category.slug,
           title,
           category: category.title,
           priceText: product.price || 'Price on request',
@@ -87,6 +89,7 @@ async function loadShopData() {
 
     renderShopCollections();
     renderShopProducts();
+    applyShopDeepLinks();
   } catch (error) {
     if (shopProductsRoot) {
       shopProductsRoot.innerHTML = '<p class="cart-empty">The product list is being prepared. Please refresh shortly.</p>';
@@ -176,7 +179,7 @@ function renderCart() {
 }
 
 function openProductModal(productId) {
-  const product = shopProducts.find(function(item) { return item.id === productId; });
+  const product = shopProducts.find(function(item) { return item.id === productId || item.slug === productId; });
   if (!product || !productModal) return;
 
   modalTitle.textContent = product.title;
@@ -211,7 +214,7 @@ function syncCartToWidget() {
 }
 
 function addToCart(productId) {
-  const product = shopProducts.find(function(item) { return item.id === productId; });
+  const product = shopProducts.find(function(item) { return item.id === productId || item.slug === productId; });
   if (!product) return;
 
   const existing = cart.find(function(item) { return item.id === productId; });
@@ -224,6 +227,41 @@ function addToCart(productId) {
   renderCart();
   syncCartToWidget();
   closeProductModal();
+}
+
+function applyShopDeepLinks() {
+  var params = new URLSearchParams(window.location.search);
+  var fragrance = params.get('fragrance');
+  var product = params.get('product');
+  var focus = params.get('focus');
+
+  if (fragrance) {
+    var customFragrance = document.getElementById('custom-fragrance');
+    if (customFragrance) customFragrance.value = fragrance;
+  }
+
+  if (fragrance || focus === 'custom') {
+    var customSection = document.getElementById('custom-care');
+    if (customSection) {
+      window.setTimeout(function() {
+        customSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 120);
+    }
+  }
+
+  if (product) {
+    window.setTimeout(function() {
+      var match = shopProducts.find(function(item) { return item.slug === product || item.id === product; });
+      if (!match) return;
+      var card = document.querySelector('.product-card[data-id="' + match.id + '"]');
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.classList.add('product-card--highlight');
+        window.setTimeout(function() { card.classList.remove('product-card--highlight'); }, 2600);
+      }
+      openProductModal(match.id);
+    }, 180);
+  }
 }
 
 function removeFromCart(productId) {

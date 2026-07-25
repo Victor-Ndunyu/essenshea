@@ -69,6 +69,10 @@ function setupCategoryEvents() {
 function loadCategoryData() {
   var slug = getQueryParam('slug');
   if (!slug) return;
+  if (slug === 'fragrances') {
+    window.location.replace('/fragrances');
+    return;
+  }
   if (window.EssensheaAgent && window.EssensheaAgent.data && window.EssensheaAgent.data.catalog) {
     var catalog = window.EssensheaAgent.data.catalog;
     for (var i = 0; i < (catalog.categories || []).length; i++) {
