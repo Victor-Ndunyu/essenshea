@@ -2732,6 +2732,29 @@ a { color: inherit; text-decoration: none; }
   transform: translateY(-1px);
 }
 
+.reveal,
+.collection-tile,
+.product-card,
+.testimonial-card {
+  animation: essenshea-rise 520ms ease both;
+  animation-timeline: view();
+  animation-range: entry 0% cover 24%;
+}
+
+@keyframes essenshea-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .collection-tile,
+  .product-card,
+  .testimonial-card {
+    animation: none;
+  }
+}
+
 @media (max-width: 768px) {
   .agent-launcher {
     right: 14px;
@@ -2766,7 +2789,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 
-/* Phase 5 testimonials — natural page flow with parallax backdrop */
+/* Phase 5 testimonials — natural page flow */
 .testimonial-strip {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -2907,110 +2930,9 @@ body:has(.site-footer) { overflow-x: hidden; }
   background: none;
 }
 
-/* Custom easing curves */
-:root {
-  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
-  --ease-out-quart: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
-}
-
-/* Button press feedback */
-.btn:active {
-  transform: scale(0.97);
-}
-.btn--ghost:active {
-  transform: scale(0.97);
-}
-
-/* Refined section reveal with custom easing */
-.reveal,
-.collection-tile,
-.product-card,
-.testimonial-card {
-  animation: essenshea-rise 620ms var(--ease-out-expo) both;
-  animation-timeline: view();
-  animation-range: entry 0% cover 22%;
-}
-
-@keyframes essenshea-rise {
-  from { opacity: 0; transform: translateY(24px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Hero entrance — stagger children */
-.hero__content > * {
-  animation: hero-fade-up 700ms var(--ease-out-expo) both;
-}
-.hero__content > .label { animation-delay: 0ms; }
-.hero__content > h1 { animation-delay: 100ms; }
-.hero__content > p { animation-delay: 200ms; }
-.hero__content > .hero__actions { animation-delay: 300ms; }
-.hero__visual {
-  animation: hero-fade-up 800ms var(--ease-out-expo) both;
-  animation-delay: 150ms;
-}
-
-@keyframes hero-fade-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Card hover lift */
-.collection-tile,
-.product-card,
-.testimonial-card,
-.product-trio__card {
-  transition: transform 400ms var(--ease-out-expo), box-shadow 400ms var(--ease-out-expo);
-}
-
-/* Section divider subtle parallax */
-.section--divider {
-  position: relative;
-}
-.section--divider::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 30% 0%, rgba(169, 137, 90, 0.06), transparent 50%);
-  pointer-events: none;
-}
-
 /* Testimonial section parallax backdrop */
-#testimonials,
 .section:has(.testimonial-strip) {
   background-attachment: fixed;
   background-image:
     radial-gradient(circle at 20% 80%, rgba(169, 137, 90, 0.08), transparent 50%);
-}
-
-/* Section heading entrance */
-.section .label,
-.section h2,
-.section .body,
-.section .body-lg {
-  animation: essenshea-rise 620ms var(--ease-out-expo) both;
-  animation-timeline: view();
-  animation-range: entry 0% cover 18%;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .reveal,
-  .collection-tile,
-  .product-card,
-  .testimonial-card,
-  .hero__content > *,
-  .hero__visual,
-  .section .label,
-  .section h2,
-  .section .body,
-  .section .body-lg {
-    animation: none;
-  }
-  .collection-tile,
-  .product-card,
-  .testimonial-card,
-  .product-trio__card {
-    transition: none;
-  }
 }
