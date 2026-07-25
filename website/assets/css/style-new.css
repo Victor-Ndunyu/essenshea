@@ -2732,29 +2732,6 @@ a { color: inherit; text-decoration: none; }
   transform: translateY(-1px);
 }
 
-.reveal,
-.collection-tile,
-.product-card,
-.testimonial-card {
-  animation: essenshea-rise 520ms ease both;
-  animation-timeline: view();
-  animation-range: entry 0% cover 24%;
-}
-
-@keyframes essenshea-rise {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .reveal,
-  .collection-tile,
-  .product-card,
-  .testimonial-card {
-    animation: none;
-  }
-}
-
 @media (max-width: 768px) {
   .agent-launcher {
     right: 14px;
@@ -2789,30 +2766,16 @@ a { color: inherit; text-decoration: none; }
 }
 
 
-/* Phase 5 agent response guard and contained review wall */
+/* Phase 5 testimonials — natural page flow with parallax backdrop */
 .testimonial-strip {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   grid-auto-flow: dense;
   align-items: start;
   gap: clamp(14px, 2vw, 22px);
-  max-height: clamp(620px, 76vh, 860px);
   margin-top: 42px;
-  padding: 6px 12px 54px 6px;
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scroll-snap-type: none;
   text-align: left;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 82%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0%, #000 82%, transparent 100%);
-  scrollbar-width: thin;
-  scrollbar-color: rgba(169, 137, 90, 0.42) rgba(169, 137, 90, 0.12);
 }
-
-.testimonial-strip::-webkit-scrollbar { width: 8px; height: 0; }
-.testimonial-strip::-webkit-scrollbar-track { background: rgba(169, 137, 90, 0.12); border-radius: 999px; }
-.testimonial-strip::-webkit-scrollbar-thumb { background: rgba(169, 137, 90, 0.42); border-radius: 999px; }
 
 .testimonial-card {
   grid-column: span 4;
@@ -2820,7 +2783,6 @@ a { color: inherit; text-decoration: none; }
   min-height: auto;
   height: auto;
   flex: initial;
-  scroll-snap-align: unset;
   align-content: start;
   gap: 18px;
 }
@@ -2839,11 +2801,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 @media (max-width: 640px) {
-  .testimonial-strip {
-    grid-template-columns: 1fr;
-    max-height: 680px;
-    padding-right: 8px;
-  }
+  .testimonial-strip { grid-template-columns: 1fr; }
   .testimonial-card,
   .testimonial-card--compact,
   .testimonial-card--wide,
@@ -2947,4 +2905,112 @@ body:has(.site-footer) { overflow-x: hidden; }
   object-fit: cover;
   padding: 0;
   background: none;
+}
+
+/* Custom easing curves */
+:root {
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-out-quart: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+/* Button press feedback */
+.btn:active {
+  transform: scale(0.97);
+}
+.btn--ghost:active {
+  transform: scale(0.97);
+}
+
+/* Refined section reveal with custom easing */
+.reveal,
+.collection-tile,
+.product-card,
+.testimonial-card {
+  animation: essenshea-rise 620ms var(--ease-out-expo) both;
+  animation-timeline: view();
+  animation-range: entry 0% cover 22%;
+}
+
+@keyframes essenshea-rise {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Hero entrance — stagger children */
+.hero__content > * {
+  animation: hero-fade-up 700ms var(--ease-out-expo) both;
+}
+.hero__content > .label { animation-delay: 0ms; }
+.hero__content > h1 { animation-delay: 100ms; }
+.hero__content > p { animation-delay: 200ms; }
+.hero__content > .hero__actions { animation-delay: 300ms; }
+.hero__visual {
+  animation: hero-fade-up 800ms var(--ease-out-expo) both;
+  animation-delay: 150ms;
+}
+
+@keyframes hero-fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Card hover lift */
+.collection-tile,
+.product-card,
+.testimonial-card,
+.product-trio__card {
+  transition: transform 400ms var(--ease-out-expo), box-shadow 400ms var(--ease-out-expo);
+}
+
+/* Section divider subtle parallax */
+.section--divider {
+  position: relative;
+}
+.section--divider::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 0%, rgba(169, 137, 90, 0.06), transparent 50%);
+  pointer-events: none;
+}
+
+/* Testimonial section parallax backdrop */
+#testimonials,
+.section:has(.testimonial-strip) {
+  background-attachment: fixed;
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(169, 137, 90, 0.08), transparent 50%);
+}
+
+/* Section heading entrance */
+.section .label,
+.section h2,
+.section .body,
+.section .body-lg {
+  animation: essenshea-rise 620ms var(--ease-out-expo) both;
+  animation-timeline: view();
+  animation-range: entry 0% cover 18%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .collection-tile,
+  .product-card,
+  .testimonial-card,
+  .hero__content > *,
+  .hero__visual,
+  .section .label,
+  .section h2,
+  .section .body,
+  .section .body-lg {
+    animation: none;
+  }
+  .collection-tile,
+  .product-card,
+  .testimonial-card,
+  .product-trio__card {
+    transition: none;
+  }
 }
