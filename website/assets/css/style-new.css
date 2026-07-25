@@ -2933,3 +2933,18 @@ body:has(.site-footer) { overflow-x: hidden; }
   .product-card img,
   .category-product-card img { padding: 12px; }
 }
+
+/* Homepage image sizing — revert to cover */
+.hero__visual img {
+  object-fit: cover;
+  filter: none;
+}
+.hero__visual {
+  padding: 0;
+  background: none;
+}
+#collections .collection-tile img {
+  object-fit: cover;
+  padding: 0;
+  background: none;
+}
