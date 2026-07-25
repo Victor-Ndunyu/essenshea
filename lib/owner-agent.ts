@@ -1,5 +1,6 @@
 ﻿import { getSupabaseAdmin } from './supabase-admin';
 import { findCatalogProduct, slugifyCatalogValue, getMergedCatalog } from './catalog';
+import { retrieveOwnerMemory, saveOwnerMemory } from './agent-memory';
 
 type TelegramPhoto = { file_id: string; file_size?: number; width?: number; height?: number };
 
@@ -23,17 +24,19 @@ export function isOwnerTelegramChat(chatId: number): boolean {
 function helpText(): string {
   return [
     'Essenshea owner desk:',
-    '/summary ? count public products, stock-set items, by-order items and hidden items',
-    '/lowstock ? show products with 3 or fewer items left',
-    '/stock product name | 5 ? set stock count and mark available now',
-    '/available product name | 5 ? set stock and mark available now',
-    '/order product name ? mark available by order',
-    '/describe product name ? show exact site description',
-    '/find product name ? search catalogue names',
-    '/setdesc product name | new description ? update description',
-    '/addproduct category | name | price | description ? add product as by order',
-    '/hide product name ? remove from public catalogue',
-    '/show product name ? restore product',
+    '/summary - count public products, stock-set items, by-order items and hidden items',
+    '/lowstock - show products with 3 or fewer items left',
+    '/stock product name | 5 - set stock count and mark available now',
+    '/available product name | 5 - set stock and mark available now',
+    '/order product name - mark available by order',
+    '/describe product name - show exact site description',
+    '/find product name - search catalogue names',
+    '/remember note - store an owner note permanently',
+    '/memory topic - retrieve owner memory',
+    '/setdesc product name | new description - update description',
+    '/addproduct category | name | price | description - add product as by order',
+    '/hide product name - remove from public catalogue',
+    '/show product name - restore product',
     'Image update: send a photo with caption /setimage product name',
   ].join('\n');
 }
@@ -186,7 +189,7 @@ export async function handleOwnerTelegramCommand(params: {
   const lower = text.toLowerCase();
 
   if (!isOwnerTelegramChat(chatId)) {
-    return { handled: true, response: ownerFallbackText() };
+    return { handled: false, response: '' };
   }
 
   try {
@@ -200,6 +203,17 @@ export async function handleOwnerTelegramCommand(params: {
 
     if (lower === '/lowstock' || lower === '/low-stock') {
       return { handled: true, response: await lowStockSummary() };
+    }
+
+    if (lower.startsWith('/remember ')) {
+      const note = text.slice(10).trim();
+      await saveOwnerMemory(chatId, 'owner_note', note, { source: 'telegram_owner' });
+      return { handled: true, response: note ? 'Saved to owner memory.' : 'Use: /remember note to save' };
+    }
+
+    if (lower.startsWith('/memory')) {
+      const query = text.slice(7).trim();
+      return { handled: true, response: await retrieveOwnerMemory(chatId, query) };
     }
 
     if (lower.startsWith('/stock ')) {
@@ -265,8 +279,10 @@ export async function handleOwnerTelegramCommand(params: {
       return { handled: true, response: 'I received the image. To attach it to a product, resend it with caption: /setimage product name' };
     }
 
-    return { handled: false, response: '' };
+    await saveOwnerMemory(chatId, 'owner_message', text, { source: 'telegram_owner' });
+    return { handled: true, response: ownerFallbackText() };
   } catch (error) {
+    await saveOwnerMemory(chatId, 'owner_error', error instanceof Error ? error.message : 'Owner command failed', { text });
     return { handled: true, response: error instanceof Error ? error.message : 'The owner command failed. Please try again.' };
   }
 }

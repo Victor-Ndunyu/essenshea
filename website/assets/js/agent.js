@@ -1,5 +1,6 @@
 const AGENT_CONFIG = window.AGENT_CONFIG || {};
 const AGENT_API_ENDPOINT = AGENT_CONFIG.apiUrl || '/api/agent';
+const AGENT_SESSION_KEY = 'essenshea_agent_session_v1';
 const AGENT_DATA = {
   page: {
     title: document.title,
@@ -12,6 +13,18 @@ const AGENT_DATA = {
   categories: {},
   messages: [],
 };
+
+function getAgentSessionId() {
+  try {
+    const existing = localStorage.getItem(AGENT_SESSION_KEY);
+    if (existing) return existing;
+    const generated = 'web_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 12);
+    localStorage.setItem(AGENT_SESSION_KEY, generated);
+    return generated;
+  } catch (error) {
+    return 'web_memory_' + Date.now().toString(36);
+  }
+}
 
 const AGENT_CONCERNS = [
   { id: 'hair-growth', label: 'Hair growth', terms: ['hair growth', 'growth serum', 'amla', 'rosemary', 'scalp', 'hairline', 'edges'] },
@@ -202,7 +215,7 @@ async function callBrainProvider(prompt) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ message: prompt, source: 'website' }),
+      body: JSON.stringify({ message: prompt, source: 'website', sessionId: getAgentSessionId() }),
     });
 
     if (!response.ok) {

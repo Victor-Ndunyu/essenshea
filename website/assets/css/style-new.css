@@ -2886,3 +2886,50 @@ body:has(.site-footer) { overflow-x: hidden; }
     padding-right: 20px;
   }
 }
+
+
+/* Phase 6 memory, customization hero, and product-first imagery */
+.hero__content { max-width: 620px; }
+.hero__copy {
+  font-size: clamp(1.08rem, 1.45vw, 1.28rem);
+  max-width: 590px;
+  color: rgba(42, 42, 36, 0.78);
+}
+.hero .display-xl { max-width: 760px; text-wrap: balance; }
+.hero__visual {
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255,255,255,.92), transparent 34%),
+    linear-gradient(145deg, rgba(247,241,229,.98), rgba(231,218,194,.86));
+  padding: clamp(14px, 2vw, 24px);
+}
+.hero__visual img {
+  object-fit: contain;
+  filter: drop-shadow(0 22px 34px rgba(70,58,35,.16));
+}
+.collection-tile img,
+.product-card img,
+.category-product-card img,
+.modal-image {
+  object-fit: contain;
+  object-position: center;
+  background:
+    radial-gradient(circle at 50% 26%, rgba(255,255,255,.9), transparent 38%),
+    linear-gradient(145deg, rgba(247,241,229,.96), rgba(235,224,203,.86));
+}
+.collection-tile img,
+.product-card img,
+.category-product-card img {
+  padding: clamp(10px, 1.5vw, 18px);
+}
+.modal-image {
+  padding: clamp(14px, 2vw, 22px);
+  max-height: min(58vh, 540px);
+}
+.product-card,
+.category-product-card,
+.collection-tile { overflow: hidden; }
+@media (max-width: 768px) {
+  .hero__visual { padding: 12px; }
+  .product-card img,
+  .category-product-card img { padding: 12px; }
+}
