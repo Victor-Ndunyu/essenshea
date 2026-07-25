@@ -1,4 +1,4 @@
-﻿import { promises as fs } from 'fs';
+import { promises as fs } from 'fs';
 import path from 'path';
 import { getSupabaseAdmin } from './supabase-admin';
 
@@ -152,7 +152,7 @@ export async function getCatalogSummary(): Promise<string> {
     for (const product of category.products || []) {
       const stock = typeof product.stock === 'number' ? `, stock ${product.stock}` : '';
       const order = product.availableByOrder ? ', available by order' : '';
-      lines.push(`- ${product.name} — ${product.price || 'Price on request'}${stock}${order}`);
+      lines.push(`- ${product.name} - ${product.price || 'Price on request'}${stock}${order}`);
     }
   }
   return lines.join('\n');

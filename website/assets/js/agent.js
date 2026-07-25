@@ -317,7 +317,7 @@ async function initializeAgent() {
     const siteProducts = getSiteProducts(catalogData);
     AGENT_DATA.products = siteProducts.products;
     AGENT_DATA.categories = siteProducts.categories;
-    addAgentMessage('assistant', 'Hi there — how can I help you today?');
+    addAgentMessage('assistant', 'Hi there - how can I help you today?');
     addAgentMessage('assistant', 'I can find products, open the right shop section, show fragrance options, and help you start a custom order.');
   } catch (error) {
     addAgentMessage('assistant', `Failed to load catalog data: ${error.message}`);
@@ -442,7 +442,7 @@ function renderCartPopup() {
     return '<div class="cart-item">'
       + '<div class="cart-item__info">'
       + '<strong>' + item.quantity + 'x ' + item.title + '</strong>'
-      + '<span>' + (item.statusText || (item.available ? 'Available &mdash; will be prepared for shipment.' : 'Made to order &mdash; will be queued and scheduled.')) + '</span>'
+      + '<span>' + (item.statusText || (item.available ? 'Available - will be prepared for shipment.' : 'Made to order - will be queued and scheduled.')) + '</span>'
       + '</div>'
       + '<button class="btn btn--sm btn--secondary cart-popup-remove" data-id="' + item.id + '">Remove</button>'
       + '</div>';

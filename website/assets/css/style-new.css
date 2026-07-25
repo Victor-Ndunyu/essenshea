@@ -2934,7 +2934,7 @@ body:has(.site-footer) { overflow-x: hidden; }
   .category-product-card img { padding: 12px; }
 }
 
-/* Homepage image sizing — revert to cover */
+/* Homepage image sizing - revert to cover */
 .hero__visual img {
   object-fit: cover;
   filter: none;

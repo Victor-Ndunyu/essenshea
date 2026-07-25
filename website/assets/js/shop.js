@@ -224,7 +224,7 @@ function renderShopProducts() {
     shopResultsCount.textContent = filteredProducts.length + ' product' + (filteredProducts.length === 1 ? '' : 's') + ' shown';
   }
   if (!filteredProducts.length) {
-    shopProductsRoot.innerHTML = '<div class="shop-empty-state"><h3>No exact match yet</h3><p>Try another product name, ingredient or goal — or request a custom product and Essenshea will guide you.</p><a class="btn btn--secondary" href="/shop?focus=custom#custom-care">Request custom care</a></div>';
+    shopProductsRoot.innerHTML = '<div class="shop-empty-state"><h3>No exact match yet</h3><p>Try another product name, ingredient or goal - or request a custom product and Essenshea will guide you.</p><a class="btn btn--secondary" href="/shop?focus=custom#custom-care">Request custom care</a></div>';
     return;
   }
   shopProductsRoot.innerHTML = filteredProducts
@@ -263,7 +263,7 @@ function renderCart() {
       return '<div class="cart-item">'
         + '<div class="cart-item__info">'
         + '<strong>' + item.quantity + 'x ' + item.title + '</strong>'
-        + '<span>' + (item.statusText || (item.available ? 'Available &mdash; will be prepared for shipment.' : 'Made to order &mdash; will be queued and scheduled.')) + '</span>'
+        + '<span>' + (item.statusText || (item.available ? 'Available - will be prepared for shipment.' : 'Made to order - will be queued and scheduled.')) + '</span>'
         + '</div>'
         + '<button class="btn btn--sm btn--secondary cart-remove" data-id="' + item.id + '">Remove</button>'
         + '</div>';

@@ -35,7 +35,7 @@ function renderEcoAccount(data) {
   const available = data.benefits.filter((benefit) => benefit.status === 'available');
   const rewards = element('div', 'eco-account__section');
   rewards.append(element('h4', '', 'Available rewards'));
-  if (!available.length) rewards.append(element('p', 'body-sm', 'No unused rewards yet—your next approved refill moves you closer.'));
+  if (!available.length) rewards.append(element('p', 'body-sm', 'No unused rewards yet-your next approved refill moves you closer.'));
   available.forEach((benefit) => {
     const card = element('div', 'eco-benefit');
     card.append(element('strong', '', benefit.label));
