@@ -2936,3 +2936,155 @@ body:has(.site-footer) { overflow-x: hidden; }
   background-image:
     radial-gradient(circle at 20% 80%, rgba(169, 137, 90, 0.08), transparent 50%);
 }
+
+/* Animation system — easings, reveals, motion */
+:root {
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-out-quart: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+/* Button press feedback */
+.btn:active,
+.btn--ghost:active {
+  transform: scale(0.97);
+}
+
+/* Refined section reveal */
+.reveal,
+.collection-tile,
+.product-card,
+.testimonial-card {
+  animation: essenshea-rise 620ms var(--ease-out-expo) both;
+  animation-timeline: view();
+  animation-range: entry 0% cover 22%;
+}
+
+@keyframes essenshea-rise {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Hero entrance stagger */
+.hero__content > * {
+  animation: hero-fade-up 700ms var(--ease-out-expo) both;
+}
+.hero__content > .label { animation-delay: 0ms; }
+.hero__content > h1 { animation-delay: 100ms; }
+.hero__content > p { animation-delay: 200ms; }
+.hero__content > .hero__actions { animation-delay: 300ms; }
+.hero__visual {
+  animation: hero-fade-up 800ms var(--ease-out-expo) both;
+  animation-delay: 150ms;
+}
+
+@keyframes hero-fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Card hover lift */
+.collection-tile,
+.product-card,
+.testimonial-card,
+.product-trio__card {
+  transition: transform 400ms var(--ease-out-expo), box-shadow 400ms var(--ease-out-expo);
+}
+
+/* Section divider subtle gradient */
+.section--divider {
+  position: relative;
+}
+.section--divider::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 0%, rgba(169, 137, 90, 0.06), transparent 50%);
+  pointer-events: none;
+}
+
+/* Section heading entrance */
+.section .label,
+.section h2,
+.section .body,
+.section .body-lg {
+  animation: essenshea-rise 620ms var(--ease-out-expo) both;
+  animation-timeline: view();
+  animation-range: entry 0% cover 18%;
+}
+
+/* Popup entrance/exit — modal */
+.modal-overlay {
+  transition: opacity 280ms var(--ease-out-expo), visibility 0ms 0ms;
+}
+.modal-overlay.hidden {
+  display: grid !important;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms var(--ease-out-expo), visibility 0ms 200ms;
+}
+.modal-card {
+  transition: transform 280ms var(--ease-out-expo), opacity 280ms var(--ease-out-expo);
+}
+.modal-overlay.hidden .modal-card {
+  transform: scale(0.94);
+  opacity: 0;
+}
+
+/* Popup entrance/exit — cart popup */
+.cart-popup {
+  transition: transform 300ms var(--ease-out-expo), opacity 300ms var(--ease-out-expo), visibility 0ms 0ms;
+}
+.cart-popup.hidden {
+  display: flex !important;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(24px);
+  transition: transform 220ms var(--ease-out-expo), opacity 220ms var(--ease-out-expo), visibility 0ms 220ms;
+}
+
+/* Popup entrance/exit — agent panel */
+.agent-panel {
+  transition: transform 300ms var(--ease-out-expo), opacity 300ms var(--ease-out-expo), visibility 0ms 0ms;
+}
+.agent-panel.hidden {
+  display: grid !important;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(16px);
+  transition: transform 220ms var(--ease-out-expo), opacity 220ms var(--ease-out-expo), visibility 0ms 220ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .collection-tile,
+  .product-card,
+  .testimonial-card,
+  .hero__content > *,
+  .hero__visual,
+  .section .label,
+  .section h2,
+  .section .body,
+  .section .body-lg {
+    animation: none;
+  }
+  .collection-tile,
+  .product-card,
+  .testimonial-card,
+  .product-trio__card,
+  .modal-overlay,
+  .modal-card,
+  .cart-popup,
+  .agent-panel {
+    transition: none;
+  }
+  .modal-overlay.hidden,
+  .cart-popup.hidden,
+  .agent-panel.hidden {
+    display: none !important;
+  }
+}
