@@ -13,6 +13,19 @@ const AGENT_DATA = {
   messages: [],
 };
 
+const AGENT_CONCERNS = [
+  { id: 'hair-growth', label: 'Hair growth', terms: ['hair growth', 'growth serum', 'amla', 'rosemary', 'scalp', 'hairline', 'edges'] },
+  { id: 'dry-skin', label: 'Dry skin', terms: ['dry', 'moisturize', 'moisturise', 'shea', 'butter', 'body oil', 'hydrating'] },
+  { id: 'glow', label: 'Glow', terms: ['glow', 'shiny', 'brighten', 'youthful', 'radiance', 'body oil'] },
+  { id: 'stretch-marks', label: 'Stretch marks', terms: ['stretch marks', 'dark spots', 'shea', 'cocoa', 'mango butter'] },
+  { id: 'acne-prone', label: 'Acne-prone skin', terms: ['acne', 'tea tree', 'neem', 'aloe', 'rashes'] },
+  { id: 'scalp-comfort', label: 'Scalp comfort', terms: ['scalp', 'itch', 'itchiness', 'peppermint', 'soothing', 'hair'] },
+  { id: 'mens-care', label: "Men's care", terms: ['men', 'beard', 'wood', 'spice', 'creed', 'balm', 'tonic'] },
+  { id: 'fragrance', label: 'Fragrance', terms: ['fragrance', 'scent', 'perfume', 'vanilla', 'bubblegum', 'lavender'] },
+  { id: 'custom-care', label: 'Custom care', terms: ['custom', 'customized', 'customised', 'bespoke', 'request'] },
+  { id: 'gifts', label: 'Gifts', terms: ['gift', 'set', 'hamper', 'bundle'] },
+];
+
 function createAgentMarkup() {
   const body = document.body;
   const wrapper = document.createElement('div');
@@ -36,7 +49,8 @@ function createAgentMarkup() {
       <div class="agent-body">
         <div class="agent-chat-window" id="agent-chat-window"></div>
         <div class="agent-quick-actions" aria-label="Assistant shortcuts">
-          <button type="button" data-agent-prompt="Show me body butters">Body butters</button>
+          <button type="button" data-agent-prompt="Show me hair growth products">Hair growth</button>
+          <button type="button" data-agent-prompt="Show me men's care">Men's care</button>
           <button type="button" data-agent-prompt="Help me make a custom order">Custom order</button>
           <button type="button" data-agent-prompt="Show me fragrances">Fragrances</button>
         </div>
@@ -108,13 +122,17 @@ function normalizeAgentText(value) {
 function findAgentProductMatches(prompt) {
   var cleanPrompt = normalizeAgentText(prompt);
   if (!cleanPrompt || !AGENT_DATA.catalog) return [];
+  var promptTerms = cleanPrompt.split(' ').filter(function(word) { return word.length > 2; });
+  var activeConcern = AGENT_CONCERNS.find(function(concern) {
+    return concern.terms.some(function(term) { return cleanPrompt.includes(normalizeAgentText(term)); });
+  });
   var scored = [];
   Object.keys(AGENT_DATA.products || {}).forEach(function(slug) {
     var product = AGENT_DATA.products[slug];
     var haystack = normalizeAgentText([product.name, product.category, product.description].join(' '));
-    var words = cleanPrompt.split(' ').filter(function(word) { return word.length > 2; });
-    var score = words.reduce(function(total, word) { return total + (haystack.includes(word) ? 1 : 0); }, 0);
+    var score = promptTerms.reduce(function(total, word) { return total + (haystack.includes(word) ? 1 : 0); }, 0);
     if (haystack.includes(cleanPrompt)) score += 4;
+    if (activeConcern && activeConcern.terms.some(function(term) { return haystack.includes(normalizeAgentText(term)); })) score += 3;
     if (score > 0) scored.push({ product: product, score: score });
   });
   return scored.sort(function(a, b) { return b.score - a.score; }).slice(0, 4).map(function(item) { return item.product; });
@@ -142,7 +160,7 @@ function answerLocalAgentIntent(prompt) {
 
   var matches = findAgentProductMatches(prompt);
   if (matches.length) {
-    addAgentMessage('assistant', 'I found a few Essenshea products that match. Open one and the shop will take you directly to it.', matches.map(function(product) {
+    addAgentMessage('assistant', 'I found a few Essenshea products that match. Open one and the shop will take you directly to it. Essenshea will still confirm the final fit and order details with you.', matches.map(function(product) {
       return { label: product.name, href: '/shop?product=' + encodeURIComponent(product.slug) };
     }));
     return true;

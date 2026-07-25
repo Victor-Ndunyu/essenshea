@@ -14,9 +14,27 @@ const modalClose = document.getElementById('modal-close');
 const customRequestForm = document.getElementById('custom-request-form');
 const customRequestStatus = document.getElementById('custom-request-status');
 const customFragranceOptions = document.getElementById('custom-fragrance-options');
+const shopSearchInput = document.getElementById('shop-search');
+const shopConcernChips = document.getElementById('shop-concern-chips');
+const shopResultsCount = document.getElementById('shop-results-count');
 
 const shopCollections = [];
 const shopProducts = [];
+let activeConcern = 'all';
+
+const concernOptions = [
+  { id: 'all', label: 'All products', terms: [] },
+  { id: 'hair-growth', label: 'Hair growth', terms: ['hair growth', 'growth serum', 'amla', 'rosemary', 'scalp', 'hairline', 'edges'] },
+  { id: 'dry-skin', label: 'Dry skin', terms: ['dry', 'moisturize', 'moisturise', 'shea', 'butter', 'body oil', 'hydrating'] },
+  { id: 'glow', label: 'Glow', terms: ['glow', 'shiny', 'brighten', 'youthful', 'radiance', 'body oil'] },
+  { id: 'stretch-marks', label: 'Stretch marks', terms: ['stretch marks', 'dark spots', 'shea', 'cocoa', 'mango butter'] },
+  { id: 'acne-prone', label: 'Acne-prone skin', terms: ['acne', 'tea tree', 'neem', 'aloe', 'rashes'] },
+  { id: 'scalp-comfort', label: 'Scalp comfort', terms: ['scalp', 'itch', 'itchiness', 'peppermint', 'soothing', 'hair'] },
+  { id: 'mens-care', label: "Men's care", terms: ['men', 'beard', 'wood', 'spice', 'creed', 'balm', 'tonic'] },
+  { id: 'fragrance', label: 'Fragrance', terms: ['fragrance', 'scent', 'perfume', 'vanilla', 'bubblegum', 'lavender'] },
+  { id: 'custom-care', label: 'Custom care', terms: ['custom', 'customized', 'customised', 'bespoke', 'request'] },
+  { id: 'gifts', label: 'Gifts', terms: ['gift', 'set', 'hamper', 'bundle'] },
+];
 
 function createProductId(value) {
   return value
@@ -29,6 +47,41 @@ function excerpt(text, length = 90) {
   if (!text) return '';
   const sanitized = text.replace(/\s+/g, ' ').trim();
   return sanitized.length <= length ? sanitized : sanitized.slice(0, length).trim() + '…';
+}
+
+function normalizeSearchValue(value) {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9\s]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function getProductConcernIds(product) {
+  const haystack = normalizeSearchValue([product.title, product.category, product.description].join(' '));
+  return concernOptions
+    .filter(function(option) {
+      if (option.id === 'all') return false;
+      return option.terms.some(function(term) { return haystack.includes(normalizeSearchValue(term)); });
+    })
+    .map(function(option) { return option.id; });
+}
+
+function getProductConcernLabels(product) {
+  const ids = product.concerns || getProductConcernIds(product);
+  return concernOptions
+    .filter(function(option) { return ids.includes(option.id); })
+    .slice(0, 3)
+    .map(function(option) { return option.label; });
+}
+
+function productMatchesQuery(product, query) {
+  if (!query) return true;
+  const haystack = normalizeSearchValue([
+    product.title,
+    product.category,
+    product.description,
+    product.bestFor.join(' '),
+  ].join(' '));
+  return normalizeSearchValue(query).split(' ').filter(Boolean).every(function(word) {
+    return haystack.includes(word);
+  });
 }
 
 function mapAvailability(product) {
@@ -60,7 +113,7 @@ async function loadShopData() {
           priceValue: product.priceValue,
         });
 
-        shopProducts.push({
+        const mappedProduct = {
           id: createProductId(category.title + '-' + title),
           slug: product.slug,
           categorySlug: category.slug,
@@ -79,7 +132,10 @@ async function loadShopData() {
             : available
             ? 'Available now. Add to your request list and we will confirm availability.'
             : 'Made to order. We will confirm price and schedule production after your request.',
-        });
+        };
+        mappedProduct.concerns = getProductConcernIds(mappedProduct);
+        mappedProduct.bestFor = getProductConcernLabels(mappedProduct);
+        shopProducts.push(mappedProduct);
       });
     });
 
@@ -88,6 +144,7 @@ async function loadShopData() {
     });
 
     renderShopCollections();
+    renderConcernChips();
     renderShopProducts();
     applyShopDeepLinks();
   } catch (error) {
@@ -126,15 +183,42 @@ function renderShopCollections() {
     .join('');
 }
 
+function renderConcernChips() {
+  if (!shopConcernChips) return;
+  shopConcernChips.innerHTML = concernOptions
+    .map(function(option) {
+      return '<button class="concern-chip' + (option.id === activeConcern ? ' is-active' : '') + '" type="button" data-concern="' + option.id + '">' + option.label + '</button>';
+    })
+    .join('');
+}
+
+function getFilteredShopProducts() {
+  const query = shopSearchInput ? shopSearchInput.value : '';
+  return shopProducts.filter(function(product) {
+    const matchesConcern = activeConcern === 'all' || product.concerns.includes(activeConcern);
+    return matchesConcern && productMatchesQuery(product, query);
+  });
+}
+
 function renderShopProducts() {
   if (!shopProductsRoot) return;
-  shopProductsRoot.innerHTML = shopProducts
+  const filteredProducts = getFilteredShopProducts();
+  if (shopResultsCount) {
+    shopResultsCount.textContent = filteredProducts.length + ' product' + (filteredProducts.length === 1 ? '' : 's') + ' shown';
+  }
+  if (!filteredProducts.length) {
+    shopProductsRoot.innerHTML = '<div class="shop-empty-state"><h3>No exact match yet</h3><p>Try another product name, ingredient or goal — or request a custom product and Essenshea will guide you.</p><a class="btn btn--secondary" href="/shop?focus=custom#custom-care">Request custom care</a></div>';
+    return;
+  }
+  shopProductsRoot.innerHTML = filteredProducts
     .map(function(product) {
+      const tags = (product.bestFor || []).map(function(tag) { return '<span>' + tag + '</span>'; }).join('');
       return '<article class="product-card" data-id="' + product.id + '">'
         + '<img src="' + product.image + '" alt="' + product.title + '" loading="lazy" />'
         + '<div class="product-card__content">'
         + '<h3>' + product.title + '</h3>'
         + '<p>' + product.descriptionExcerpt + '</p>'
+        + (tags ? '<div class="product-card__tags" aria-label="Best for">' + tags + '</div>' : '')
         + '</div>'
         + '<div class="product-card__meta">'
         + '<span class="product-card__price">' + product.priceText + '</span>'
@@ -186,7 +270,7 @@ function openProductModal(productId) {
   modalImage.src = product.image;
   modalImage.alt = product.title;
   modalDescription.textContent = product.description;
-  modalDetails.textContent = product.priceText + ' &middot; ' + (product.available ? 'Available now' : 'Made to order') + (product.stockText ? ' &middot; ' + product.stockText : '') + ' &middot; ' + product.note;
+  modalDetails.textContent = product.priceText + ' · ' + (product.available ? 'Available now' : 'Made to order') + (product.stockText ? ' · ' + product.stockText : '') + (product.bestFor && product.bestFor.length ? ' · Best for: ' + product.bestFor.join(', ') : '') + ' · ' + product.note;
   modalAction.textContent = 'Add to request';
   modalAction.dataset.id = product.id;
   productModal.classList.remove('hidden');
@@ -420,4 +504,18 @@ document.addEventListener('click', function(event) {
 
 if (customRequestForm) {
   customRequestForm.addEventListener('submit', handleCustomRequestSubmit);
+}
+
+if (shopSearchInput) {
+  shopSearchInput.addEventListener('input', renderShopProducts);
+}
+
+if (shopConcernChips) {
+  shopConcernChips.addEventListener('click', function(event) {
+    const button = event.target.closest('[data-concern]');
+    if (!button) return;
+    activeConcern = button.dataset.concern || 'all';
+    renderConcernChips();
+    renderShopProducts();
+  });
 }

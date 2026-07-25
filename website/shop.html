@@ -50,6 +50,14 @@
         <span class="label">Storefront</span>
         <h2 class="display-md">Select products, submit a request, and we will confirm your order.</h2>
         <p class="body" style="margin-bottom:20px;max-width:640px">Open a product to view details, then add it to your request list. Some items are available now; others are made to order.</p>
+        <div class="shop-discovery" aria-label="Product discovery">
+          <label class="shop-search">
+            <span class="form-label">Search by product, ingredient or goal</span>
+            <input id="shop-search" class="form-input" type="search" placeholder="Try hair growth, shea, peppermint, men, glow..." />
+          </label>
+          <div id="shop-concern-chips" class="concern-chips" aria-label="Shop by concern"></div>
+          <p id="shop-results-count" class="body-sm" aria-live="polite"></p>
+        </div>
         <div id="shop-products-grid" class="shop-product-grid"></div>
       </section>
 

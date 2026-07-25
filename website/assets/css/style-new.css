@@ -709,26 +709,52 @@ a { color: inherit; text-decoration: none; }
   margin: 0 auto;
 }
 
-.testimonial-grid {
+.testimonial-strip {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(300px, 0.36fr);
+  gap: 18px;
   margin-top: 40px;
+  padding: 4px 6px 18px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: inline mandatory;
   text-align: left;
 }
 
+.testimonial-strip::-webkit-scrollbar {
+  height: 8px;
+}
+
+.testimonial-strip::-webkit-scrollbar-track {
+  background: rgba(169, 137, 90, 0.12);
+  border-radius: 999px;
+}
+
+.testimonial-strip::-webkit-scrollbar-thumb {
+  background: rgba(169, 137, 90, 0.42);
+  border-radius: 999px;
+}
+
 .testimonial-card {
+  min-height: 300px;
   padding: 28px;
-  border-radius: var(--radius);
-  background: var(--card);
-  border: 1px solid var(--ink-border);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(169, 137, 90, 0.16), transparent 36%),
+    var(--card);
+  border: 1px solid rgba(169, 137, 90, 0.22);
+  box-shadow: 0 18px 40px rgba(70, 58, 35, 0.08);
+  scroll-snap-align: start;
+  display: grid;
+  align-content: space-between;
 }
 
 .testimonial-card__text {
-  font-size: 0.95rem;
+  font-size: clamp(0.98rem, 1vw, 1.08rem);
   line-height: 1.7;
   color: var(--ink-soft);
-  margin: 0 0 16px;
+  margin: 0 0 22px;
   font-style: italic;
 }
 
@@ -741,6 +767,86 @@ a { color: inherit; text-decoration: none; }
 .testimonial-card__role {
   font-size: 0.78rem;
   color: var(--gold);
+}
+
+.shop-discovery {
+  display: grid;
+  gap: 16px;
+  margin: 24px 0 26px;
+  padding: 18px;
+  border-radius: 24px;
+  background: var(--card);
+  border: 1px solid var(--ink-border);
+}
+
+.shop-search {
+  display: grid;
+  gap: 8px;
+}
+
+.concern-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.concern-chip {
+  border: 1px solid rgba(169, 137, 90, 0.26);
+  background: var(--white);
+  color: var(--ink-soft);
+  border-radius: 999px;
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition), transform var(--transition);
+}
+
+.concern-chip:hover {
+  transform: translateY(-1px);
+  border-color: rgba(169, 137, 90, 0.5);
+}
+
+.concern-chip.is-active {
+  background: var(--gold);
+  color: var(--white);
+  border-color: var(--gold);
+}
+
+.product-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.product-card__tags span {
+  border-radius: 999px;
+  background: rgba(169, 137, 90, 0.12);
+  color: var(--olive);
+  font-size: 0.72rem;
+  padding: 5px 8px;
+  font-weight: 600;
+}
+
+.shop-empty-state {
+  grid-column: 1 / -1;
+  padding: clamp(28px, 4vw, 44px);
+  border-radius: 28px;
+  background: var(--card);
+  border: 1px solid var(--ink-border);
+  text-align: center;
+}
+
+.shop-empty-state h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+}
+
+.shop-empty-state p {
+  max-width: 520px;
+  margin: 0 auto 18px;
+  color: var(--ink-soft);
 }
 
 .instagram-strip {
