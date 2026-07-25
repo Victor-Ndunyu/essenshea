@@ -18,9 +18,14 @@ const server = spawn(
     stdio: ['ignore', 'pipe', 'pipe'],
     env: {
       ...process.env,
-      ORDERS_TELEGRAM_CHAT_ID: '',
-      WHATSAPP_ACCESS_TOKEN: '',
-      RESEND_API_KEY: '',
+      TELEGRAM_BOT_TOKEN: 'disabled-for-local-e2e',
+      ORDERS_TELEGRAM_CHAT_ID: 'disabled-for-local-e2e',
+      WHATSAPP_ACCESS_TOKEN: 'disabled-for-local-e2e',
+      WHATSAPP_PHONE_NUMBER_ID: 'disabled-for-local-e2e',
+      OWNER_WHATSAPP_NUMBER: 'disabled-for-local-e2e',
+      WHATSAPP_ORDER_TEMPLATE: 'disabled_for_local_e2e',
+      RESEND_API_KEY: 'disabled-for-local-e2e',
+      ALERT_EMAIL_FROM: 'disabled@example.invalid',
     },
   },
 );

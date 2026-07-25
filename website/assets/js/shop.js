@@ -13,6 +13,7 @@ const modalAction = document.getElementById('modal-action');
 const modalClose = document.getElementById('modal-close');
 const customRequestForm = document.getElementById('custom-request-form');
 const customRequestStatus = document.getElementById('custom-request-status');
+const customFragranceOptions = document.getElementById('custom-fragrance-options');
 
 const shopCollections = [];
 const shopProducts = [];
@@ -65,8 +66,8 @@ async function loadShopData() {
           category: category.title,
           priceText: product.price || 'Price on request',
           priceValue: product.priceValue,
-          description: product.description || category.description || 'Natural skincare and fragrance products crafted for ritual use.',
-          descriptionExcerpt: excerpt(product.description || category.description || 'Natural skincare and fragrance products crafted for ritual use.'),
+          description: product.description || category.description || 'Natural skincare and fragrance products crafted for daily care.',
+          descriptionExcerpt: excerpt(product.description || category.description || 'Natural skincare and fragrance products crafted for daily care.'),
           image: product.image,
           available,
           stock: product.stock ?? null,
@@ -80,6 +81,10 @@ async function loadShopData() {
       });
     });
 
+    shopProducts.sort(function(a, b) {
+      return a.title.localeCompare(b.title, undefined, { sensitivity: 'base' });
+    });
+
     renderShopCollections();
     renderShopProducts();
   } catch (error) {
@@ -87,6 +92,19 @@ async function loadShopData() {
       shopProductsRoot.innerHTML = '<p class="cart-empty">The product list is being prepared. Please refresh shortly.</p>';
     }
     console.error('Unable to load shop product data', error);
+  }
+}
+
+async function loadFragranceOptions() {
+  if (!customFragranceOptions) return;
+  try {
+    const response = await fetch('/data/fragrances.json');
+    const data = await response.json();
+    const notes = [...new Set((data.collections || []).flatMap((collection) => collection.notes || []))]
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+    customFragranceOptions.innerHTML = notes.map((note) => '<option value="' + note + '"></option>').join('');
+  } catch (error) {
+    console.error('Unable to load fragrance options', error);
   }
 }
 
@@ -281,7 +299,7 @@ async function handleCustomRequestSubmit(event) {
   const email = formData.get('email').trim();
   const productType = formData.get('productType');
   const details = formData.get('details').trim();
-  const notes = formData.getAll('notes');
+  const fragrance = (formData.get('fragrance') || '').trim();
   const submitBtn = document.getElementById('custom-submit');
 
   if (!name || !email || !details) {
@@ -308,7 +326,7 @@ async function handleCustomRequestSubmit(event) {
           name: name,
           contact: email,
           email: email,
-          notes: details + (notes.length ? ' | Fragrance notes: ' + notes.join(', ') : ''),
+          notes: details + (fragrance ? ' | Preferred fragrance: ' + fragrance : ''),
         },
         type: 'custom',
       }),
@@ -331,6 +349,7 @@ async function handleCustomRequestSubmit(event) {
 
 renderCart();
 loadShopData();
+loadFragranceOptions();
 
 document.addEventListener('click', function(event) {
   const button = event.target.closest('button');

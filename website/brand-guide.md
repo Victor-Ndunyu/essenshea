@@ -1,7 +1,7 @@
 # Essenshea brand direction
 
 ## Brand essence
-Essenshea is a premium natural beauty brand rooted in ritual, warmth and botanical depth. The identity draws from the circular form of the logo, the organic shape of a leaf, and the grounded luxury of shea-based skincare.
+Essenshea is a premium natural beauty brand rooted in intention, warmth and botanical depth. The identity draws from the circular form of the logo, the organic shape of a leaf, and the grounded luxury of shea-based skincare.
 
 ## Visual language
 - Tone: calm, elevated, sensual, and warm
@@ -20,7 +20,7 @@ Essenshea is a premium natural beauty brand rooted in ritual, warmth and botanic
 
 ## Messaging pillars
 - Natural luxury
-- Botanical ritual
+- Botanical care
 - Retail and wholesale flexibility
 - Giftable self-care
 - Bespoke blends and elevated essentials

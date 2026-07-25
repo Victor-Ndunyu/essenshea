@@ -7,6 +7,7 @@ import {
   ValidationError,
 } from '../../../lib/order-validation';
 import { getClientAddress, checkRateLimit } from '../../../lib/rate-limit';
+import { checkMemoryRateLimit } from '../../../lib/memory-rate-limit';
 import { notifyOwnerOfOrder, sendOperationalAlert } from '../../../lib/notifications';
 import { getSupabaseAdmin } from '../../../lib/supabase-admin';
 
@@ -48,6 +49,18 @@ export async function POST(req: NextRequest) {
     return response({ error: `Request exceeds the ${MAX_REQUEST_BYTES}-byte limit` }, 413);
   }
 
+  let order: ReturnType<typeof validateOrderPayload>;
+  try {
+    const rawBody = await req.text();
+    if (Buffer.byteLength(rawBody, 'utf8') > MAX_REQUEST_BYTES) {
+      return response({ error: `Request exceeds the ${MAX_REQUEST_BYTES}-byte limit` }, 413);
+    }
+    order = validateOrderPayload(JSON.parse(rawBody));
+  } catch (error) {
+    if (error instanceof ValidationError) return response({ error: error.message }, 400);
+    return response({ error: 'The order request is not valid JSON' }, 400);
+  }
+
   const ip = getClientAddress(req.headers);
   try {
     const allowed = await checkRateLimit({
@@ -64,19 +77,18 @@ export async function POST(req: NextRequest) {
     }
   } catch (error) {
     console.error('Order rate-limit error:', error);
-    return response({ error: 'Ordering is temporarily unavailable. Please contact us on WhatsApp.' }, 503);
-  }
-
-  let order: ReturnType<typeof validateOrderPayload>;
-  try {
-    const rawBody = await req.text();
-    if (Buffer.byteLength(rawBody, 'utf8') > MAX_REQUEST_BYTES) {
-      return response({ error: `Request exceeds the ${MAX_REQUEST_BYTES}-byte limit` }, 413);
+    const allowed = checkMemoryRateLimit({
+      key: `orders:${ip}`,
+      limit: 8,
+      windowSeconds: 15 * 60,
+    });
+    if (!allowed) {
+      return response(
+        { error: 'Too many requests. Please wait a few minutes or contact us on WhatsApp.' },
+        429,
+        900,
+      );
     }
-    order = validateOrderPayload(JSON.parse(rawBody));
-  } catch (error) {
-    if (error instanceof ValidationError) return response({ error: error.message }, 400);
-    return response({ error: 'The order request is not valid JSON' }, 400);
   }
 
   const supabase = getSupabaseAdmin();

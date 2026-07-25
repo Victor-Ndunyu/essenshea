@@ -14,9 +14,9 @@
 
 ---
 
-## Baobal Oil
+## Baobab Oil
 
-![Baobal Oil](images/baobal_oil.jpg)
+![Baobab Oil](images/baobal_oil.jpg)
 
 120ml ksh 600 250ml ksh 900 500ml ksh 1250 1L ksh 2200 BENEFITS • Rich with Vitamin E and fatty acids to moisturize skin & scalp. • Provide a barrier to protect from environmental elements. • Protect collagen to ensure skin elasticity and prevent sagging, wrinkles and fine lines. • Gentle oil cleanser. Massage a few drops on skin to strip down oils and makeup to open up pores before using your regular cleanser. • Fights acne. It is lightweight non comedogenic oil perfect for oily skin to moisturize without causing breakouts. • Nourishes & moisturize hair & scalp to prevent frizz, breakage and dryness. • Soother inflammation & eczema. Baobab oil is a rich source of omega fatty acids that fight inflammation, making it an excellent choice for sensitive or inflamed skin.
 
@@ -315,13 +315,5 @@
 ![Jamaican Black Castor Oil](images/jamaican_black_castor_oil.jpg)
 
 120ml ksh 700 250ml ksh 950 500ml ksh 1400 1L ksh 2100 BENEFITS For Skin: •Moisturizer: JBCO is a thick and rich oil that provides deep hydration to the skin. It's beneficial for dry or rough skin and can help improve overall skin moisture. • Anti-Inflammatory: The oil contains ricinoleic acid, which has anti-inflammatory properties. It can be used to soothe irritated skin, reduce redness, and alleviate minor skin issues like rashes or sunburn. • Anti-Acne: JBCO's antimicrobial and anti-inflammatory properties may help in managing acne by preventing bacterial growth and reducing inflammation. It can be used as a spot treatment. • Scar Reduction: Some people use JBCO to reduce the appearance of scars and stretch marks. The oil's nourishing and hydrating properties may support skin repair and regeneration. • Natural Cleanser: JBCO can be used as a natural cleanser or makeup remover. Its thick consistency can effectively remove makeup and impurities from the skin. For Hair: •Hair Growth: JBCO is widely recognized for its potential to promote hair growth. It strengthens hair follicles, prevents hair breakage, and may lead to longer and healthier hair when applied to the scalp. •Thicker Hair: The oil's nutrients and omega-9 fatty acids can help make hair strands thicker and more resilient. It's often used in hair care routines to achieve fuller and more voluminous hair. •Dandruff Control: JBCO can be applied to the scalp to control dandruff and flaky scalp conditions. Its antifungal properties help maintain a healthy scalp. •Split End Treatment: It can be used to treat and prevent split ends, helping maintain the overall health and appearance of hair. • Sealant for Moisture: JBCO is often used as a sealant in the "LOC" (Liquid, Oil, Cream) method for curly and coily hair types. It locks in moisture, keeping hair hydrated and preventing dryness. •Hot Oil Treatment: JBCO can be used in hot oil treatments to condition and revitalize damaged or dry hair.
-
----
-
-## Vitamin E oil
-
-![Vitamin E oil](images/vitamin_e_oil.jpg)
-
-120ml. Ksh 700 250ml. Ksh 950 500ml Ksh 1650 1L. Ksh 2600
 
 ---

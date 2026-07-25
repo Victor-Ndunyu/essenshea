@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fragrances &mdash; Essenshea | Browse scent options</title>
+  <meta name="description" content="Browse Essenshea fragrance options for body oils, custom body care and made-to-order products." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" href="/assets/images/star-mark.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/css/style-new.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Essenshea home">
+        <img class="brand-logo" src="/assets/images/essenshea-logo.jpg" alt="Essenshea logo" />
+        <span class="brand-text"><strong>Essenshea</strong><small>Perfect for skin and hair</small></span>
+      </a>
+      <button class="nav-toggle" aria-label="Open navigation" aria-expanded="false" onclick="document.querySelector('.topnav').classList.toggle('is-open'); this.setAttribute('aria-expanded', document.querySelector('.topnav').classList.contains('is-open'))">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
+      </button>
+      <nav class="topnav" aria-label="Primary navigation">
+        <a href="/catalog">Catalog</a>
+        <a href="/shop">Shop</a>
+        <a href="/fragrances" aria-current="page">Fragrances</a>
+        <a href="/eco-rewards">Eco-Rewards</a>
+        <a href="/about">About</a>
+        <a href="/#contact">Contact</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="fragrance-hero">
+        <div>
+          <span class="label">Fragrance library</span>
+          <h1 class="display-lg">Choose a scent direction for body oils and custom care.</h1>
+          <p class="body-lg">Browse Essenshea fragrance options by collection, search by note, then include your preferred scent when placing an order or requesting a custom product.</p>
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="/shop#custom-care">Request custom care</a>
+            <a class="btn btn--ghost" href="#fragrance-browser">Browse notes</a>
+          </div>
+        </div>
+        <figure class="fragrance-hero__mark">
+          <img src="/assets/images/essenshea-logo.jpg" alt="Essenshea floral body silhouette logo" />
+        </figure>
+      </section>
+
+      <section class="section section--divider" id="fragrance-browser">
+        <div class="fragrance-browser-head">
+          <div>
+            <span class="label">Browse scents</span>
+            <h2 class="display-md">Find a fragrance by mood, note or collection.</h2>
+          </div>
+          <label class="fragrance-search">
+            <span class="form-label">Search fragrances</span>
+            <input id="fragrance-search" class="form-input" type="search" placeholder="Try vanilla, oud, citrus..." />
+          </label>
+        </div>
+        <div id="fragrance-tabs" class="filter-pills fragrance-tabs" aria-label="Fragrance collections"></div>
+        <p id="fragrance-count" class="body-sm fragrance-count" aria-live="polite"></p>
+        <div id="fragrance-grid" class="fragrance-grid"></div>
+      </section>
+
+      <section class="section section--divider">
+        <div style="max-width:560px">
+          <span class="label">Original sheets</span>
+          <h2 class="display-md">Essenshea fragrance lists.</h2>
+          <p class="body">These are the current business fragrance sheets, kept visible so customers can browse them the way they appear on the brand page.</p>
+        </div>
+        <div id="fragrance-sheets" class="fragrance-sheets"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__brand">
+        <strong>Essenshea</strong>
+        <p>Natural luxury, rooted in intention&thinsp;&mdash;&thinsp;crafted for retail, gifting and wholesale with elevated presentation.</p>
+        <p>Kimathi House, 3rd Floor, Suite 303, KIKAO. Open Monday to Saturday, 8am-5pm.</p>
+        <p class="footer-legal">&copy; 2026 Essenshea. All rights reserved.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <a href="/catalog">Catalog</a>
+        <a href="/shop">Shop</a>
+        <a href="/fragrances">Fragrances</a>
+        <a href="/eco-rewards">Eco-Rewards</a>
+        <a href="/about">About</a>
+        <a href="/#contact">Contact</a>
+      </nav>
+    </footer>
+  </div>
+
+  <script src="/assets/js/agent-config.js"></script>
+  <script src="/assets/js/agent.js"></script>
+  <script src="/assets/js/fragrances.js"></script>
+</body>
+</html>

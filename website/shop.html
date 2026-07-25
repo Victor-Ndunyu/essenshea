@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shop &mdash; Essenshea | Natural luxury for everyday ritual</title>
+  <title>Shop &mdash; Essenshea | Natural luxury for everyday care</title>
   <meta name="description" content="Shop Essenshea's signature butters, oils, haircare and fragrance-led essentials. Request-based ordering for retail and wholesale." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15,7 +15,7 @@
   <div class="page-shell">
     <header class="topbar">
       <a class="brand" href="/" aria-label="Essenshea home">
-        <img class="brand-logo" src="assets/images/essenshea-logo.svg" alt="Essenshea logo" />
+        <img class="brand-logo" src="assets/images/essenshea-logo.jpg" alt="Essenshea logo" />
         <span class="brand-text">
           <strong>Essenshea</strong>
           <small>Perfect for skin and hair</small>
@@ -27,6 +27,7 @@
       <nav class="topnav" aria-label="Primary navigation">
         <a href="/catalog">Catalog</a>
         <a href="/shop" aria-current="page">Shop</a>
+        <a href="/fragrances">Fragrances</a>
         <a href="/eco-rewards">Eco-Rewards</a>
         <a href="/about">About</a>
         <a href="/#contact">Contact</a>
@@ -34,18 +35,18 @@
     </header>
 
     <main>
-      <!-- ── Hero ── -->
+      <!-- -- Hero -- -->
       <section class="shop-hero">
         <span class="label">Shop essentials</span>
-        <h1 class="display-lg">Curated rituals for skin, scent and self-care.</h1>
-        <p class="body-lg">Browse the Essenshea range for body care, nourishing oils, hair rituals and bespoke requests&thinsp;&mdash;&thinsp;all available through our simple request-based ordering.</p>
+        <h1 class="display-lg">Curated care for skin, scent and self-care.</h1>
+        <p class="body-lg">Browse the Essenshea range for body care, nourishing oils, haircare and bespoke requests&thinsp;&mdash;&thinsp;all available through our simple request-based ordering.</p>
         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px">
           <a class="btn btn--primary" href="#shop-products">Browse products</a>
           <a class="btn btn--ghost" href="/#contact">Wholesale inquiry</a>
         </div>
       </section>
 
-      <!-- ── Product Grid ── -->
+      <!-- -- Product Grid -- -->
       <section class="shop-section" id="shop-products">
         <span class="label">Storefront</span>
         <h2 class="display-md">Select products, submit a request, and we will confirm your order.</h2>
@@ -53,7 +54,7 @@
         <div id="shop-products-grid" class="shop-product-grid"></div>
       </section>
 
-      <!-- ── Request Guide ── -->
+      <!-- -- Request Guide -- -->
       <section class="shop-section section--divider" style="text-align:center">
         <span class="label">How it works</span>
         <h2 class="display-md">Request-based ordering, simplified.</h2>
@@ -74,12 +75,12 @@
         </div>
       </section>
 
-      <!-- ── Custom Formulation ── -->
-      <section class="shop-section section--divider">
+      <!-- -- Custom Formulation -- -->
+      <section class="shop-section section--divider" id="custom-care">
         <div class="custom-form-wrap">
-          <span class="label">Custom design</span>
-          <h2 class="display-md">Create a bespoke product.</h2>
-          <p class="body-lg">Tell us what you want, choose your fragrance family, and describe the texture or ritual you have in mind. We will confirm a price and schedule production once your request is received.</p>
+          <span class="label">Custom care</span>
+          <h2 class="display-md">Plan a product around your needs.</h2>
+          <p class="body-lg">Tell us the ingredients, fragrance, texture and purpose you want. Custom products are planned and made after your request, then priced and scheduled before pickup or delivery.</p>
         </div>
         <form id="custom-request-form" class="form-wrap" style="margin-top:24px;max-width:640px">
           <div class="form-group">
@@ -99,28 +100,26 @@
               <option value="Haircare">Haircare serum</option>
               <option value="Fragrance">Fragrance blend</option>
               <option value="Gift set">Gift set</option>
+              <option value="Other custom product">Other custom product</option>
             </select>
           </div>
-          <fieldset class="fragrance-options">
-            <legend>Preferred fragrance notes</legend>
-            <label><input type="checkbox" name="notes" value="Lavender" /> Lavender</label>
-            <label><input type="checkbox" name="notes" value="Rose" /> Rose</label>
-            <label><input type="checkbox" name="notes" value="Vanilla" /> Vanilla</label>
-            <label><input type="checkbox" name="notes" value="Peppermint" /> Peppermint</label>
-            <label><input type="checkbox" name="notes" value="Oak & Amber" /> Oak &amp; Amber</label>
-            <label><input type="checkbox" name="notes" value="Citrus" /> Citrus</label>
-            <label><input type="checkbox" name="notes" value="Cedarwood" /> Cedarwood</label>
-          </fieldset>
+          <div class="form-group">
+            <label class="form-label" for="custom-fragrance">Preferred fragrance</label>
+            <input type="text" id="custom-fragrance" name="fragrance" class="form-input" list="custom-fragrance-options" placeholder="Type a scent, or write no fragrance" />
+            <datalist id="custom-fragrance-options"></datalist>
+            <p class="body-sm">Need ideas? <a class="inline-link" href="/fragrances">Browse the fragrance library</a>.</p>
+          </div>
           <div class="form-group">
             <label class="form-label" for="custom-details">Describe your request</label>
-            <textarea id="custom-details" name="details" class="form-textarea" placeholder="Tell us the texture, scent, finish or purpose you have in mind." required></textarea>
+            <textarea id="custom-details" name="details" class="form-textarea" placeholder="List the ingredients you want, fragrance preference, skin or hair goal, texture, size and any allergies or sensitivities." required></textarea>
           </div>
+          <p class="body-sm">There is no fixed ingredient limit. Essenshea will review the formulation, confirm what is workable, then share pricing and production timing.</p>
           <button class="btn btn--primary btn--lg" type="submit" id="custom-submit">Request custom product</button>
           <p class="form-status" id="custom-request-status" role="status" aria-live="polite"></p>
         </form>
       </section>
 
-      <!-- ── Discover More ── -->
+      <!-- -- Discover More -- -->
       <section class="shop-section section--divider">
         <span class="label">Discover more</span>
         <h2 class="display-md">Browse our full categories for wholesale, gift sets and signature collections.</h2>
@@ -128,7 +127,7 @@
       </section>
     </main>
 
-    <!-- ── Product Modal ── -->
+    <!-- -- Product Modal -- -->
     <div id="product-modal" class="modal-overlay hidden" aria-hidden="true" role="dialog" aria-modal="true">
       <div class="modal-card">
         <div class="modal-header">
@@ -149,12 +148,14 @@
     <footer class="site-footer">
       <div class="site-footer__brand">
         <strong>Essenshea</strong>
-        <p>Natural luxury, rooted in ritual&thinsp;&mdash;&thinsp;crafted for retail, gifting and wholesale with elevated presentation.</p>
+        <p>Natural luxury, rooted in intention&thinsp;&mdash;&thinsp;crafted for retail, gifting and wholesale with elevated presentation.</p>
+        <p>Kimathi House, 3rd Floor, Suite 303, KIKAO. Open Monday to Saturday, 8am-5pm.</p>
         <p class="footer-legal">&copy; 2026 Essenshea. All rights reserved.</p>
       </div>
       <nav class="footer-nav" aria-label="Footer navigation">
         <a href="/catalog">Catalog</a>
         <a href="/shop">Shop</a>
+        <a href="/fragrances">Fragrances</a>
         <a href="/eco-rewards">Eco-Rewards</a>
         <a href="/about">About</a>
         <a href="/#contact">Contact</a>

@@ -14,12 +14,28 @@ def create_slug(value: str) -> str:
     return re.sub(r"(^-|-$)", "", value)
 
 
+def clean_copy(value: str) -> str:
+    replacements = {
+        "Baobal": "Baobab",
+        "baobal": "baobab",
+        "Soother inflammation": "Soothes inflammation",
+        "Clears ache": "Clears acne",
+        "Skin exture": "Skin texture",
+        "\u00e2\u20ac\u00a2": "•",
+        "KES\u00c2": "KES",
+        "Ksh\u00c2": "Ksh",
+    }
+    for old, new in replacements.items():
+        value = value.replace(old, new)
+    return value
+
+
 def parse_product_section(section: str, category_dir: Path, default_image: str) -> dict:
     lines = [line.strip() for line in section.splitlines() if line.strip()]
     if not lines or not lines[0].startswith("## "):
         return None
 
-    product_name = lines[0][3:].strip()
+    product_name = clean_copy(lines[0][3:].strip())
     image = ""
     description_lines = []
 
@@ -48,7 +64,7 @@ def parse_product_section(section: str, category_dir: Path, default_image: str) 
     for index in range(len(description_lines) - 1, -1, -1):
         line = description_lines[index]
         if re.search(r"\bKES\s*[\d,]+(?:\.\d{2})?\b", line, re.IGNORECASE):
-            price_text = line
+            price_text = clean_copy(line)
             del description_lines[index]
             break
         if re.search(r"\bPrice\s+on\s+request\b", line, re.IGNORECASE):
@@ -57,10 +73,10 @@ def parse_product_section(section: str, category_dir: Path, default_image: str) 
             break
 
     # Build final description from remaining lines
-    description = " ".join(description_lines).strip()
+    description = clean_copy(" ".join(description_lines).strip())
     description = re.sub(r"\s+", " ", description)
     if not description:
-        description = "A premium Essenshea product crafted for ritual and wellness."
+        description = "A premium Essenshea product crafted for self-care and wellness."
 
     if price_text:
         match = re.search(r"KES\s*([\d,]+(?:\.\d{2})?)", price_text, re.IGNORECASE)
@@ -107,12 +123,12 @@ for category_dir in sorted(source_dir.iterdir()):
             if line.startswith("# "):
                 title = line[2:].strip()
             elif line.startswith("**Description:**"):
-                description = line.replace("**Description:**", "").strip()
+                description = clean_copy(line.replace("**Description:**", "").strip())
 
     if not title:
         title = category_dir.name.replace("_", " ")
     if not description:
-        description = "Natural beauty essentials crafted for ritual, wellness and gifting."
+        description = "Natural beauty essentials crafted for self-care, wellness and gifting."
 
     image_dir = category_dir / "images"
     image_files = sorted(image_dir.glob("*")) if image_dir.exists() else []
@@ -124,6 +140,8 @@ for category_dir in sorted(source_dir.iterdir()):
         product = parse_product_section(section, category_dir, default_image)
         if product:
             products.append(product)
+
+    products.sort(key=lambda item: item["name"].casefold())
 
     categories.append({
         "title": title,
