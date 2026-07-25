@@ -88,10 +88,29 @@ function productMatchesQuery(product, query) {
 
 function mapAvailability(product) {
   const requestOnlyPatterns = /(custom|customized|request)/i;
+  if (product.availableByOrder) return false;
+  if (typeof product.stock === 'number' && product.stock <= 0) return false;
   if (requestOnlyPatterns.test(product.title) || requestOnlyPatterns.test(product.category)) {
     return false;
   }
   return typeof product.priceValue === 'number';
+}
+
+function productStatusLabel(product) {
+  if (product.availableByOrder) return 'By order';
+  if (typeof product.stock === 'number') {
+    if (product.stock <= 0) return 'Currently out';
+    if (product.stock <= 3) return 'Only ' + product.stock + ' left';
+    return 'In stock: ' + product.stock;
+  }
+  return product.available ? 'Available' : 'Made to order';
+}
+
+function productFulfilmentText(product) {
+  if (product.availableByOrder) return 'Available by order. Essenshea will confirm the preparation timeline.';
+  if (typeof product.stock === 'number' && product.stock <= 0) return 'Currently out. You can still request it and Essenshea will confirm the next availability.';
+  if (product.available) return 'Available now. Add to your request list and Essenshea will confirm availability.';
+  return 'Made to order. Essenshea will confirm price and schedule production after your request.';
 }
 
 async function loadShopData() {
@@ -129,11 +148,7 @@ async function loadShopData() {
           available,
           stock: product.stock ?? null,
           stockText: typeof product.stock === 'number' ? 'In stock: ' + product.stock : '',
-          note: /custom/i.test(title)
-            ? 'Custom product. We will confirm price and schedule production after your request.'
-            : available
-            ? 'Available now. Add to your request list and we will confirm availability.'
-            : 'Made to order. We will confirm price and schedule production after your request.',
+          note: '',
         };
         mappedProduct.concerns = getProductConcernIds(mappedProduct);
         mappedProduct.bestFor = getProductConcernLabels(mappedProduct);
@@ -224,7 +239,7 @@ function renderShopProducts() {
         + '</div>'
         + '<div class="product-card__meta">'
         + '<span class="product-card__price">' + product.priceText + '</span>'
-        + '<span class="product-card__flag">' + (product.available ? 'Available' : product.availableByOrder ? 'By order' : 'Made to order') + '</span>'
+        + '<span class="product-card__flag">' + productStatusLabel(product) + '</span>'
         + '<button class="btn btn--sm btn--secondary product-open" data-id="' + product.id + '">View</button>'
         + '</div>'
         + '</article>';
@@ -248,7 +263,7 @@ function renderCart() {
       return '<div class="cart-item">'
         + '<div class="cart-item__info">'
         + '<strong>' + item.quantity + 'x ' + item.title + '</strong>'
-        + '<span>' + (item.available ? 'Available &mdash; will be prepared for shipment.' : 'Made to order &mdash; will be queued and scheduled.') + '</span>'
+        + '<span>' + (item.statusText || (item.available ? 'Available &mdash; will be prepared for shipment.' : 'Made to order &mdash; will be queued and scheduled.')) + '</span>'
         + '</div>'
         + '<button class="btn btn--sm btn--secondary cart-remove" data-id="' + item.id + '">Remove</button>'
         + '</div>';
@@ -272,7 +287,7 @@ function openProductModal(productId) {
   modalImage.src = product.image;
   modalImage.alt = product.title;
   modalDescription.textContent = product.description;
-  modalDetails.textContent = product.priceText + ' · ' + (product.available ? 'Available now' : 'Made to order') + (product.stockText ? ' · ' + product.stockText : '') + (product.bestFor && product.bestFor.length ? ' · Best for: ' + product.bestFor.join(', ') : '') + ' · ' + product.note;
+  modalDetails.textContent = [product.priceText, productStatusLabel(product), product.bestFor && product.bestFor.length ? 'Best for: ' + product.bestFor.join(', ') : '', productFulfilmentText(product)].filter(Boolean).join(' - ');
   modalAction.textContent = 'Add to request';
   modalAction.dataset.id = product.id;
   productModal.classList.remove('hidden');

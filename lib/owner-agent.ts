@@ -22,16 +22,19 @@ export function isOwnerTelegramChat(chatId: number): boolean {
 
 function helpText(): string {
   return [
-    'Owner commands:',
-    '/stock product name | 5 — set stock count',
-    '/available product name | 5 — set stock and mark available now',
-    '/order product name — mark available by order',
-    '/describe product name — show current site description',
-    '/setdesc product name | new description — update description',
-    '/addproduct category | name | price | description — add a product',
-    '/hide product name — remove from public catalogue',
-    '/show product name — restore product',
-    'To change a product image, send a photo with caption: /setimage product name',
+    'Essenshea owner desk:',
+    '/summary ? count public products, stock-set items, by-order items and hidden items',
+    '/lowstock ? show products with 3 or fewer items left',
+    '/stock product name | 5 ? set stock count and mark available now',
+    '/available product name | 5 ? set stock and mark available now',
+    '/order product name ? mark available by order',
+    '/describe product name ? show exact site description',
+    '/find product name ? search catalogue names',
+    '/setdesc product name | new description ? update description',
+    '/addproduct category | name | price | description ? add product as by order',
+    '/hide product name ? remove from public catalogue',
+    '/show product name ? restore product',
+    'Image update: send a photo with caption /setimage product name',
   ].join('\n');
 }
 
@@ -102,26 +105,75 @@ async function handleAddProduct(chatId: number, text: string): Promise<string> {
   return `${name} has been added under ${category}. It is public as available by order. Send a product photo with caption: /setimage ${name}`;
 }
 
+function ownerFallbackText(): string {
+  return [
+    'I can manage the live site catalogue from here.',
+    'Use /summary, /lowstock, /describe product name, /stock product name | 5, /order product name, or /help.',
+    'For edits, keep product name and new value separated with a vertical bar: product | value.',
+  ].join('\n');
+}
+
 async function describeProduct(productName: string): Promise<string> {
   const match = await findCatalogProduct(productName);
   if (!match) return `I could not find "${productName}" in the catalogue.`;
   const product = match.product;
-  const stock = typeof product.stock === 'number' ? `\nStock: ${product.stock}` : '\nStock: not set';
-  const order = product.availableByOrder ? '\nStatus: available by order' : '\nStatus: available now or standard request';
+  const stock = typeof product.stock === 'number' ? (product.stock <= 0 ? '\nStock: 0 (currently out)' : '\nStock: ' + product.stock) : '\nStock: not set';
+  const order = product.availableByOrder ? '\nStatus: available by order' : typeof product.stock === 'number' && product.stock <= 0 ? '\nStatus: currently out' : '\nStatus: available now or standard request';
   return [`${product.name}`, `Category: ${match.category.title}`, `Price: ${product.price || 'Price on request'}`, stock, order, '', product.description || 'No description is listed.'].join('\n');
+}
+
+async function findProductsForOwner(query: string): Promise<string> {
+  const catalog = await getMergedCatalog();
+  const clean = query.toLowerCase().trim();
+  if (!clean) return 'Use: /find product name';
+  const matches: string[] = [];
+  for (const category of catalog.categories || []) {
+    for (const product of category.products || []) {
+      const haystack = [product.name, category.title, product.description].join(' ').toLowerCase();
+      if (haystack.includes(clean) || clean.split(/\s+/).filter(Boolean).every((word) => haystack.includes(word))) {
+        const stock = typeof product.stock === 'number' ? ', stock ' + product.stock : '';
+        const status = product.availableByOrder ? ', by order' : typeof product.stock === 'number' && product.stock <= 0 ? ', out' : ', available';
+        matches.push(`${product.name} (${category.title}${stock}${status})`);
+      }
+    }
+  }
+  return matches.length ? ['Matches:', ...matches.slice(0, 12).map((item) => '- ' + item)].join('\n') : `No public catalogue match for "${query}".`;
 }
 
 async function summarizeSite(): Promise<string> {
   const catalog = await getMergedCatalog();
-  const lines = ['Yes. Current public catalogue summary:'];
+  const lines = ['Current public catalogue:'];
   let total = 0;
+  let stockSet = 0;
+  let byOrder = 0;
+  let out = 0;
   for (const category of catalog.categories || []) {
-    const count = category.products?.length || 0;
+    const products = category.products || [];
+    const count = products.length;
     total += count;
-    lines.push(`- ${category.title}: ${count} item${count === 1 ? '' : 's'}`);
+    stockSet += products.filter((product) => typeof product.stock === 'number').length;
+    byOrder += products.filter((product) => product.availableByOrder).length;
+    out += products.filter((product) => typeof product.stock === 'number' && product.stock <= 0 && !product.availableByOrder).length;
+    lines.push(`${category.title}: ${count} item${count === 1 ? '' : 's'}`);
   }
-  lines.push(`Total listed products: ${total}`);
+  lines.push(`Total listed: ${total}`);
+  lines.push(`Stock counts set: ${stockSet}`);
+  lines.push(`Available by order: ${byOrder}`);
+  if (out) lines.push(`Currently out: ${out}`);
   return lines.join('\n');
+}
+
+async function lowStockSummary(): Promise<string> {
+  const catalog = await getMergedCatalog();
+  const items: string[] = [];
+  for (const category of catalog.categories || []) {
+    for (const product of category.products || []) {
+      if (typeof product.stock === 'number' && product.stock <= 3 && !product.availableByOrder) {
+        items.push(`${product.name}: ${product.stock} left (${category.title})`);
+      }
+    }
+  }
+  return items.length ? ['Low stock:', ...items.map((item) => '- ' + item)].join('\n') : 'No low-stock products are currently set at 3 or fewer.';
 }
 
 export async function handleOwnerTelegramCommand(params: {
@@ -134,7 +186,7 @@ export async function handleOwnerTelegramCommand(params: {
   const lower = text.toLowerCase();
 
   if (!isOwnerTelegramChat(chatId)) {
-    return { handled: false, response: '' };
+    return { handled: true, response: ownerFallbackText() };
   }
 
   try {
@@ -144,6 +196,10 @@ export async function handleOwnerTelegramCommand(params: {
 
     if (lower.includes('what is in the site') || lower.includes('is there something in the site') || lower === '/summary') {
       return { handled: true, response: await summarizeSite() };
+    }
+
+    if (lower === '/lowstock' || lower === '/low-stock') {
+      return { handled: true, response: await lowStockSummary() };
     }
 
     if (lower.startsWith('/stock ')) {
@@ -166,6 +222,10 @@ export async function handleOwnerTelegramCommand(params: {
 
     if (lower.startsWith('/describe ')) {
       return { handled: true, response: await describeProduct(text.slice(10)) };
+    }
+
+    if (lower.startsWith('/find ')) {
+      return { handled: true, response: await findProductsForOwner(text.slice(6)) };
     }
 
     const descriptionAsk = text.match(/(?:what is|show me|send me).{0,20}description.{0,20}(?:of|for)\s+(.+)/i);

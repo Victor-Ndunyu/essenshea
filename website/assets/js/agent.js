@@ -429,7 +429,7 @@ function renderCartPopup() {
     return '<div class="cart-item">'
       + '<div class="cart-item__info">'
       + '<strong>' + item.quantity + 'x ' + item.title + '</strong>'
-      + '<span>' + (item.available ? 'Available &mdash; will be prepared for shipment.' : 'Made to order &mdash; will be queued and scheduled.') + '</span>'
+      + '<span>' + (item.statusText || (item.available ? 'Available &mdash; will be prepared for shipment.' : 'Made to order &mdash; will be queued and scheduled.')) + '</span>'
       + '</div>'
       + '<button class="btn btn--sm btn--secondary cart-popup-remove" data-id="' + item.id + '">Remove</button>'
       + '</div>';

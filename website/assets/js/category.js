@@ -28,9 +28,11 @@ function openCategoryProductModal(productSlug) {
   categoryModalImage.src = product.image;
   categoryModalImage.alt = product.name;
   categoryModalDescription.textContent = product.description;
-  var available = typeof product.priceValue === 'number';
-  var stockText = typeof product.stock === 'number' ? 'In stock: ' + product.stock : 'Stock pending';
-  categoryModalDetails.textContent = (product.price || 'Price on request') + ' · ' + (available ? 'Available now' : 'Request only') + ' · ' + stockText + ' · ' + (available ? 'Seller will ship or confirm pickup options.' : 'Seller will review and confirm pricing and availability.');
+  var availableByOrder = product.availableByOrder === true;
+  var available = !availableByOrder && typeof product.priceValue === 'number' && !(typeof product.stock === 'number' && product.stock <= 0);
+  var stockText = typeof product.stock === 'number' ? (product.stock <= 0 ? 'Currently out' : product.stock <= 3 ? 'Only ' + product.stock + ' left' : 'In stock: ' + product.stock) : 'Stock pending';
+  var statusText = availableByOrder ? 'Available by order' : available ? 'Available now' : 'Request only';
+  categoryModalDetails.textContent = (product.price || 'Price on request') + ' - ' + statusText + ' - ' + stockText + ' - ' + (available ? 'Essenshea will confirm pickup or delivery options.' : 'Essenshea will review and confirm timing.');
   categoryModal.classList.remove('hidden');
   categoryModal.setAttribute('aria-hidden', 'false');
 }
