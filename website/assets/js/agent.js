@@ -120,10 +120,22 @@ function normalizeAgentText(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9\s]+/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+function shouldOfferProductMatches(prompt) {
+  var cleanPrompt = normalizeAgentText(prompt);
+  if (!cleanPrompt) return false;
+  var shoppingTerms = [
+    'recommend', 'suggest', 'show', 'find', 'product', 'products', 'shop', 'buy', 'order', 'available',
+    'price', 'cost', 'for my', 'for hair', 'for skin', 'dry skin', 'hair growth', 'acne', 'glow', 'scent', 'fragrance'
+  ];
+  return shoppingTerms.some(function(term) { return cleanPrompt.includes(term); });
+}
+
 function findAgentProductMatches(prompt) {
   var cleanPrompt = normalizeAgentText(prompt);
   if (!cleanPrompt || !AGENT_DATA.catalog) return [];
-  var promptTerms = cleanPrompt.split(' ').filter(function(word) { return word.length > 2; });
+  var stopWords = new Set(['the', 'and', 'for', 'with', 'you', 'your', 'are', 'can', 'what', 'how', 'why', 'when', 'where', 'which', 'that', 'this', 'have', 'has', 'from', 'about', 'there', 'they', 'them', 'please', 'need', 'want']);
+  var promptTerms = cleanPrompt.split(' ').filter(function(word) { return word.length > 2 && !stopWords.has(word); });
+  if (!promptTerms.length) return [];
   var activeConcern = AGENT_CONCERNS.find(function(concern) {
     return concern.terms.some(function(term) { return cleanPrompt.includes(normalizeAgentText(term)); });
   });
@@ -131,10 +143,11 @@ function findAgentProductMatches(prompt) {
   Object.keys(AGENT_DATA.products || {}).forEach(function(slug) {
     var product = AGENT_DATA.products[slug];
     var haystack = normalizeAgentText([product.name, product.category, product.description].join(' '));
+    var name = normalizeAgentText(product.name);
     var score = promptTerms.reduce(function(total, word) { return total + (haystack.includes(word) ? 1 : 0); }, 0);
-    if (haystack.includes(cleanPrompt)) score += 4;
+    if (name && (name.includes(cleanPrompt) || cleanPrompt.includes(name))) score += 8;
     if (activeConcern && activeConcern.terms.some(function(term) { return haystack.includes(normalizeAgentText(term)); })) score += 3;
-    if (score > 0) scored.push({ product: product, score: score });
+    if (score >= 3) scored.push({ product: product, score: score });
   });
   return scored.sort(function(a, b) { return b.score - a.score; }).slice(0, 4).map(function(item) { return item.product; });
 }
@@ -159,7 +172,7 @@ function answerLocalAgentIntent(prompt) {
     return true;
   }
 
-  var matches = findAgentProductMatches(prompt);
+  var matches = shouldOfferProductMatches(prompt) ? findAgentProductMatches(prompt) : [];
   if (matches.length) {
     addAgentMessage('assistant', 'I found a few Essenshea products that match. Open one and the shop will take you directly to it. Essenshea will still confirm the final fit and order details with you.', matches.map(function(product) {
       return { label: product.name, href: '/shop?product=' + encodeURIComponent(product.slug) };

@@ -2787,3 +2787,65 @@ a { color: inherit; text-decoration: none; }
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Phase 5 agent response guard and contained review wall */
+.testimonial-strip {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-auto-flow: dense;
+  align-items: start;
+  gap: clamp(14px, 2vw, 22px);
+  max-height: clamp(620px, 76vh, 860px);
+  margin-top: 42px;
+  padding: 6px 12px 54px 6px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-snap-type: none;
+  text-align: left;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 82%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 82%, transparent 100%);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(169, 137, 90, 0.42) rgba(169, 137, 90, 0.12);
+}
+
+.testimonial-strip::-webkit-scrollbar { width: 8px; height: 0; }
+.testimonial-strip::-webkit-scrollbar-track { background: rgba(169, 137, 90, 0.12); border-radius: 999px; }
+.testimonial-strip::-webkit-scrollbar-thumb { background: rgba(169, 137, 90, 0.42); border-radius: 999px; }
+
+.testimonial-card {
+  grid-column: span 4;
+  width: 100%;
+  min-height: auto;
+  height: auto;
+  flex: initial;
+  scroll-snap-align: unset;
+  align-content: start;
+  gap: 18px;
+}
+
+.testimonial-card--compact { grid-column: span 3; }
+.testimonial-card--wide { grid-column: span 6; }
+.testimonial-card--tall { grid-column: span 5; }
+
+.testimonial-card__text { text-wrap: pretty; }
+
+@media (max-width: 980px) {
+  .testimonial-card,
+  .testimonial-card--compact,
+  .testimonial-card--wide,
+  .testimonial-card--tall { grid-column: span 6; }
+}
+
+@media (max-width: 640px) {
+  .testimonial-strip {
+    grid-template-columns: 1fr;
+    max-height: 680px;
+    padding-right: 8px;
+  }
+  .testimonial-card,
+  .testimonial-card--compact,
+  .testimonial-card--wide,
+  .testimonial-card--tall { grid-column: 1 / -1; }
+}
