@@ -63,6 +63,24 @@
     </main>
   </div>
 
+  <div class="modal-overlay hidden" id="success-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Loyalty card created 🎉</h2>
+        <button class="modal-close" id="success-modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-description" id="success-customer-detail"></p>
+        <p class="modal-description" style="margin-top:8px">Send them their welcome message and private access code on WhatsApp.</p>
+        <p class="form-status" id="success-status" role="status" aria-live="polite"></p>
+      </div>
+      <div class="modal-footer" style="display:flex;gap:12px;justify-content:flex-end;padding:0 24px 24px">
+        <button class="btn btn--ghost" id="success-modal-close-btn">Close</button>
+        <a class="btn btn--primary" id="success-whatsapp-link" target="_blank" rel="noreferrer">Send on WhatsApp</a>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay hidden" id="delete-modal">
     <div class="modal-card">
       <div class="modal-header">

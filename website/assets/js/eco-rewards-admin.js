@@ -129,6 +129,10 @@ byId('delete-confirm-input').addEventListener('input', () => {
 });
 byId('delete-modal-confirm').addEventListener('click', deleteCustomer);
 
+byId('success-modal-close').addEventListener('click', () => byId('success-modal').classList.add('hidden'));
+byId('success-modal-close-btn').addEventListener('click', () => byId('success-modal').classList.add('hidden'));
+byId('success-modal').addEventListener('click', (e) => { if (e.target === byId('success-modal')) byId('success-modal').classList.add('hidden'); });
+
 async function recordRefill() {
   const status = byId('refill-status');
   status.textContent = 'Saving…';
@@ -189,13 +193,23 @@ byId('create-account').addEventListener('click', async () => {
         consentSource: 'shop',
       }),
     });
-    const whatsappText = encodeURIComponent(`Welcome to Essenshea Eco-Rewards. Your private access code is ${data.accessCode}. View your card at https://essenshea.vercel.app/eco-rewards`);
-    status.replaceChildren(safeNode('span', `Account created. Access code: ${data.accessCode} · `));
-    const link = safeNode('a', 'Send securely on WhatsApp');
-    link.href = `https://wa.me/${data.account.phone}?text=${whatsappText}`;
-    link.target = '_blank';
-    link.rel = 'noreferrer';
-    status.append(link);
+    byId('new-name').value = '';
+    byId('new-phone').value = '';
+    byId('new-consent').checked = false;
+    status.textContent = '';
+    byId('success-customer-detail').textContent = data.account.customer_name + ' (' + data.account.phone + ') \u2014 card active.';
+    var msg = encodeURIComponent(
+      '\uD83C\uDF89 Welcome to Essenshea Eco-Rewards, ' + data.account.customer_name + '!\n\n'
+      + 'Your loyalty card is ready \uD83C\uDF3F\n'
+      + '\uD83D\uDD11 Your private access code: ' + data.accessCode + '\n\n'
+      + '\u2705 View your card & check rewards:\nhttps://essenshea.vercel.app/eco-rewards\n\n'
+      + '\uD83D\uDD12 Your data is safe with us \u2013 we never share your personal information.\n'
+      + 'You can request to leave the program at any time \u2013 no questions asked.\n\n'
+      + 'Thank you for refilling with us \uD83D\uDC9A\n'
+      + '\u2014 Essenshea'
+    );
+    byId('success-whatsapp-link').href = 'https://wa.me/' + data.account.phone + '?text=' + msg;
+    byId('success-modal').classList.remove('hidden');
     await loadAccounts();
   } catch (error) {
     status.textContent = error.message;
