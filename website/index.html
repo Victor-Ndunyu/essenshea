@@ -432,6 +432,10 @@
           card.style.removeProperty('--my');
         });
       });
+      viewport.addEventListener('click', function(e) {
+        if (e.target.closest('.reviews-cta-overlay')) return;
+        window.location.href = '/reviews';
+      });
     }
   </script>
 </body>
