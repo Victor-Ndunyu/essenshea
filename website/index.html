@@ -391,10 +391,13 @@
       }).catch(function() {});
     }
 
+    var homeSection = document.getElementById('home-reviews');
+
     function updateParallax() {
       if (!viewport || !parallaxInner) return;
       var rect = viewport.getBoundingClientRect();
       var wh = window.innerHeight;
+      if (rect.bottom < 0 || rect.top > wh) return;
       var progress = (wh - rect.top) / (wh + rect.height);
       progress = Math.max(0, Math.min(1, progress));
       var maxScroll = parallaxInner.scrollHeight - viewport.clientHeight;
