@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     const [{ data: account }, { data: benefits }, { data: refills }] = await Promise.all([
       supabase
         .from('eco_reward_accounts')
-        .select('id, customer_name, phone, current_punches, active, consented_at, updated_at')
+        .select('id, customer_name, phone, current_punches, active, consented_at, updated_at, access_code')
         .eq('id', accountId)
         .maybeSingle(),
       supabase
@@ -99,13 +99,14 @@ export async function POST(req: NextRequest) {
       .insert({
         customer_name: customerName,
         phone,
+        access_code: accessCode,
         access_code_hash: hashEcoAccessCode(phone, accessCode, secret),
         consented_at: new Date().toISOString(),
         consent_source: ['shop', 'website', 'whatsapp'].includes(String(body.consentSource))
           ? body.consentSource
           : 'shop',
       })
-      .select('id, customer_name, phone, current_punches')
+      .select('id, customer_name, phone, current_punches, access_code')
       .single();
     if (error) {
       const duplicate = error.code === '23505';

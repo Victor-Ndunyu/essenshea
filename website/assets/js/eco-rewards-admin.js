@@ -50,6 +50,13 @@ async function openAccount(id) {
   heading.append(safeNode('h2', `${data.account.customer_name} · ${data.account.current_punches}/8 punches`, 'display-md'));
   const phone = safeNode('span', data.account.phone, 'body');
   heading.append(phone);
+  if (data.account.access_code) {
+    const code = safeNode('span', 'Code: ' + data.account.access_code, 'body');
+    code.style.marginLeft = '16px';
+    code.style.fontSize = '0.85rem';
+    code.style.opacity = '0.7';
+    heading.append(code);
+  }
   const deleteBtn = safeNode('button', 'Delete customer', 'btn btn--sm btn--ghost');
   deleteBtn.type = 'button';
   deleteBtn.style.color = '#B33A3A';
