@@ -199,14 +199,15 @@ byId('create-account').addEventListener('click', async () => {
     status.textContent = '';
     byId('success-customer-detail').textContent = data.account.customer_name + ' (' + data.account.phone + ') \u2014 card active.';
     var msg = encodeURIComponent(
-      '\uD83C\uDF89 Welcome to Essenshea Eco-Rewards, ' + data.account.customer_name + '!\n\n'
-      + 'Your loyalty card is ready \uD83C\uDF3F\n'
-      + '\uD83D\uDD11 Your private access code: ' + data.accessCode + '\n\n'
-      + '\u2705 View your card & check rewards:\nhttps://essenshea.vercel.app/eco-rewards\n\n'
-      + '\uD83D\uDD12 Your data is safe with us \u2013 we never share your personal information.\n'
-      + 'You can request to leave the program at any time \u2013 no questions asked.\n\n'
-      + 'Thank you for refilling with us \uD83D\uDC9A\n'
-      + '\u2014 Essenshea'
+      'Hey ' + data.account.customer_name + '! 🌿\n\n'
+      + 'Welcome to Essenshea Eco-Rewards! Your loyalty card is ready 🎉\n\n'
+      + '🔑 Your private access code: ' + data.accessCode + '\n'
+      + '👉 View your card: https://essenshea.vercel.app/eco-rewards\n\n'
+      + 'Every time you refill, you earn punches toward free samples and discounts. 💚\n\n'
+      + 'Your privacy matters — your info stays with us and is never shared.\n'
+      + 'You can leave the program anytime, no questions asked.\n\n'
+      + 'So glad to have you refilling with us!\n'
+      + '- Essenshea'
     );
     byId('success-whatsapp-link').href = 'https://wa.me/' + data.account.phone + '?text=' + msg;
     byId('success-modal').classList.remove('hidden');
