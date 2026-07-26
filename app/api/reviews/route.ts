@@ -18,14 +18,18 @@ function authorized(req: NextRequest): boolean {
   return a.length === b.length && a.length > 0 && a.every((byte, i) => byte === b[i]);
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const limit = Math.min(Math.max(Number(searchParams.get('limit')) || 0, 0), 100);
   const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase
+  let query = supabase
     .from('site_reviews')
     .select('id, author, role, text, created_at')
     .eq('is_visible', true)
     .order('order_index', { ascending: true })
     .order('created_at', { ascending: false });
+  if (limit > 0) query = query.limit(limit);
+  const { data, error } = await query;
   if (error) return NextResponse.json({ error: 'Could not load reviews' }, { status: 503 });
   return NextResponse.json({ reviews: data || [] });
 }

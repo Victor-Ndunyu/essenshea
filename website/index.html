@@ -160,14 +160,14 @@
         </div>
       </section>
 
-      <!-- -- Testimonials -- -->
+      <!-- -- Reviews -- -->
       <section class="section section--divider" id="home-reviews">
         <div class="testimonials">
           <span class="label">What our customers say</span>
           <h2 class="display-md">Real words from the Essenshea community.</h2>
         </div>
         <a class="reviews-viewport" href="/reviews" aria-label="Read all customer reviews">
-          <div class="reviews-track" id="home-reviews-track"></div>
+          <div class="reviews-grid" id="home-reviews-grid"></div>
           <div class="reviews-fade-top"></div>
           <div class="reviews-fade-bottom"></div>
           <div class="reviews-mouse-glow" id="reviews-mouse-glow"></div>
@@ -352,7 +352,7 @@
     }
   </script>
   <script>
-    var track = document.getElementById('home-reviews-track');
+    var grid = document.getElementById('home-reviews-grid');
     var glow = document.getElementById('reviews-mouse-glow');
     var viewport = document.querySelector('.reviews-viewport');
 
@@ -376,12 +376,12 @@
       return c;
     }
 
-    if (track) {
-      fetch('/api/reviews').then(function(r) { return r.json(); }).then(function(d) {
+    if (grid) {
+      fetch('/api/reviews?limit=6').then(function(r) { return r.json(); }).then(function(d) {
         if (d.reviews && d.reviews.length) {
           var frag = document.createDocumentFragment();
           d.reviews.forEach(function(r) { frag.appendChild(makeReviewCard(r)); });
-          track.replaceChildren(frag);
+          grid.replaceChildren(frag);
         }
       }).catch(function() {});
     }

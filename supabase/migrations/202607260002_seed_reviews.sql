@@ -1,0 +1,9 @@
+INSERT INTO site_reviews (author, role, text, source, order_index) VALUES
+  ('Cia', 'Custom glow care', 'Ayayayaya\nI love it!!!\n10/10\nNo notes!!!!!!\nInanukia, it''s beautiful, it''s shiny\nIt''s everything I wanted😂', 'admin', 1),
+  ('Michelle', 'Body butters', 'I just received the butters\n\nYesss I tried it today morning on my hair and it''s exactly what I wanted. Plus it has a nice soothing effect on my scalp too🤗', 'admin', 2),
+  ('Essenshea customer', 'Fragrance-led body care', 'Received. They smell like snacks 😍\n\nEspecially after settling on the skin', 'admin', 3),
+  ('Essenshea customer', 'Custom formulation', 'I got it and it smells like heaven thank you 💗💗💗\n\nFinally let me give you your flowers the formulation for this is soooooo gooood its been moisturizing not greasy at all my skin feels so soft', 'admin', 4),
+  ('Essenshea customer', 'Hair growth serum', 'Awesome\n\nFirst of all your hair growth serum is liquid gold ☺️☺️\n\nIt restored my receding hairline because of breastfeeding\n\nI need more where that came from!\n\nAnd I only used it for 2 weeks\n\nImagine if I''m consistent ☺️☺️', 'admin', 5),
+  ('Linet', 'Sweet orange body butter + Himalayan scrub', 'I love the butter; the sweet orange was a good choice\n\nWith the scrub, I loved how smooth my skin felt immediately after😍😍\nI''ve used other scrubs but nothing comes close to this one, it''s so good😊\n\nAlafu the scent is even better😍', 'admin', 6),
+  ('Fiona', 'Hair oil', 'Trying the hair oil today, noticed my scalp is dry\n\nI loved it, it was easy to apply, used a few drops and it spread well, and it was minty but not too much so you feel fresh but not chocked 😂. Will keep using it in place of the shea butter nione if my hair will grow faster coz already it''s growing like weeds 😂, kwanza the baby hairs that keep cutting from braiding', 'admin', 7)
+ON CONFLICT DO NOTHING;
