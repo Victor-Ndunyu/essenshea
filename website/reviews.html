@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reviews - Essenshea | Real words from our community</title>
+  <meta name="description" content="Read what our customers say about Essenshea's natural body care, haircare, and custom formulations." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" href="assets/images/star-mark.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/css/style-new.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Essenshea home">
+        <img class="brand-logo" src="assets/images/essenshea-logo.jpg" alt="Essenshea logo" />
+        <span class="brand-text">
+          <strong>Essenshea</strong>
+          <small>Perfect for skin and hair</small>
+        </span>
+      </a>
+      <button class="nav-toggle" aria-label="Open navigation" aria-expanded="false" onclick="document.querySelector('.topnav').classList.toggle('is-open'); this.setAttribute('aria-expanded', document.querySelector('.topnav').classList.contains('is-open'))">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
+      </button>
+      <nav class="topnav" aria-label="Primary navigation">
+        <a href="/catalog">Catalog</a>
+        <a href="/shop">Shop</a>
+        <a href="/eco-rewards">Eco-Rewards</a>
+        <a href="/about">About</a>
+        <a href="/#contact">Contact</a>
+      </nav>
+    </header>
+
+    <main class="reviews-page">
+      <section class="reviews-hero">
+        <span class="label">What our customers say</span>
+        <h1 class="display-xl">Real words from the Essenshea community.</h1>
+        <p class="body-lg">Every jar, bottle and blend carries a story. Here is what our people are saying.</p>
+      </section>
+
+      <section class="reviews-grid" id="reviews-grid">
+      </section>
+
+      <section class="reviews-cta section--divider" style="padding:72px 0;text-align:center">
+        <h2 class="display-md">Share your experience</h2>
+        <p class="body" style="max-width:520px;margin:8px auto 0">Message us on WhatsApp or Instagram to add your voice to the community.</p>
+        <div style="margin-top:20px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+          <a class="btn btn--primary" href="https://wa.me/254727349749" target="_blank" rel="noreferrer">Send a review on WhatsApp</a>
+          <a class="btn btn--ghost" href="https://instagram.com/essenshea.ke" target="_blank" rel="noreferrer">Tag us on Instagram</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__brand">
+        <img class="site-footer__logo" src="/assets/images/essenshea-logo.jpg" alt="Essenshea logo" />
+        <strong>Essenshea</strong>
+        <p>Natural luxury, rooted in intention - crafted for retail, gifting and wholesale with elevated presentation.</p>
+        <p>Kimathi House, 3rd Floor, Suite 303, KIKAO. Open Monday to Saturday, 8am-5pm.</p>
+        <p class="footer-legal">&copy; 2026 Essenshea. All rights reserved.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <a href="/catalog">Catalog</a>
+        <a href="/shop">Shop</a>
+        <a href="/eco-rewards">Eco-Rewards</a>
+        <a href="/about">About</a>
+        <a href="/#contact">Contact</a>
+      </nav>
+      <div class="footer-social">
+        <a href="https://instagram.com/essenshea.ke" target="_blank" rel="noreferrer" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17" cy="7" r="1.5" fill="currentColor" stroke="none"/></svg>
+        </a>
+        <a href="https://wa.me/254727349749" target="_blank" rel="noreferrer" aria-label="WhatsApp">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        </a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const template = document.getElementById('review-card-template');
+    const grid = document.getElementById('reviews-grid');
+
+    function createReviewCard(review) {
+      const card = document.createElement('article');
+      card.className = 'review-card';
+      const text = document.createElement('p');
+      text.className = 'review-card__text';
+      text.textContent = review.text;
+      card.appendChild(text);
+      const author = document.createElement('div');
+      author.className = 'review-card__author';
+      author.textContent = review.author;
+      card.appendChild(author);
+      if (review.role) {
+        const role = document.createElement('div');
+        role.className = 'review-card__role';
+        role.textContent = review.role;
+        card.appendChild(role);
+      }
+      return card;
+    }
+
+    fetch('/api/reviews')
+      .then(r => r.json())
+      .then(data => {
+        if (data.reviews && data.reviews.length) {
+          grid.replaceChildren(...data.reviews.map(createReviewCard));
+        } else {
+          grid.innerHTML = '<p class="body" style="text-align:center;color:var(--ink-soft);padding:60px 0">No reviews yet. Be the first to share your experience.</p>';
+        }
+      })
+      .catch(() => {
+        grid.innerHTML = '<p class="body" style="text-align:center;color:var(--ink-soft);padding:60px 0">Could not load reviews. Please try again later.</p>';
+      });
+  </script>
+  <script src="assets/js/agent-config.js"></script>
+  <script src="assets/js/agent.js"></script>
+</body>
+</html>

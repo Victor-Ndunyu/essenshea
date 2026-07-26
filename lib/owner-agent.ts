@@ -38,6 +38,9 @@ function helpText(): string {
     '/hide product name - remove from public catalogue',
     '/show product name - restore product',
     'Image update: send a photo with caption /setimage product name',
+    '/addreview Author | Role | Review text - add a review to the site',
+    '/reviews - list all reviews',
+    '/delreview review_id - hide a review',
   ].join('\n');
 }
 
@@ -273,6 +276,57 @@ export async function handleOwnerTelegramCommand(params: {
       if (!fileId) return { handled: true, response: 'Send the product photo with caption: /setimage product name' };
       const updated = await upsertOverride(text.slice(10), { image_url: `/api/catalog/image?fileId=${encodeURIComponent(fileId)}` }, chatId);
       return { handled: true, response: `${updated.name} image has been updated on the site.` };
+    }
+
+    // ── Review management ──
+    const reviewAdminKey = process.env.ECO_REWARDS_ADMIN_KEY || '';
+
+    if (lower.startsWith('/addreview ')) {
+      const parts = splitPipeArgs(text.slice(11));
+      if (parts.length < 2) return { handled: true, response: 'Use: /addreview Author | Role | Review text' };
+      const author = parts[0].slice(0, 120);
+      const role = parts.length > 2 ? parts[1].slice(0, 120) : '';
+      const reviewText = (parts.length > 2 ? parts.slice(2).join(' | ') : parts[1]).slice(0, 2000);
+      if (!author || !reviewText) return { handled: true, response: 'Author and review text are required.' };
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-eco-admin-key': reviewAdminKey },
+        body: JSON.stringify({ action: 'add', author, role, text: reviewText }),
+      });
+      const data = await res.json();
+      if (!res.ok) return { handled: true, response: data.error || 'Could not add review.' };
+      const r = data.review;
+      return { handled: true, response: `Review added.\n${r.author}${r.role ? ' (' + r.role + ')' : ''}:\n${r.text}` };
+    }
+
+    if (lower === '/reviews' || lower === '/listreviews') {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-eco-admin-key': reviewAdminKey },
+        body: JSON.stringify({ action: 'list' }),
+      });
+      const data = await res.json();
+      if (!res.ok) return { handled: true, response: data.error || 'Could not load reviews.' };
+      const reviews = data.reviews || [];
+      if (!reviews.length) return { handled: true, response: 'No reviews on the site yet.' };
+      const lines = reviews.map((r: { id: string; author: string; role?: string; text: string; order_index?: number; is_visible?: boolean }) =>
+        `${r.is_visible !== false ? '' : '[hidden] '}${r.author}${r.role ? ' (' + r.role + ')' : ''}: ${r.text.slice(0, 80)}${r.text.length > 80 ? '..' : ''} (id: ${r.id.slice(0, 8)}..)`
+      );
+      return { handled: true, response: ['Site reviews:', ...lines].join('\n') };
+    }
+
+    if (lower.startsWith('/removereview ') || lower.startsWith('/delreview ')) {
+      const cmd = lower.startsWith('/removereview ') ? '/removereview ' : '/delreview ';
+      const reviewId = text.slice(cmd.length).trim().slice(0, 60);
+      if (!reviewId) return { handled: true, response: 'Use: /removereview review_id' };
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-eco-admin-key': reviewAdminKey },
+        body: JSON.stringify({ action: 'hide', reviewId }),
+      });
+      const data = await res.json();
+      if (!res.ok) return { handled: true, response: data.error || 'Could not hide review.' };
+      return { handled: true, response: 'Review has been hidden from the site.' };
     }
 
     if (photos?.length) {

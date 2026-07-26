@@ -161,49 +161,17 @@
       </section>
 
       <!-- -- Testimonials -- -->
-      <section class="section section--divider">
+      <section class="section section--divider" id="home-reviews">
         <div class="testimonials">
           <span class="label">What our customers say</span>
           <h2 class="display-md">Real words from the Essenshea community.</h2>
         </div>
-        <div class="testimonial-strip" aria-label="Customer reviews">
-          <article class="testimonial-card">
-            <p class="testimonial-card__text">Ayayayaya<br />I love it!!!<br />10/10<br />No notes!!!!!!<br />Inanukia, it's beautiful, it's shiny<br />It's everything I wanted😂</p>
-            <div class="testimonial-card__author">Cia</div>
-            <div class="testimonial-card__role">Custom glow care</div>
-          </article>
-          <article class="testimonial-card">
-            <p class="testimonial-card__text">I just received the butters<br /><br />Yesss I tried it today morning on my hair and it's exactly what I wanted. Plus it has a nice soothing effect on my scalp too�-</p>
-            <div class="testimonial-card__author">Michelle</div>
-            <div class="testimonial-card__role">Body butters</div>
-          </article>
-          <article class="testimonial-card testimonial-card--compact">
-            <p class="testimonial-card__text">Received. They smell like snacks 😍<br /><br />Especially after settling on the skin</p>
-            <div class="testimonial-card__author">Essenshea customer</div>
-            <div class="testimonial-card__role">Fragrance-led body care</div>
-          </article>
-          <article class="testimonial-card testimonial-card--wide">
-            <p class="testimonial-card__text">I got it and it smells like heaven thank you �-�-�-<br /><br />Finally let me give you your flowers the formulation for this is soooooo gooood its been moisturizing not greasy at all my skin feels so soft</p>
-            <div class="testimonial-card__author">Essenshea customer</div>
-            <div class="testimonial-card__role">Custom formulation</div>
-          </article>
-          <article class="testimonial-card testimonial-card--tall">
-            <p class="testimonial-card__text">Awesome<br /><br />First of all your hair growth serum is liquid gold ☺️☺️<br /><br />It restored my receding hairline because of breastfeeding<br /><br />I need more where that came from!<br /><br />And I only used it for 2 weeks<br /><br />Imagine if I'm consistent ☺️☺️</p>
-            <div class="testimonial-card__author">Essenshea customer</div>
-            <div class="testimonial-card__role">Hair growth serum</div>
-          </article>
-          <article class="testimonial-card testimonial-card--wide">
-            <p class="testimonial-card__text">I love the butter; the sweet orange was a good choice<br /><br />With the scrub, I loved how smooth my skin felt immediately after&#128525;&#128525;<br />I've used other scrubs but nothing comes close to this one, it's so good&#128522;<br /><br />Alafu the scent is even better&#128525;</p>
-            <div class="testimonial-card__author">Linet</div>
-            <div class="testimonial-card__role">Sweet orange body butter + Himalayan scrub</div>
-          </article>
-          <article class="testimonial-card testimonial-card--tall">
-            <p class="testimonial-card__text">Trying the hair oil today, noticed my scalp is dry<br /><br />I loved it, it was easy to apply, used a few drops and it spread well, and it was minty but not too much so you feel fresh but not chocked &#128514;. Will keep using it in place of the shea butter nione if my hair will grow faster coz already it's growing like weeds &#128514;, kwanza the baby hairs that keep cutting from braiding</p>
-            <div class="testimonial-card__author">Fiona</div>
-            <div class="testimonial-card__role">Hair oil</div>
-          </article>
-
-        </div>
+        <a class="reviews-viewport" href="/reviews" aria-label="Read all customer reviews">
+          <div class="reviews-track" id="home-reviews-track"></div>
+          <div class="reviews-fade-top"></div>
+          <div class="reviews-fade-bottom"></div>
+          <div class="reviews-mouse-glow" id="reviews-mouse-glow"></div>
+        </a>
       </section>
 
       <!-- -- Instagram -- -->
@@ -381,6 +349,51 @@
           submitBtn.textContent = 'Send inquiry';
         }
       });
+    }
+  </script>
+  <script>
+    var track = document.getElementById('home-reviews-track');
+    var glow = document.getElementById('reviews-mouse-glow');
+    var viewport = document.querySelector('.reviews-viewport');
+
+    function makeReviewCard(r) {
+      var c = document.createElement('article');
+      c.className = 'review-card';
+      var t = document.createElement('p');
+      t.className = 'review-card__text';
+      t.textContent = r.text;
+      c.appendChild(t);
+      var a = document.createElement('div');
+      a.className = 'review-card__author';
+      a.textContent = r.author;
+      c.appendChild(a);
+      if (r.role) {
+        var o = document.createElement('div');
+        o.className = 'review-card__role';
+        o.textContent = r.role;
+        c.appendChild(o);
+      }
+      return c;
+    }
+
+    if (track) {
+      fetch('/api/reviews').then(function(r) { return r.json(); }).then(function(d) {
+        if (d.reviews && d.reviews.length) {
+          var frag = document.createDocumentFragment();
+          d.reviews.forEach(function(r) { frag.appendChild(makeReviewCard(r)); });
+          track.replaceChildren(frag);
+        }
+      }).catch(function() {});
+    }
+
+    if (glow && viewport) {
+      viewport.addEventListener('mousemove', function(e) {
+        var rect = viewport.getBoundingClientRect();
+        var x = ((e.clientX - rect.left) / rect.width) * 100;
+        var y = ((e.clientY - rect.top) / rect.height) * 100;
+        glow.style.background = 'radial-gradient(circle at ' + x + '% ' + y + '%, rgba(169, 137, 90, 0.10) 0%, transparent 60%)';
+      });
+      viewport.addEventListener('mouseleave', function() { glow.style.background = 'none'; });
     }
   </script>
 </body>
