@@ -198,12 +198,13 @@ byId('create-account').addEventListener('click', async () => {
     byId('new-consent').checked = false;
     status.textContent = '';
     byId('success-customer-detail').textContent = data.account.customer_name + ' (' + data.account.phone + ') \u2014 card active.';
-    var msg = 'Hey%20' + encodeURIComponent(data.account.customer_name) + ',%20welcome%20to%20Essenshea%20Eco-Rewards!%0A%0A'
-      + 'Your%20private%20access%20code:%20' + encodeURIComponent(data.accessCode) + '%0A'
-      + 'View%20your%20card:%20https://essenshea.vercel.app/eco-rewards%0A%0A'
-      + 'Every%20refill%20earns%20punches%20toward%20free%20samples%20and%20discounts.%0A%0A'
-      + 'Your%20info%20is%20safe%20with%20us%20-%20never%20shared.%0A'
-      + 'You%20can%20leave%20the%20program%20anytime.%0A%0A'
+    var msg = 'Hey%20' + encodeURIComponent(data.account.customer_name) + '!%20%F0%9F%8C%BF%0A%0A'
+      + 'Welcome%20to%20Essenshea%20Eco-Rewards!%20Your%20loyalty%20card%20is%20ready%20%F0%9F%8E%89%0A%0A'
+      + '%F0%9F%94%91%20Your%20private%20access%20code:%20' + encodeURIComponent(data.accessCode) + '%0A'
+      + '%F0%9F%91%89%20View%20your%20card:%20https://essenshea.vercel.app/eco-rewards%0A%0A'
+      + 'Every%20time%20you%20refill,%20you%20earn%20punches%20toward%20free%20samples%20and%20discounts.%20%F0%9F%92%9A%0A%0A'
+      + 'Your%20privacy%20matters%20%E2%80%94%20your%20info%20stays%20with%20us%20and%20is%20never%20shared.%0A'
+      + 'You%20can%20leave%20the%20program%20anytime,%20no%20questions%20asked.%0A%0A'
       + 'So%20glad%20to%20have%20you%20refilling%20with%20us!%0A'
       + '-%20Essenshea';
     byId('success-whatsapp-link').href = 'https://wa.me/' + data.account.phone + '?text=' + msg;
