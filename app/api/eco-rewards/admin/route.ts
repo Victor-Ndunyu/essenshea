@@ -153,5 +153,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
   }
 
+  if (action === 'delete_account') {
+    const accountId = cleanText(body.accountId, 50);
+    if (!accountId) return NextResponse.json({ error: 'Account ID is required' }, { status: 400 });
+    const { error: refillsError } = await supabase
+      .from('eco_reward_refills')
+      .delete()
+      .eq('account_id', accountId);
+    if (refillsError) return NextResponse.json({ error: 'Could not remove refills' }, { status: 503 });
+    const { error: benefitsError } = await supabase
+      .from('eco_reward_benefits')
+      .delete()
+      .eq('account_id', accountId);
+    if (benefitsError) return NextResponse.json({ error: 'Could not remove benefits' }, { status: 503 });
+    const { error: accountError } = await supabase
+      .from('eco_reward_accounts')
+      .delete()
+      .eq('id', accountId);
+    if (accountError) return NextResponse.json({ error: 'Could not delete account' }, { status: 503 });
+    return NextResponse.json({ success: true });
+  }
+
   return NextResponse.json({ error: 'Unknown Eco-Rewards action' }, { status: 400 });
 }

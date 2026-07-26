@@ -62,6 +62,26 @@
       </div>
     </main>
   </div>
+
+  <div class="modal-overlay hidden" id="delete-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Delete customer account</h2>
+        <button class="modal-close" id="delete-modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-description">Remove <strong id="delete-customer-name"></strong> and all their refill history, rewards, and loyalty card. This cannot be undone.</p>
+        <p class="modal-description" style="color:var(--ink-soft);font-size:0.9rem">Type <strong>DELETE</strong> to confirm.</p>
+        <input class="form-input" id="delete-confirm-input" placeholder="Type DELETE" autocomplete="off" />
+        <p class="form-status" id="delete-status" role="status" aria-live="polite"></p>
+      </div>
+      <div class="modal-footer" style="display:flex;gap:12px;justify-content:flex-end;padding:0 24px 24px">
+        <button class="btn btn--ghost" id="delete-modal-cancel">Cancel</button>
+        <button class="btn btn--primary" id="delete-modal-confirm" disabled>Delete account</button>
+      </div>
+    </div>
+  </div>
+
   <script src="/assets/js/eco-rewards-admin.js"></script>
 </body>
 </html>

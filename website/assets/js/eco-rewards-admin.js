@@ -48,7 +48,14 @@ async function openAccount(id) {
   detail.replaceChildren();
   const heading = safeNode('div', '', 'eco-admin-detail__heading');
   heading.append(safeNode('h2', `${data.account.customer_name} · ${data.account.current_punches}/8 punches`, 'display-md'));
-  heading.append(safeNode('span', data.account.phone, 'body'));
+  const phone = safeNode('span', data.account.phone, 'body');
+  heading.append(phone);
+  const deleteBtn = safeNode('button', 'Delete customer', 'btn btn--sm btn--ghost');
+  deleteBtn.type = 'button';
+  deleteBtn.style.color = '#B33A3A';
+  deleteBtn.style.borderColor = 'rgba(179,58,58,0.3)';
+  deleteBtn.addEventListener('click', () => openDeleteModal(data.account));
+  heading.append(deleteBtn);
   detail.append(heading);
 
   const form = safeNode('div', '', 'form-wrap');
@@ -83,7 +90,44 @@ async function openAccount(id) {
     benefits.append(row);
   });
   detail.append(benefits);
+
+  detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
+function openDeleteModal(account) {
+  byId('delete-customer-name').textContent = account.customer_name;
+  byId('delete-confirm-input').value = '';
+  byId('delete-status').textContent = '';
+  byId('delete-modal-confirm').disabled = true;
+  byId('delete-modal').classList.remove('hidden');
+  byId('delete-confirm-input').focus();
+}
+
+async function deleteCustomer() {
+  const status = byId('delete-status');
+  status.textContent = 'Deleting…';
+  try {
+    await adminRequest('/api/eco-rewards/admin', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'delete_account', accountId: selectedAccount.id }),
+    });
+    byId('delete-modal').classList.add('hidden');
+    selectedAccount = null;
+    byId('account-detail').classList.add('hidden');
+    byId('account-search').value = '';
+    await loadAccounts();
+  } catch (error) {
+    status.textContent = error.message;
+  }
+}
+
+byId('delete-modal-close').addEventListener('click', () => byId('delete-modal').classList.add('hidden'));
+byId('delete-modal-cancel').addEventListener('click', () => byId('delete-modal').classList.add('hidden'));
+byId('delete-modal').addEventListener('click', (e) => { if (e.target === byId('delete-modal')) byId('delete-modal').classList.add('hidden'); });
+byId('delete-confirm-input').addEventListener('input', () => {
+  byId('delete-modal-confirm').disabled = byId('delete-confirm-input').value !== 'DELETE';
+});
+byId('delete-modal-confirm').addEventListener('click', deleteCustomer);
 
 async function recordRefill() {
   const status = byId('refill-status');
