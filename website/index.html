@@ -168,7 +168,7 @@
         </div>
         <div class="reviews-viewport">
           <div class="reviews-parallax-inner" id="home-reviews-inner">
-            <div class="reviews-masonry" id="home-reviews-masonry"></div>
+            <div class="reviews-grid" id="home-reviews-grid"></div>
           </div>
           <div class="reviews-fade-top"></div>
           <div class="reviews-fade-bottom"></div>
@@ -355,7 +355,7 @@
     }
   </script>
   <script>
-    var masonry = document.getElementById('home-reviews-masonry');
+    var grid = document.getElementById('home-reviews-grid');
     var viewport = document.querySelector('.reviews-viewport');
     var parallaxInner = document.getElementById('home-reviews-inner');
     var glow = document.getElementById('reviews-mouse-glow');
@@ -385,7 +385,7 @@
         if (d.reviews && d.reviews.length) {
           var frag = document.createDocumentFragment();
           d.reviews.forEach(function(r) { frag.appendChild(makeReviewCard(r)); });
-          masonry.replaceChildren(frag);
+          grid.replaceChildren(frag);
           requestAnimationFrame(updateParallax);
         }
       }).catch(function() {});
@@ -413,7 +413,7 @@
         var x = ((e.clientX - rect.left) / rect.width) * 100;
         var y = ((e.clientY - rect.top) / rect.height) * 100;
         glow.style.background = 'radial-gradient(circle at ' + x + '% ' + y + '%, rgba(169, 137, 90, 0.10) 0%, transparent 60%)';
-        var cards = masonry.querySelectorAll('.review-card');
+        var cards = grid.querySelectorAll('.review-card');
         var cx = rect.left + rect.width / 2;
         var cy = rect.top + rect.height / 2;
         var dx = (e.clientX - cx) / (rect.width / 2);
@@ -426,7 +426,7 @@
       });
       viewport.addEventListener('mouseleave', function() {
         glow.style.background = 'none';
-        var cards = masonry.querySelectorAll('.review-card');
+        var cards = grid.querySelectorAll('.review-card');
         cards.forEach(function(card) {
           card.style.removeProperty('--mx');
           card.style.removeProperty('--my');
