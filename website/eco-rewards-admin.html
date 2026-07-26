@@ -63,6 +63,25 @@
     </main>
   </div>
 
+  <div class="modal-overlay hidden" id="redeem-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Redeem reward</h2>
+        <button class="modal-close" id="redeem-modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-description">Redeeming <strong id="redeem-reward-type"></strong> for <strong id="redeem-customer-name"></strong>.</p>
+        <label class="form-label" for="redeem-product-name">Which product is being redeemed?</label>
+        <input class="form-input" id="redeem-product-name" placeholder="Product name" />
+        <p class="form-status" id="redeem-status" role="status" aria-live="polite"></p>
+      </div>
+      <div class="modal-footer" style="display:flex;gap:12px;justify-content:flex-end;padding:0 24px 24px">
+        <button class="btn btn--ghost" id="redeem-modal-cancel">Cancel</button>
+        <button class="btn btn--primary" id="redeem-modal-confirm">Confirm redemption</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay hidden" id="success-modal">
     <div class="modal-card">
       <div class="modal-header">

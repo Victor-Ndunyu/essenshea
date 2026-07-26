@@ -84,7 +84,7 @@ async function openAccount(id) {
     if (reward.status === 'available') {
       const redeem = safeNode('button', 'Redeem', 'btn btn--sm btn--secondary');
       redeem.type = 'button';
-      redeem.addEventListener('click', () => redeemReward(reward.id));
+      redeem.addEventListener('click', () => redeemReward(reward.id, reward.reward_type));
       row.append(redeem);
     }
     benefits.append(row);
@@ -159,15 +159,40 @@ async function recordRefill() {
   }
 }
 
-async function redeemReward(rewardId) {
-  const productName = window.prompt('Which refill product is this reward being used on?');
-  if (!productName) return;
-  await adminRequest('/api/eco-rewards/admin', {
-    method: 'POST',
-    body: JSON.stringify({ action: 'redeem_reward', rewardId, productName }),
-  });
-  await openAccount(selectedAccount.id);
+var pendingRedeemId = null;
+
+function redeemReward(rewardId, rewardType) {
+  pendingRedeemId = rewardId;
+  byId('redeem-reward-type').textContent = rewardType.replaceAll('_', ' ');
+  byId('redeem-customer-name').textContent = selectedAccount.customer_name;
+  byId('redeem-product-name').value = '';
+  byId('redeem-status').textContent = '';
+  byId('redeem-modal-confirm').disabled = false;
+  byId('redeem-modal').classList.remove('hidden');
+  byId('redeem-product-name').focus();
 }
+
+byId('redeem-modal-close').addEventListener('click', () => byId('redeem-modal').classList.add('hidden'));
+byId('redeem-modal-cancel').addEventListener('click', () => byId('redeem-modal').classList.add('hidden'));
+byId('redeem-modal').addEventListener('click', (e) => { if (e.target === byId('redeem-modal')) byId('redeem-modal').classList.add('hidden'); });
+byId('redeem-modal-confirm').addEventListener('click', async () => {
+  const productName = byId('redeem-product-name').value.trim();
+  if (!productName) { byId('redeem-status').textContent = 'Enter the product being redeemed.'; return; }
+  byId('redeem-modal-confirm').disabled = true;
+  byId('redeem-status').textContent = 'Redeeming...';
+  try {
+    await adminRequest('/api/eco-rewards/admin', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'redeem_reward', rewardId: pendingRedeemId, productName }),
+    });
+    byId('redeem-modal').classList.add('hidden');
+    pendingRedeemId = null;
+    await openAccount(selectedAccount.id);
+  } catch (error) {
+    byId('redeem-status').textContent = error.message;
+    byId('redeem-modal-confirm').disabled = false;
+  }
+});
 
 byId('admin-login').addEventListener('click', async () => {
   ownerKey = byId('admin-key').value;
