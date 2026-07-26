@@ -166,12 +166,15 @@
           <span class="label">What our customers say</span>
           <h2 class="display-md">Real words from the Essenshea community.</h2>
         </div>
-        <a class="reviews-viewport" href="/reviews" aria-label="Read all customer reviews">
-          <div class="reviews-grid" id="home-reviews-grid"></div>
+        <div class="reviews-viewport">
+          <div class="reviews-parallax-inner" id="home-reviews-inner">
+            <div class="reviews-masonry" id="home-reviews-masonry"></div>
+          </div>
           <div class="reviews-fade-top"></div>
           <div class="reviews-fade-bottom"></div>
           <div class="reviews-mouse-glow" id="reviews-mouse-glow"></div>
-        </a>
+          <a class="reviews-cta-overlay" href="/reviews" aria-label="Read all customer reviews">View all reviews &rarr;</a>
+        </div>
       </section>
 
       <!-- -- Instagram -- -->
@@ -352,9 +355,10 @@
     }
   </script>
   <script>
-    var grid = document.getElementById('home-reviews-grid');
-    var glow = document.getElementById('reviews-mouse-glow');
+    var masonry = document.getElementById('home-reviews-masonry');
     var viewport = document.querySelector('.reviews-viewport');
+    var parallaxInner = document.getElementById('home-reviews-inner');
+    var glow = document.getElementById('reviews-mouse-glow');
 
     function makeReviewCard(r) {
       var c = document.createElement('article');
@@ -376,15 +380,32 @@
       return c;
     }
 
-    if (grid) {
+    function populateReviews() {
       fetch('/api/reviews?limit=6').then(function(r) { return r.json(); }).then(function(d) {
         if (d.reviews && d.reviews.length) {
           var frag = document.createDocumentFragment();
           d.reviews.forEach(function(r) { frag.appendChild(makeReviewCard(r)); });
-          grid.replaceChildren(frag);
+          masonry.replaceChildren(frag);
+          requestAnimationFrame(updateParallax);
         }
       }).catch(function() {});
     }
+
+    function updateParallax() {
+      if (!viewport || !parallaxInner) return;
+      var rect = viewport.getBoundingClientRect();
+      var wh = window.innerHeight;
+      var progress = (wh - rect.top) / (wh + rect.height);
+      progress = Math.max(0, Math.min(1, progress));
+      var maxScroll = parallaxInner.scrollHeight - viewport.clientHeight;
+      if (maxScroll <= 0) { parallaxInner.style.transform = ''; return; }
+      var offset = progress * maxScroll * 0.5;
+      parallaxInner.style.transform = 'translateY(' + (-offset) + 'px)';
+    }
+
+    populateReviews();
+    window.addEventListener('scroll', updateParallax);
+    window.addEventListener('resize', updateParallax);
 
     if (glow && viewport) {
       viewport.addEventListener('mousemove', function(e) {
@@ -392,8 +413,25 @@
         var x = ((e.clientX - rect.left) / rect.width) * 100;
         var y = ((e.clientY - rect.top) / rect.height) * 100;
         glow.style.background = 'radial-gradient(circle at ' + x + '% ' + y + '%, rgba(169, 137, 90, 0.10) 0%, transparent 60%)';
+        var cards = masonry.querySelectorAll('.review-card');
+        var cx = rect.left + rect.width / 2;
+        var cy = rect.top + rect.height / 2;
+        var dx = (e.clientX - cx) / (rect.width / 2);
+        var dy = (e.clientY - cy) / (rect.height / 2);
+        cards.forEach(function(card, i) {
+          var f = 3 + (i % 3) * 0.6;
+          card.style.setProperty('--mx', (dx * f) + 'px');
+          card.style.setProperty('--my', (dy * f) + 'px');
+        });
       });
-      viewport.addEventListener('mouseleave', function() { glow.style.background = 'none'; });
+      viewport.addEventListener('mouseleave', function() {
+        glow.style.background = 'none';
+        var cards = masonry.querySelectorAll('.review-card');
+        cards.forEach(function(card) {
+          card.style.removeProperty('--mx');
+          card.style.removeProperty('--my');
+        });
+      });
     }
   </script>
 </body>

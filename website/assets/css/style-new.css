@@ -2789,8 +2789,13 @@ a { color: inherit; text-decoration: none; }
 }
 
 
-/* Phase 5 reviews — grid of 6 latest, doubled height, fade edges, mouse glow */
-#home-reviews { position: relative; }
+/* Phase 5 reviews — masonry, parallax scroll, fade edges, mouse motion */
+#home-reviews {
+  position: relative;
+  background-attachment: fixed;
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(169, 137, 90, 0.08), transparent 50%);
+}
 
 .reviews-viewport {
   display: block;
@@ -2799,27 +2804,24 @@ a { color: inherit; text-decoration: none; }
   height: clamp(620px, 80vh, 960px);
   margin-top: 36px;
   overflow: hidden;
-  cursor: pointer;
-  border-radius: 12px;
 }
 
-.reviews-viewport #home-reviews-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: 1fr 1fr;
-  gap: 16px;
-  padding: 28px 24px;
+.reviews-parallax-inner {
+  will-change: transform;
   width: 100%;
-  height: 100%;
-  box-sizing: border-box;
 }
 
-.reviews-viewport #home-reviews-grid .review-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 0;
-  overflow: hidden;
+.reviews-masonry {
+  column-count: 3;
+  column-gap: 18px;
+  padding: 28px 24px;
+}
+
+.reviews-masonry .review-card {
+  break-inside: avoid;
+  display: inline-block;
+  width: 100%;
+  margin-bottom: 18px;
 }
 
 .reviews-fade-top,
@@ -2827,7 +2829,7 @@ a { color: inherit; text-decoration: none; }
   position: absolute;
   left: 0;
   right: 0;
-  height: 60px;
+  height: 80px;
   pointer-events: none;
   z-index: 2;
 }
@@ -2850,11 +2852,10 @@ a { color: inherit; text-decoration: none; }
   transition: background 80ms linear;
 }
 
-.reviews-viewport::after {
-  content: 'View all reviews →';
+.reviews-cta-overlay {
   position: absolute;
-  bottom: 20px;
-  right: 24px;
+  bottom: 22px;
+  right: 26px;
   z-index: 3;
   font-family: 'Jost', sans-serif;
   font-size: 0.82rem;
@@ -2864,29 +2865,32 @@ a { color: inherit; text-decoration: none; }
   color: rgba(169, 137, 90, 0.8);
   background: rgba(255,255,255,0.85);
   backdrop-filter: blur(6px);
-  padding: 6px 14px;
+  padding: 7px 16px;
   border-radius: 20px;
+  text-decoration: none;
   transition: color 250ms, background 250ms;
 }
 
-.reviews-viewport:hover::after {
+.reviews-cta-overlay:hover {
   color: rgba(71, 58, 38, 1);
   background: rgba(255,255,255,0.95);
 }
 
-/* Review card base */
+/* Review card — restored warm gradient style */
 .review-card {
-  background: rgba(255,255,255,0.82);
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(169, 137, 90, 0.14);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.74), rgba(247,241,229,.92)),
+    radial-gradient(circle at 84% 8%, rgba(169,137,90,.18), transparent 34%);
   border-radius: 10px;
-  padding: 18px 20px;
-  transition: transform 350ms var(--ease-out-expo), box-shadow 350ms var(--ease-out-expo);
+  padding: 20px 22px;
+  box-shadow: 0 4px 14px rgba(100, 80, 50, 0.06);
+  transform: translate3d(var(--mx, 0px), calc(var(--my, 0px) + var(--hover-y, 0px)), 0);
+  transition: transform 400ms var(--ease-out-expo), box-shadow 400ms var(--ease-out-expo);
 }
 
 .review-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(100, 80, 50, 0.08);
+  --hover-y: -3px;
+  box-shadow: 0 10px 28px rgba(100, 80, 50, 0.10);
 }
 
 .review-card__text {
@@ -2926,19 +2930,22 @@ a { color: inherit; text-decoration: none; }
 }
 
 .reviews-page .reviews-grid .review-card {
-  background: rgba(255,255,255,0.78);
-  border-color: rgba(169, 137, 90, 0.12);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.74), rgba(247,241,229,.92)),
+    radial-gradient(circle at 84% 8%, rgba(169,137,90,.18), transparent 34%);
 }
 
 @media (max-width: 860px) {
   .reviews-page .reviews-grid { grid-template-columns: repeat(2, 1fr); }
-  .reviews-viewport #home-reviews-grid { grid-template-columns: repeat(2, 1fr); }
+  .reviews-masonry { column-count: 2; }
 }
 
 @media (max-width: 640px) {
   .reviews-page .reviews-grid { grid-template-columns: 1fr; }
-  .reviews-viewport #home-reviews-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
+  .reviews-masonry { column-count: 1; padding: 20px 16px; }
   .reviews-viewport { height: clamp(520px, 72vh, 760px); }
+  .reviews-fade-top,
+  .reviews-fade-bottom { height: 50px; }
 }
 
 @media (min-width: 1200px) {
@@ -3044,12 +3051,7 @@ body:has(.site-footer) { overflow-x: hidden; }
   background: none;
 }
 
-/* Homepage reviews section parallax backdrop */
-#home-reviews {
-  background-attachment: fixed;
-  background-image:
-    radial-gradient(circle at 20% 80%, rgba(169, 137, 90, 0.08), transparent 50%);
-}
+
 
 /* Animation system — easings, reveals, motion */
 :root {
