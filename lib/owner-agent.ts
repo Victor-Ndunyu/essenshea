@@ -1,6 +1,8 @@
 ﻿import { getSupabaseAdmin } from './supabase-admin';
 import { findCatalogProduct, slugifyCatalogValue, getMergedCatalog } from './catalog';
 import { retrieveOwnerMemory, saveOwnerMemory } from './agent-memory';
+import { callChatModel, getModelAttempts } from './ai-providers';
+import { parseTelegramOwnerIds } from './security';
 
 type TelegramPhoto = { file_id: string; file_size?: number; width?: number; height?: number };
 
@@ -10,10 +12,7 @@ type OwnerCommandResult = {
 };
 
 function ownerChatIds(): Set<number> {
-  const raw = [process.env.OWNER_TELEGRAM_CHAT_ID, process.env.ORDERS_TELEGRAM_CHAT_ID]
-    .filter(Boolean)
-    .join(',');
-  return new Set(raw.split(',').map((item) => Number(item.trim())).filter((item) => Number.isFinite(item)));
+  return parseTelegramOwnerIds(process.env.OWNER_TELEGRAM_CHAT_ID);
 }
 
 export function isOwnerTelegramChat(chatId: number): boolean {
@@ -113,10 +112,57 @@ async function handleAddProduct(chatId: number, text: string): Promise<string> {
 
 function ownerFallbackText(): string {
   return [
-    'I can manage the live site catalogue from here.',
-    'Use /summary, /lowstock, /describe product name, /stock product name | 5, /order product name, or /help.',
-    'For edits, keep product name and new value separated with a vertical bar: product | value.',
+    'I could not reach the conversational assistant just now.',
+    'You can retry your question, or use /summary, /lowstock, /describe product name, /stock product name | 5, /order product name, or /help.',
   ].join('\n');
+}
+
+async function answerOwnerConversationally(chatId: number, message: string): Promise<string> {
+  await saveOwnerMemory(chatId, 'owner_message', message, { source: 'telegram_owner' });
+  const [catalog, memory] = await Promise.all([
+    getMergedCatalog(),
+    retrieveOwnerMemory(chatId, message),
+  ]);
+  const catalogContext = (catalog.categories || []).map((category) => {
+    const products = (category.products || []).map((product) => {
+      const stock = typeof product.stock === 'number' ? `stock ${product.stock}` : 'stock not set';
+      const status = product.availableByOrder ? 'by order' : 'standard availability';
+      return `${product.name} (${product.price || 'price on request'}, ${stock}, ${status})`;
+    });
+    return `${category.title}: ${products.join('; ')}`;
+  }).join('\n');
+  const systemPrompt = `You are the private Essenshea business-owner assistant speaking with the verified owner in Telegram.
+Hold a natural, useful conversation about any business topic the owner raises: products, customers, operations, stock, marketing, strategy, website content, planning, or general business questions.
+Answer the owner's actual question directly. Do not respond with a limited menu of capabilities. Ask at most one focused follow-up question only when the missing detail genuinely changes the answer.
+You may proactively notice useful patterns and ask occasional relevant questions about the business, but never interrogate the owner or ask random questions disconnected from the conversation.
+Use the catalogue and owner memory when relevant. Never invent sales, customers, stock, prices, policies, or business facts.
+You cannot directly change the live site from this conversational response. If the owner asks for a site mutation, explain the exact supported command they can send, and do not claim the change happened.
+Keep Telegram replies clear and conversational, normally under 10 short sentences unless the owner requests detail.
+
+Current public catalogue:
+${catalogContext}
+
+Relevant owner memory:
+${memory}`;
+
+  for (const attempt of getModelAttempts()) {
+    try {
+      const result = await callChatModel(attempt, [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: message },
+      ]);
+      await saveOwnerMemory(chatId, 'owner_agent_reply', result.content, {
+        source: 'telegram_owner',
+        provider: result.provider,
+        model: result.model,
+      });
+      return result.content;
+    } catch (error) {
+      console.error(`Owner AI attempt failed for ${attempt.provider}/${attempt.model}:`, error);
+    }
+  }
+
+  return ownerFallbackText();
 }
 
 async function describeProduct(productName: string): Promise<string> {
@@ -221,11 +267,6 @@ export async function handleOwnerTelegramCommand(params: {
 
     if (lower.startsWith('/stock ')) {
       return { handled: true, response: await handleStockCommand(chatId, text.slice(7), false) };
-    }
-
-    const flexibleStock = text.match(/(?:set|adjust|change).{0,20}(?:stock|amount|number).{0,20}(?:of|for)?\s*(.*?)\s*(?:to|=)\s*(\d+)/i);
-    if (flexibleStock) {
-      return { handled: true, response: await handleStockCommand(chatId, `${flexibleStock[1]} | ${flexibleStock[2]}`, false) };
     }
 
     if (lower.startsWith('/available ')) {
@@ -333,8 +374,7 @@ export async function handleOwnerTelegramCommand(params: {
       return { handled: true, response: 'I received the image. To attach it to a product, resend it with caption: /setimage product name' };
     }
 
-    await saveOwnerMemory(chatId, 'owner_message', text, { source: 'telegram_owner' });
-    return { handled: true, response: ownerFallbackText() };
+    return { handled: true, response: await answerOwnerConversationally(chatId, text) };
   } catch (error) {
     await saveOwnerMemory(chatId, 'owner_error', error instanceof Error ? error.message : 'Owner command failed', { text });
     return { handled: true, response: error instanceof Error ? error.message : 'The owner command failed. Please try again.' };

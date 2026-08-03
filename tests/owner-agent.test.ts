@@ -1,12 +1,20 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { parseTelegramOwnerIds, secretsMatch } from '../lib/security.ts';
 
 test('owner telegram chat id parsing is strict', () => {
-  const configured = '12345, 777';
-  const allowed = new Set(configured.split(',').map((id) => id.trim()).filter(Boolean));
-  assert.equal(allowed.has(String(12345)), true);
-  assert.equal(allowed.has(String(777)), true);
-  assert.equal(allowed.has(String(999)), false);
+  const allowed = parseTelegramOwnerIds('12345, 777, -9, 12oops, 0');
+  assert.equal(allowed.has(12345), true);
+  assert.equal(allowed.has(777), true);
+  assert.equal(allowed.has(999), false);
+  assert.equal(allowed.has(-9), false);
+  assert.equal(allowed.has(12), false);
+});
+
+test('shared secrets reject blanks and mismatches', () => {
+  assert.equal(secretsMatch('correct-value', 'correct-value'), true);
+  assert.equal(secretsMatch('wrong-value', 'correct-value'), false);
+  assert.equal(secretsMatch('', ''), false);
 });
 
 test('owner catalog commands support product names with spaces', () => {

@@ -15,6 +15,7 @@ const customRequestForm = document.getElementById('custom-request-form');
 const customRequestStatus = document.getElementById('custom-request-status');
 const customFragranceOptions = document.getElementById('custom-fragrance-options');
 const shopSearchInput = document.getElementById('shop-search');
+const shopCategoryChips = document.getElementById('shop-category-chips');
 const shopConcernChips = document.getElementById('shop-concern-chips');
 const shopResultsCount = document.getElementById('shop-results-count');
 const shopSearchToggle = document.getElementById('shop-search-toggle');
@@ -23,6 +24,8 @@ const shopDiscoveryPanel = document.getElementById('shop-discovery-panel');
 const shopCollections = [];
 const shopProducts = [];
 let activeConcern = 'all';
+let activeCategory = 'all';
+let categoryOptions = [];
 
 const concernOptions = [
   { id: 'all', label: 'All products', terms: [] },
@@ -119,6 +122,10 @@ async function loadShopData() {
     const data = await response.json();
     const categories = data.categories || [];
 
+    categoryOptions = [{ id: 'all', label: 'All categories' }].concat(categories.map(function(category) {
+      return { id: category.slug, label: category.title };
+    }));
+
     categories.forEach((category) => {
       shopCollections.push({
         title: category.title,
@@ -161,6 +168,7 @@ async function loadShopData() {
     });
 
     renderShopCollections();
+    renderCategoryChips();
     renderConcernChips();
     renderShopProducts();
     applyShopDeepLinks();
@@ -209,11 +217,21 @@ function renderConcernChips() {
     .join('');
 }
 
+function renderCategoryChips() {
+  if (!shopCategoryChips) return;
+  shopCategoryChips.innerHTML = categoryOptions
+    .map(function(option) {
+      return '<button class="concern-chip' + (option.id === activeCategory ? ' is-active' : '') + '" type="button" data-category="' + option.id + '">' + option.label + '</button>';
+    })
+    .join('');
+}
+
 function getFilteredShopProducts() {
   const query = shopSearchInput ? shopSearchInput.value : '';
   return shopProducts.filter(function(product) {
     const matchesConcern = activeConcern === 'all' || product.concerns.includes(activeConcern);
-    return matchesConcern && productMatchesQuery(product, query);
+    const matchesCategory = activeCategory === 'all' || product.categorySlug === activeCategory;
+    return matchesCategory && matchesConcern && productMatchesQuery(product, query);
   });
 }
 
@@ -541,6 +559,16 @@ if (shopConcernChips) {
     if (!button) return;
     activeConcern = button.dataset.concern || 'all';
     renderConcernChips();
+    renderShopProducts();
+  });
+}
+
+if (shopCategoryChips) {
+  shopCategoryChips.addEventListener('click', function(event) {
+    const button = event.target.closest('[data-category]');
+    if (!button) return;
+    activeCategory = button.dataset.category || 'all';
+    renderCategoryChips();
     renderShopProducts();
   });
 }

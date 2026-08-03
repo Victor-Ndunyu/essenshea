@@ -50,13 +50,10 @@ async function openAccount(id) {
   heading.append(safeNode('h2', `${data.account.customer_name} · ${data.account.current_punches}/8 punches`, 'display-md'));
   const phone = safeNode('span', data.account.phone, 'body');
   heading.append(phone);
-  if (data.account.access_code) {
-    const code = safeNode('span', 'Code: ' + data.account.access_code, 'body');
-    code.style.marginLeft = '16px';
-    code.style.fontSize = '0.85rem';
-    code.style.opacity = '0.7';
-    heading.append(code);
-  }
+  const resetCodeBtn = safeNode('button', 'Issue new code', 'btn btn--sm btn--ghost');
+  resetCodeBtn.type = 'button';
+  resetCodeBtn.addEventListener('click', () => rotateAccessCode(data.account));
+  heading.append(resetCodeBtn);
   const deleteBtn = safeNode('button', 'Delete customer', 'btn btn--sm btn--ghost');
   deleteBtn.type = 'button';
   deleteBtn.style.color = '#B33A3A';
@@ -99,6 +96,19 @@ async function openAccount(id) {
   detail.append(benefits);
 
   detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function rotateAccessCode(account) {
+  if (!window.confirm(`Issue a new access code for ${account.customer_name}? Their previous code will stop working.`)) return;
+  try {
+    const data = await adminRequest('/api/eco-rewards/admin', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'rotate_access_code', accountId: account.id }),
+    });
+    window.alert(`New one-time code: ${data.accessCode}\n\nCopy and send it securely now. It cannot be viewed again.`);
+  } catch (error) {
+    window.alert(error.message || 'Could not issue a new code.');
+  }
 }
 
 function openDeleteModal(account) {
