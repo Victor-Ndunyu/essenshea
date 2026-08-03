@@ -74,6 +74,7 @@
           <div class="shop-filter-summary"><p id="shop-results-count" class="body-sm" aria-live="polite"></p><button id="shop-clear-filters" class="shop-clear-filters" type="button">Clear all</button></div>
         </div>
         <div id="shop-products-grid" class="shop-product-grid"></div>
+        <div id="shop-routines" class="shop-routines" aria-label="Guided Essenshea routines"></div>
       </section>
 
       <!-- -- Request Guide -- -->
@@ -158,8 +159,13 @@
         </div>
         <div class="modal-body">
           <img id="modal-image" class="modal-image" src="" alt="" />
-          <p id="modal-description" class="modal-description"></p>
-          <p id="modal-details" class="modal-details"></p>
+          <div class="product-detail-content">
+            <p id="modal-description" class="modal-description"></p>
+            <div id="modal-details" class="product-detail-facts"></div>
+            <div id="modal-benefits" class="product-detail-section"></div>
+            <div id="modal-ingredients" class="product-detail-section"></div>
+            <div id="modal-related" class="product-detail-section"></div>
+          </div>
         </div>
         <div class="modal-footer">
           <button id="modal-action" class="btn btn--primary" type="button">Add to request</button>

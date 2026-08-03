@@ -9,6 +9,9 @@ const modalTitle = document.getElementById('modal-title');
 const modalImage = document.getElementById('modal-image');
 const modalDescription = document.getElementById('modal-description');
 const modalDetails = document.getElementById('modal-details');
+const modalBenefits = document.getElementById('modal-benefits');
+const modalIngredients = document.getElementById('modal-ingredients');
+const modalRelated = document.getElementById('modal-related');
 const modalAction = document.getElementById('modal-action');
 const modalClose = document.getElementById('modal-close');
 const customRequestForm = document.getElementById('custom-request-form');
@@ -24,6 +27,7 @@ const shopAvailabilitySelect = document.getElementById('shop-availability');
 const shopPriceSelect = document.getElementById('shop-price');
 const shopSortSelect = document.getElementById('shop-sort');
 const shopClearFilters = document.getElementById('shop-clear-filters');
+const shopRoutinesRoot = document.getElementById('shop-routines');
 
 const shopCollections = [];
 const shopProducts = [];
@@ -54,6 +58,13 @@ const concernOptions = [
   { id: 'fragrance', label: 'Fragrance', terms: ['fragrance', 'scent', 'perfume', 'vanilla', 'bubblegum', 'lavender'] },
   { id: 'custom-care', label: 'Custom care', terms: ['custom', 'customized', 'customised', 'bespoke', 'request'] },
   { id: 'gifts', label: 'Gifts', terms: ['gift', 'set', 'hamper', 'bundle'] },
+];
+
+const routineOptions = [
+  { id: 'dry-skin', title: 'Daily moisture ritual', copy: 'Layer a nourishing oil with a body butter to help seal in moisture.', concerns: ['dry-skin'], categories: ['body-oils-and-tonics', 'body-butters-and-balms'], limit: 2 },
+  { id: 'hair-growth', title: 'Scalp and hair ritual', copy: 'Pair targeted scalp care with a nourishing hair product for a simple weekly routine.', concerns: ['hair-growth', 'scalp-comfort'], categories: ['haircare', 'carrier-oils'], limit: 2 },
+  { id: 'glow', title: 'Body glow pairing', copy: 'Combine lightweight body care products selected for radiance and everyday softness.', concerns: ['glow'], categories: ['body-oils-and-tonics', 'body-butters-and-balms'], limit: 2 },
+  { id: 'gift', title: 'Easy gifting edit', copy: 'A small, thoughtful selection that makes choosing an Essenshea gift less complicated.', concerns: ['gifts', 'fragrance'], categories: ['gift-sets', 'fragrances'], limit: 2 },
 ];
 
 function createProductId(value) {
@@ -131,6 +142,73 @@ function productFulfilmentText(product) {
   return 'Made to order. Essenshea will confirm price and schedule production after your request.';
 }
 
+function splitProductDescription(description) {
+  const clean = String(description || '').replace(/\s+/g, ' ').trim();
+  const ingredientMatch = clean.match(/ingredients?\s*:\s*([^.!]+(?:\.[^.!]+)?)/i);
+  const ingredients = ingredientMatch ? ingredientMatch[1].replace(/\.$/, '').trim() : '';
+  const benefitText = ingredientMatch ? clean.replace(ingredientMatch[0], '').trim() : clean;
+  const benefits = benefitText
+    .split(/\s*[•.]\s*/)
+    .map(function(item) { return item.trim(); })
+    .filter(function(item) { return item.length > 2; })
+    .slice(0, 6);
+  return { ingredients: ingredients, benefits: benefits };
+}
+
+function getRelatedProducts(product, limit) {
+  return shopProducts
+    .filter(function(item) { return item.id !== product.id; })
+    .map(function(item) {
+      const sharedConcerns = item.concerns.filter(function(concern) { return product.concerns.includes(concern); }).length;
+      const categoryScore = item.categorySlug === product.categorySlug ? 1 : 0;
+      return { item: item, score: sharedConcerns * 2 + categoryScore + Number(item.available) * 0.25 };
+    })
+    .filter(function(entry) { return entry.score > 0; })
+    .sort(function(a, b) { return b.score - a.score || a.item.title.localeCompare(b.item.title); })
+    .slice(0, limit || 3)
+    .map(function(entry) { return entry.item; });
+}
+
+function getRoutineProducts(routine) {
+  const chosen = [];
+  routine.categories.forEach(function(categorySlug) {
+    const match = shopProducts.find(function(product) {
+      return !chosen.includes(product)
+        && product.categorySlug === categorySlug
+        && product.concerns.some(function(concern) { return routine.concerns.includes(concern); });
+    });
+    if (match) chosen.push(match);
+  });
+  if (chosen.length < routine.limit) {
+    shopProducts.forEach(function(product) {
+      if (chosen.length >= routine.limit || chosen.includes(product)) return;
+      if (product.concerns.some(function(concern) { return routine.concerns.includes(concern); })) chosen.push(product);
+    });
+  }
+  return chosen.slice(0, routine.limit);
+}
+
+function renderShopRoutines() {
+  if (!shopRoutinesRoot) return;
+  const routines = routineOptions.map(function(routine) {
+    return { ...routine, products: getRoutineProducts(routine) };
+  }).filter(function(routine) { return routine.products.length >= 2; });
+  if (!routines.length) {
+    shopRoutinesRoot.innerHTML = '';
+    return;
+  }
+  shopRoutinesRoot.innerHTML = '<div class="shop-routines__header"><span class="label">Guided pairings</span><h2>Start with a simple routine.</h2><p>These are practical shopping suggestions, not medical treatment plans. Open each product to check whether it suits you.</p></div>'
+    + '<div class="shop-routines__grid">'
+    + routines.map(function(routine) {
+      return '<article class="routine-card">'
+        + '<h3>' + routine.title + '</h3><p>' + routine.copy + '</p>'
+        + '<ul>' + routine.products.map(function(product) { return '<li>' + product.title + '</li>'; }).join('') + '</ul>'
+        + '<button class="btn btn--sm btn--secondary routine-add" type="button" data-products="' + routine.products.map(function(product) { return product.id; }).join(',') + '">Add pairing to request</button>'
+        + '</article>';
+    }).join('')
+    + '</div>';
+}
+
 async function loadShopData() {
   try {
     const response = await fetch('/api/catalog');
@@ -190,6 +268,7 @@ async function loadShopData() {
     renderCategoryChips();
     renderConcernChips();
     renderShopProducts();
+    renderShopRoutines();
     restoreCart();
     renderCart();
     applyShopDeepLinks();
@@ -301,6 +380,35 @@ function syncShopFiltersToUrl() {
   window.history.replaceState({}, '', window.location.pathname + (params.toString() ? '?' + params.toString() : '') + window.location.hash);
 }
 
+function hasActiveDiscovery() {
+  return Boolean(
+    (shopSearchInput && shopSearchInput.value.trim())
+    || activeCategory !== 'all'
+    || activeConcern !== 'all'
+    || (shopAvailabilitySelect && shopAvailabilitySelect.value !== 'all')
+    || (shopPriceSelect && shopPriceSelect.value !== 'all')
+    || (shopSortSelect && shopSortSelect.value !== 'recommended')
+  );
+}
+
+function renderProductCard(product) {
+  const tags = (product.bestFor || []).map(function(tag) { return '<span>' + tag + '</span>'; }).join('');
+  return '<article class="product-card" data-id="' + product.id + '">'
+    + '<img src="' + product.image + '" alt="' + product.title + '" loading="lazy" />'
+    + '<div class="product-card__content">'
+    + '<h3>' + product.title + '</h3>'
+    + '<p>' + product.descriptionExcerpt + '</p>'
+    + (product.variants.length ? '<span class="product-card__variants">Sizes: ' + product.variants.join(' · ') + '</span>' : '')
+    + (tags ? '<div class="product-card__tags" aria-label="Best for">' + tags + '</div>' : '')
+    + '</div>'
+    + '<div class="product-card__meta">'
+    + '<span class="product-card__price">' + product.priceText + '</span>'
+    + '<span class="product-card__flag">' + productStatusLabel(product) + '</span>'
+    + '<button class="btn btn--sm btn--secondary product-open" data-id="' + product.id + '">View</button>'
+    + '</div>'
+    + '</article>';
+}
+
 function renderShopProducts() {
   if (!shopProductsRoot) return;
   const filteredProducts = getFilteredShopProducts();
@@ -311,23 +419,27 @@ function renderShopProducts() {
     shopProductsRoot.innerHTML = '<div class="shop-empty-state"><h3>No exact match yet</h3><p>Try another product name, ingredient or goal - or request a custom product and Essenshea will guide you.</p><a class="btn btn--secondary" href="/shop?focus=custom#custom-care">Request custom care</a></div>';
     return;
   }
-  shopProductsRoot.innerHTML = filteredProducts
-    .map(function(product) {
-      const tags = (product.bestFor || []).map(function(tag) { return '<span>' + tag + '</span>'; }).join('');
-      return '<article class="product-card" data-id="' + product.id + '">'
-        + '<img src="' + product.image + '" alt="' + product.title + '" loading="lazy" />'
-        + '<div class="product-card__content">'
-        + '<h3>' + product.title + '</h3>'
-        + '<p>' + product.descriptionExcerpt + '</p>'
-        + (product.variants.length ? '<span class="product-card__variants">Sizes: ' + product.variants.join(' · ') + '</span>' : '')
-        + (tags ? '<div class="product-card__tags" aria-label="Best for">' + tags + '</div>' : '')
+  if (hasActiveDiscovery()) {
+    shopProductsRoot.classList.remove('shop-product-groups');
+    shopProductsRoot.classList.add('shop-product-grid');
+    shopProductsRoot.innerHTML = filteredProducts.map(renderProductCard).join('');
+    return;
+  }
+
+  shopProductsRoot.classList.remove('shop-product-grid');
+  shopProductsRoot.classList.add('shop-product-groups');
+  shopProductsRoot.innerHTML = categoryOptions
+    .filter(function(category) { return category.id !== 'all'; })
+    .map(function(category) {
+      const products = filteredProducts.filter(function(product) { return product.categorySlug === category.id; });
+      if (!products.length) return '';
+      return '<section class="shop-category-section" aria-labelledby="shop-category-' + category.id + '">'
+        + '<div class="shop-category-section__header">'
+        + '<div><span class="label">Collection</span><h3 id="shop-category-' + category.id + '">' + category.label + '</h3></div>'
+        + '<span class="shop-category-section__count">' + products.length + ' product' + (products.length === 1 ? '' : 's') + '</span>'
         + '</div>'
-        + '<div class="product-card__meta">'
-        + '<span class="product-card__price">' + product.priceText + '</span>'
-        + '<span class="product-card__flag">' + productStatusLabel(product) + '</span>'
-        + '<button class="btn btn--sm btn--secondary product-open" data-id="' + product.id + '">View</button>'
-        + '</div>'
-        + '</article>';
+        + '<div class="shop-product-grid">' + products.map(renderProductCard).join('') + '</div>'
+        + '</section>';
     })
     .join('');
 }
@@ -376,9 +488,24 @@ function openProductModal(productId) {
   modalTitle.textContent = product.title;
   modalImage.src = product.image;
   modalImage.alt = product.title;
-  modalDescription.textContent = product.description;
-  modalDetails.textContent = [product.priceText, productStatusLabel(product), product.bestFor && product.bestFor.length ? 'Best for: ' + product.bestFor.join(', ') : '', productFulfilmentText(product)].filter(Boolean).join(' - ');
-  if (product.variants.length) modalDetails.textContent += ' - Size options: ' + product.variants.join(', ');
+  const descriptionParts = splitProductDescription(product.description);
+  const related = getRelatedProducts(product, 3);
+  modalDescription.textContent = product.descriptionExcerpt;
+  modalDetails.innerHTML = '<div><span>Price</span><strong>' + product.priceText + '</strong></div>'
+    + '<div><span>Availability</span><strong>' + productStatusLabel(product) + '</strong></div>'
+    + (product.bestFor && product.bestFor.length ? '<div><span>Best for</span><strong>' + product.bestFor.join(', ') + '</strong></div>' : '')
+    + (product.variants.length ? '<div><span>Sizes</span><strong>' + product.variants.join(', ') + '</strong></div>' : '');
+  modalBenefits.innerHTML = descriptionParts.benefits.length
+    ? '<h3>Benefits and product notes</h3><ul>' + descriptionParts.benefits.map(function(benefit) { return '<li>' + benefit + '</li>'; }).join('') + '</ul>'
+    : '';
+  modalIngredients.innerHTML = '<h3>Ingredients and fulfilment</h3>'
+    + (descriptionParts.ingredients ? '<p><strong>Ingredients:</strong> ' + descriptionParts.ingredients + '</p>' : '<p>Full ingredient details are not yet listed. Ask Essenshea before ordering if you have allergies or sensitivities.</p>')
+    + '<p>' + productFulfilmentText(product) + '</p>';
+  modalRelated.innerHTML = related.length
+    ? '<h3>You may also like</h3><div class="product-related-list">' + related.map(function(item) {
+      return '<button type="button" class="product-related-item" data-related-id="' + item.id + '"><img src="' + item.image + '" alt="" loading="lazy"><span><strong>' + item.title + '</strong><small>' + item.priceText + '</small></span></button>';
+    }).join('') + '</div>'
+    : '';
   modalAction.textContent = 'Add to request';
   modalAction.dataset.id = product.id;
   productModal.classList.remove('hidden');
@@ -565,6 +692,14 @@ document.addEventListener('click', function(event) {
 
   if (button.id === 'modal-action') {
     addToCart(button.dataset.id);
+  }
+
+  if (button.classList.contains('product-related-item')) {
+    openProductModal(button.dataset.relatedId);
+  }
+
+  if (button.classList.contains('routine-add')) {
+    String(button.dataset.products || '').split(',').filter(Boolean).forEach(addToCart);
   }
 
   if (event.target === productModal) {
