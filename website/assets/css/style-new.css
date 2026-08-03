@@ -1378,6 +1378,90 @@ a { color: inherit; text-decoration: none; }
   white-space: nowrap;
 }
 
+.shop-routines {
+  padding-top: 64px;
+}
+
+.shop-routines__header {
+  max-width: 680px;
+  margin-bottom: 22px;
+}
+
+.shop-routines__header h2 {
+  margin: 6px 0 8px;
+  font-family: var(--font-display);
+  font-size: clamp(1.65rem, 3vw, 2.3rem);
+}
+
+.shop-routines__header p { color: var(--ink-soft); }
+
+.shop-routines__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.routine-card {
+  padding: 24px;
+  border: 1px solid var(--ink-border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.routine-card h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+}
+
+.routine-card p, .routine-card li { color: var(--ink-soft); line-height: 1.55; }
+.routine-card ul { padding-left: 20px; margin: 16px 0 20px; }
+
+.product-detail-content { display: grid; gap: 18px; }
+
+.product-detail-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.product-detail-facts > div {
+  display: grid;
+  gap: 3px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--surface-soft, #f7f4ee);
+}
+
+.product-detail-facts span { color: var(--ink-soft); font-size: 0.76rem; text-transform: uppercase; letter-spacing: .06em; }
+.product-detail-section h3 { margin: 0 0 8px; font-family: var(--font-display); font-size: 1.05rem; }
+.product-detail-section p, .product-detail-section li { color: var(--ink-soft); line-height: 1.55; }
+.product-detail-section ul { margin: 0; padding-left: 20px; }
+
+.product-related-list { display: grid; gap: 8px; }
+.product-related-item {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--ink-border);
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.product-related-item:hover { background: var(--surface-soft, #f7f4ee); }
+.product-related-item img { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; }
+.product-related-item span { display: grid; gap: 3px; }
+.product-related-item small { color: var(--gold); }
+
+@media (max-width: 720px) {
+  .shop-routines__grid, .product-detail-facts { grid-template-columns: 1fr; }
+  .shop-category-section__header { align-items: start; }
+}
+
 .product-card {
   border-radius: var(--radius);
   overflow: hidden;
