@@ -159,8 +159,9 @@ async function serveFile(relativePath: string, baseDir: string): Promise<NextRes
     const data = await fs.readFile(fullPath);
     const ext = path.extname(fullPath).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+    const cacheControl = getCacheControl(ext, relativePath);
     return new NextResponse(data, {
-      headers: { 'Content-Type': contentType, 'Cache-Control': 'no-cache' },
+      headers: { 'Content-Type': contentType, 'Cache-Control': cacheControl },
     });
   } catch {
     if (!path.extname(fullPath)) {
@@ -174,4 +175,17 @@ async function serveFile(relativePath: string, baseDir: string): Promise<NextRes
     }
     return new NextResponse('Not found', { status: 404 });
   }
+}
+
+function getCacheControl(ext: string, relativePath: string): string {
+  if (ext === '.html' || relativePath.startsWith('data/')) {
+    return 'no-cache';
+  }
+  if (['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.otf'].includes(ext)) {
+    return 'public, max-age=604800, stale-while-revalidate=2592000';
+  }
+  if (ext === '.css' || ext === '.js') {
+    return 'public, max-age=3600, stale-while-revalidate=86400';
+  }
+  return 'no-cache';
 }
