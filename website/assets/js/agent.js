@@ -334,6 +334,7 @@ initializeAgent();
 // ── Cart Widget ──
 
 var CART_STORAGE_KEY = 'essenshea_cart';
+var CHECKOUT_DRAFT_KEY = 'essenshea_checkout_draft';
 
 function loadCartFromStorage() {
   try {
@@ -344,6 +345,25 @@ function loadCartFromStorage() {
 
 function saveCartToStorage(cart) {
   try { localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart)); } catch (e) {}
+}
+
+function loadCheckoutDraft() {
+  try { return JSON.parse(localStorage.getItem(CHECKOUT_DRAFT_KEY) || '{}'); } catch (e) { return {}; }
+}
+
+function saveCheckoutDraft(form) {
+  if (!form) return;
+  var data = new FormData(form);
+  try {
+    localStorage.setItem(CHECKOUT_DRAFT_KEY, JSON.stringify({
+      name: String(data.get('name') || ''),
+      phone: String(data.get('phone') || ''),
+      fulfilmentMethod: String(data.get('fulfilmentMethod') || 'delivery'),
+      deliveryLocation: String(data.get('deliveryLocation') || ''),
+      notes: String(data.get('notes') || ''),
+      ecoRewardsOptIn: data.get('ecoRewardsOptIn') === 'on',
+    }));
+  } catch (e) {}
 }
 
 function createCartWidgetMarkup() {
@@ -382,6 +402,8 @@ function createCartWidgetMarkup() {
     + '<label for="cart-delivery-location">Delivery town or area</label>'
     + '<input id="cart-delivery-location" name="deliveryLocation" type="text" autocomplete="address-level2" maxlength="200" required />'
     + '</div>'
+    + '<label for="cart-order-notes">Order notes <span>(optional)</span></label>'
+    + '<textarea id="cart-order-notes" name="notes" rows="2" maxlength="500" placeholder="Delivery instructions, preferred contact time, or anything we should know"></textarea>'
     + '<label class="consent-check"><input name="ecoRewardsOptIn" type="checkbox" /> <span>Keep my purchase history so Essenshea can check Eco-Rewards refill eligibility.</span></label>'
     + '<div class="form-honeypot" aria-hidden="true"><input name="companyWebsite" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" /></div>'
     + '<button id="cart-popup-checkout" class="btn btn--primary" type="submit" disabled>Send request</button>'
@@ -444,7 +466,12 @@ function renderCartPopup() {
       + '<strong>' + item.quantity + 'x ' + item.title + '</strong>'
       + '<span>' + (item.statusText || (item.available ? 'Available - will be prepared for shipment.' : 'Made to order - will be queued and scheduled.')) + '</span>'
       + '</div>'
-      + '<button class="btn btn--sm btn--secondary cart-popup-remove" data-id="' + item.id + '">Remove</button>'
+      + '<div class="cart-item__actions">'
+      + '<button class="cart-quantity" type="button" data-cart-action="decrease" data-id="' + item.id + '" aria-label="Remove one">&minus;</button>'
+      + '<span>' + item.quantity + '</span>'
+      + '<button class="cart-quantity" type="button" data-cart-action="increase" data-id="' + item.id + '" aria-label="Add one more">+</button>'
+      + '<button class="btn btn--sm btn--secondary cart-popup-remove" type="button" data-id="' + item.id + '">Remove</button>'
+      + '</div>'
       + '</div>';
   }).join('');
 
@@ -485,6 +512,7 @@ function submitCartPopup(event) {
         preferredContact: 'whatsapp',
         fulfilmentMethod: String(formData.get('fulfilmentMethod') || 'discuss'),
         deliveryLocation: String(formData.get('deliveryLocation') || '').trim(),
+        notes: String(formData.get('notes') || '').trim(),
         ecoRewardsOptIn: formData.get('ecoRewardsOptIn') === 'on',
       },
       type: 'cart',
@@ -499,6 +527,8 @@ function submitCartPopup(event) {
       updateCartWidget();
       renderCartPopup();
       form.reset();
+      localStorage.removeItem(CHECKOUT_DRAFT_KEY);
+      if (status) status.textContent = result.message;
     } else {
       if (status) status.textContent = (result.error || 'We could not submit the request.');
     }
@@ -552,6 +582,20 @@ function initializeCartWidget() {
   });
 
   document.addEventListener('click', function(e) {
+    var quantityBtn = e.target.closest('[data-cart-action]');
+    if (quantityBtn && quantityBtn.closest('#cart-popup')) {
+      var quantityCart = loadCartFromStorage();
+      var quantityItem = quantityCart.find(function(item) { return item.id === quantityBtn.dataset.id; });
+      if (quantityItem) {
+        quantityItem.quantity = Math.max(0, Math.min(20, Number(quantityItem.quantity || 1) + (quantityBtn.dataset.cartAction === 'increase' ? 1 : -1)));
+        quantityCart = quantityCart.filter(function(item) { return item.quantity > 0; });
+        saveCartToStorage(quantityCart);
+        updateCartWidget();
+        renderCartPopup();
+        window.dispatchEvent(new CustomEvent('essenshea-cart-update'));
+      }
+      return;
+    }
     var btn = e.target.closest('.cart-popup-remove');
     if (!btn) return;
     var id = btn.dataset.id;
@@ -580,14 +624,25 @@ function initializeCartWidget() {
   var locationGroup = document.getElementById('cart-location-group');
   if (checkoutForm) {
     checkoutForm.addEventListener('submit', submitCartPopup);
+    var draft = loadCheckoutDraft();
+    Object.keys(draft).forEach(function(key) {
+      var field = checkoutForm.elements.namedItem(key);
+      if (!field) return;
+      if (field.type === 'checkbox') field.checked = Boolean(draft[key]);
+      else field.value = draft[key];
+    });
+    checkoutForm.addEventListener('input', function() { saveCheckoutDraft(checkoutForm); });
+    checkoutForm.addEventListener('change', function() { saveCheckoutDraft(checkoutForm); });
   }
   if (fulfilmentSelect && locationInput && locationGroup) {
-    fulfilmentSelect.addEventListener('change', function() {
+    var updateFulfilmentFields = function() {
       var delivery = fulfilmentSelect.value === 'delivery';
       locationGroup.hidden = !delivery;
       locationInput.required = delivery;
       if (!delivery) locationInput.value = '';
-    });
+    };
+    fulfilmentSelect.addEventListener('change', updateFulfilmentFields);
+    updateFulfilmentFields();
   }
 }
 
