@@ -784,6 +784,11 @@ a { color: inherit; text-decoration: none; }
   gap: 8px;
 }
 
+.shop-filter-group {
+  display: grid;
+  gap: 9px;
+}
+
 .concern-chips {
   display: flex;
   flex-wrap: wrap;

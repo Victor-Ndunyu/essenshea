@@ -1,8 +1,10 @@
-import { randomBytes, timingSafeEqual } from 'node:crypto';
+import { randomBytes } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { hashEcoAccessCode, normalizeKenyanPhone } from '../../../../lib/eco-rewards';
 import { checkRateLimit, getClientAddress } from '../../../../lib/rate-limit';
 import { getSupabaseAdmin } from '../../../../lib/supabase-admin';
+import { recordOperationalEvent } from '../../../../lib/operational-events';
+import { secretsMatch } from '../../../../lib/security';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -11,16 +13,20 @@ function authorized(req: NextRequest): boolean {
   const expected = process.env.ECO_REWARDS_ADMIN_KEY || '';
   const supplied = req.headers.get('x-eco-admin-key') || '';
   if (!expected || !supplied) return false;
-  const a = Buffer.from(expected);
-  const b = Buffer.from(supplied);
-  return a.length === b.length && timingSafeEqual(a, b);
+  return secretsMatch(supplied, expected);
 }
 
 async function guard(req: NextRequest) {
   const ip = getClientAddress(req.headers);
   const allowed = await checkRateLimit({ key: `eco-admin:${ip}`, limit: 60, windowSeconds: 15 * 60 });
-  if (!allowed) return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
-  if (!authorized(req)) return NextResponse.json({ error: 'Owner access is required' }, { status: 401 });
+  if (!allowed) {
+    await recordOperationalEvent({ eventType: 'admin_rate_limited', safeMessage: 'Eco-Rewards admin request was rate limited' });
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+  if (!authorized(req)) {
+    await recordOperationalEvent({ eventType: 'admin_authentication_failed', safeMessage: 'Eco-Rewards admin authentication failed' });
+    return NextResponse.json({ error: 'Owner access is required' }, { status: 401 });
+  }
   return null;
 }
 
@@ -37,7 +43,7 @@ export async function GET(req: NextRequest) {
     const [{ data: account }, { data: benefits }, { data: refills }] = await Promise.all([
       supabase
         .from('eco_reward_accounts')
-        .select('id, customer_name, phone, current_punches, active, consented_at, updated_at, access_code')
+        .select('id, customer_name, phone, current_punches, active, consented_at, updated_at')
         .eq('id', accountId)
         .maybeSingle(),
       supabase
@@ -99,14 +105,13 @@ export async function POST(req: NextRequest) {
       .insert({
         customer_name: customerName,
         phone,
-        access_code: accessCode,
         access_code_hash: hashEcoAccessCode(phone, accessCode, secret),
         consented_at: new Date().toISOString(),
         consent_source: ['shop', 'website', 'whatsapp'].includes(String(body.consentSource))
           ? body.consentSource
           : 'shop',
       })
-      .select('id, customer_name, phone, current_punches, access_code')
+      .select('id, customer_name, phone, current_punches')
       .single();
     if (error) {
       const duplicate = error.code === '23505';
@@ -116,6 +121,31 @@ export async function POST(req: NextRequest) {
       );
     }
     return NextResponse.json({ account: data, accessCode }, { status: 201 });
+  }
+
+  if (action === 'rotate_access_code') {
+    const accountId = cleanText(body.accountId, 50);
+    if (!accountId) return NextResponse.json({ error: 'Account ID is required' }, { status: 400 });
+    const { data: account } = await supabase
+      .from('eco_reward_accounts')
+      .select('id, phone, active')
+      .eq('id', accountId)
+      .maybeSingle();
+    if (!account?.active) return NextResponse.json({ error: 'Active Eco-Rewards account not found' }, { status: 404 });
+
+    const accessCode = randomBytes(5).toString('hex').toUpperCase();
+    const secret = process.env.ECO_REWARDS_HASH_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+    const { error } = await supabase
+      .from('eco_reward_accounts')
+      .update({ access_code_hash: hashEcoAccessCode(account.phone, accessCode, secret), updated_at: new Date().toISOString() })
+      .eq('id', accountId);
+    if (error) return NextResponse.json({ error: 'Could not issue a new access code' }, { status: 503 });
+    await recordOperationalEvent({
+      eventType: 'eco_access_code_rotated',
+      safeMessage: 'An Eco-Rewards access code was replaced by the owner',
+      metadata: { accountId },
+    });
+    return NextResponse.json({ accessCode });
   }
 
   if (action === 'record_refill') {

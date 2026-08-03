@@ -1,13 +1,7 @@
-import { timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
+import { secretsMatch } from '../../../../lib/security';
 
 export const dynamic = 'force-dynamic';
-
-function secretsMatch(provided: string, expected: string): boolean {
-  const a = Buffer.from(provided);
-  const b = Buffer.from(expected);
-  return a.length === b.length && timingSafeEqual(a, b);
-}
 
 export async function POST(req: NextRequest) {
   const setupSecret = process.env.TELEGRAM_SETUP_SECRET;

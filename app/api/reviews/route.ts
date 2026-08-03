@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../lib/supabase-admin';
 import { checkRateLimit, getClientAddress } from '../../../lib/rate-limit';
+import { secretsMatch } from '../../../lib/security';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -13,9 +14,7 @@ function authorized(req: NextRequest): boolean {
   const expected = process.env.ECO_REWARDS_ADMIN_KEY || '';
   const supplied = req.headers.get('x-eco-admin-key') || '';
   if (!expected || !supplied) return false;
-  const a = Buffer.from(expected);
-  const b = Buffer.from(supplied);
-  return a.length === b.length && a.length > 0 && a.every((byte, i) => byte === b[i]);
+  return secretsMatch(supplied, expected);
 }
 
 export async function GET(req: NextRequest) {

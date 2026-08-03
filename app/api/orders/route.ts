@@ -24,7 +24,7 @@ function buildOwnerAlert(
   order: ReturnType<typeof validateOrderPayload>,
 ): string {
   const lines = order.items.map(
-    (item) => `- ${item.quantity} �- ${item.title} (${item.priceText})`,
+    (item) => `- ${item.quantity} × ${item.title} (${item.priceText})`,
   );
   return [
     `New Essenshea ${order.type.replace(/_/g, ' ')} - ${reference}`,
