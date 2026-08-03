@@ -121,3 +121,24 @@ export async function retrieveOwnerMemory(chatId: number, query: string): Promis
     return 'I could not retrieve owner memory right now.';
   }
 }
+
+export async function loadRecentOwnerConversation(chatId: number): Promise<AgentMemoryMessage[]> {
+  try {
+    const { data, error } = await getSupabaseAdmin()
+      .from('owner_agent_memory')
+      .select('memory_type, content, created_at')
+      .eq('telegram_chat_id', chatId)
+      .in('memory_type', ['owner_message', 'owner_agent_reply'])
+      .order('created_at', { ascending: false })
+      .limit(12);
+    if (error) throw error;
+    return (data || []).reverse().map((item) => ({
+      role: item.memory_type === 'owner_agent_reply' ? 'assistant' : 'user',
+      content: String(item.content || '').slice(0, 2000),
+      created_at: item.created_at,
+    }));
+  } catch (error) {
+    console.error('Owner conversation load failed:', error);
+    return [];
+  }
+}
