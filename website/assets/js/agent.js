@@ -63,10 +63,10 @@ function createAgentMarkup() {
       <div class="agent-body">
         <div class="agent-chat-window" id="agent-chat-window"></div>
         <div class="agent-quick-actions" aria-label="Assistant shortcuts">
-          <button type="button" data-agent-prompt="Show me hair growth products">Hair growth</button>
-          <button type="button" data-agent-prompt="Show me men's care">Men's care</button>
+          <button type="button" data-agent-prompt="Help me build a simple skincare routine">Build a routine</button>
+          <button type="button" data-agent-prompt="Help me choose products for my hair goals">Hair guide</button>
+          <button type="button" data-agent-prompt="Help me choose a fragrance or gift">Fragrance or gift</button>
           <button type="button" data-agent-prompt="Help me make a custom order">Custom order</button>
-          <button type="button" data-agent-prompt="Show me fragrances">Fragrances</button>
         </div>
         <form id="agent-send-form" class="agent-send-form">
           <input id="agent-input" type="text" placeholder="Type your question..." aria-label="Agent message input" />
@@ -165,42 +165,37 @@ function findAgentProductMatches(prompt) {
   return scored.sort(function(a, b) { return b.score - a.score; }).slice(0, 4).map(function(item) { return item.product; });
 }
 
-function answerLocalAgentIntent(prompt) {
+function getAgentActions(prompt) {
   var cleanPrompt = normalizeAgentText(prompt);
-  if (!cleanPrompt) return false;
+  if (!cleanPrompt) return [];
+
+  var actions = [];
 
   if (cleanPrompt.includes('custom') || cleanPrompt.includes('personalized') || cleanPrompt.includes('customised') || cleanPrompt.includes('customized')) {
-    addAgentMessage('assistant', 'Custom products are made after Essenshea reviews your ingredients, fragrance, texture, size and skin or hair goal. I can take you straight to the custom request form.', [
+    actions.push(
       { label: 'Start custom order', href: '/shop?focus=custom#custom-care' },
-      { label: 'Browse fragrances', href: '/fragrances' },
-    ]);
-    return true;
+      { label: 'Browse fragrances', href: '/fragrances' }
+    );
   }
 
   if (cleanPrompt.includes('fragrance') || cleanPrompt.includes('scent') || cleanPrompt.includes('perfume')) {
-    addAgentMessage('assistant', 'The fragrance library is the best place to browse scent options. Pick a scent there and it will carry into the custom order form.', [
-      { label: 'Open fragrance library', href: '/fragrances' },
-      { label: 'Custom order', href: '/shop?focus=custom#custom-care' },
-    ]);
-    return true;
-  }
-
-  var matches = shouldOfferProductMatches(prompt) ? findAgentProductMatches(prompt) : [];
-  if (matches.length) {
-    addAgentMessage('assistant', 'I found a few Essenshea products that match. Open one and the shop will take you directly to it. Essenshea will still confirm the final fit and order details with you.', matches.map(function(product) {
-      return { label: product.name, href: '/shop?product=' + encodeURIComponent(product.slug) };
-    }));
-    return true;
+    actions.push({ label: 'Open fragrance library', href: '/fragrances' });
   }
 
   if (cleanPrompt.includes('order') || cleanPrompt.includes('buy') || cleanPrompt.includes('shop')) {
-    addAgentMessage('assistant', 'You can browse the full collection and build your request directly in the shop.', [
-      { label: 'Open shop', href: '/shop' },
-    ]);
-    return true;
+    actions.push({ label: 'Open shop', href: '/shop' });
   }
 
-  return false;
+  var matches = shouldOfferProductMatches(prompt) ? findAgentProductMatches(prompt) : [];
+  matches.forEach(function(product) {
+    actions.push({ label: product.name, href: '/shop?product=' + encodeURIComponent(product.slug) });
+  });
+  if (matches.length && !actions.some(function(action) { return action.href === '/shop'; })) {
+    actions.push({ label: 'Browse all products', href: '/shop' });
+  }
+  return actions.filter(function(action, index, list) {
+    return list.findIndex(function(candidate) { return candidate.href === action.href; }) === index;
+  }).slice(0, 5);
 }
 
 async function callBrainProvider(prompt) {
@@ -243,11 +238,6 @@ async function handleAgentSend(event) {
   addAgentMessage('user', value);
   input.value = '';
 
-  if (answerLocalAgentIntent(value)) {
-    input.focus();
-    return;
-  }
-
   input.disabled = true;
   const sendButton = event.currentTarget.querySelector('button[type="submit"]');
   if (sendButton) {
@@ -259,7 +249,7 @@ async function handleAgentSend(event) {
   if (result.error) {
     addAgentMessage('assistant', result.error);
   } else {
-    addAgentMessage('assistant', result.result);
+    addAgentMessage('assistant', result.result, getAgentActions(value));
   }
   input.disabled = false;
   input.focus();
@@ -316,8 +306,7 @@ async function initializeAgent() {
     const siteProducts = getSiteProducts(catalogData);
     AGENT_DATA.products = siteProducts.products;
     AGENT_DATA.categories = siteProducts.categories;
-    addAgentMessage('assistant', 'Hi there - how can I help you today?');
-    addAgentMessage('assistant', 'I can find products, open the right shop section, show fragrance options, and help you start a custom order.');
+    addAgentMessage('assistant', 'Hi — tell me what you are shopping for, your skin or hair goal, preferred scent, or budget. I can help narrow it down and explain the options.');
   } catch (error) {
     addAgentMessage('assistant', `Failed to load catalog data: ${error.message}`);
   }

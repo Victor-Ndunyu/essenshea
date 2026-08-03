@@ -1,8 +1,9 @@
 ﻿import { getSupabaseAdmin } from './supabase-admin';
 import { findCatalogProduct, slugifyCatalogValue, getMergedCatalog } from './catalog';
-import { retrieveOwnerMemory, saveOwnerMemory } from './agent-memory';
+import { formatConversationMemory, loadRecentOwnerConversation, retrieveOwnerMemory, saveOwnerMemory } from './agent-memory';
 import { callChatModel, getModelAttempts } from './ai-providers';
 import { parseTelegramOwnerIds } from './security';
+import { parseOwnerConfirmation } from './owner-command';
 
 type TelegramPhoto = { file_id: string; file_size?: number; width?: number; height?: number };
 
@@ -10,6 +11,18 @@ type OwnerCommandResult = {
   handled: boolean;
   response: string;
 };
+
+const MUTATING_COMMANDS = ['/stock ', '/available ', '/order ', '/setdesc ', '/addproduct ', '/hide ', '/show ', '/setimage ', '/addreview ', '/removereview ', '/delreview '];
+
+function confirmationPreview(command: string): string {
+  return [
+    'This will change the live site:',
+    command,
+    '',
+    `To approve it, send exactly:\n/confirm ${command}`,
+    'Nothing has changed yet.',
+  ].join('\n');
+}
 
 function ownerChatIds(): Set<number> {
   return parseTelegramOwnerIds(process.env.OWNER_TELEGRAM_CHAT_ID);
@@ -25,14 +38,16 @@ function helpText(): string {
     'Essenshea owner desk:',
     '/summary - count public products, stock-set items, by-order items and hidden items',
     '/lowstock - show products with 3 or fewer items left',
-    '/stock product name | 5 - set stock count and mark available now',
+    'Live-site commands show a preview first; resend them with /confirm to apply the change.',
+    '/stock product name | 5 - preview a stock update',
     '/available product name | 5 - set stock and mark available now',
     '/order product name - mark available by order',
     '/describe product name - show exact site description',
     '/find product name - search catalogue names',
     '/remember note - store an owner note permanently',
     '/memory topic - retrieve owner memory',
-    '/setdesc product name | new description - update description',
+    '/activity - show the latest owner-agent changes',
+    '/setdesc product name | new description - preview a description update',
     '/addproduct category | name | price | description - add product as by order',
     '/hide product name - remove from public catalogue',
     '/show product name - restore product',
@@ -119,9 +134,10 @@ function ownerFallbackText(): string {
 
 async function answerOwnerConversationally(chatId: number, message: string): Promise<string> {
   await saveOwnerMemory(chatId, 'owner_message', message, { source: 'telegram_owner' });
-  const [catalog, memory] = await Promise.all([
+  const [catalog, memory, recentConversation] = await Promise.all([
     getMergedCatalog(),
     retrieveOwnerMemory(chatId, message),
+    loadRecentOwnerConversation(chatId),
   ]);
   const catalogContext = (catalog.categories || []).map((category) => {
     const products = (category.products || []).map((product) => {
@@ -143,7 +159,10 @@ Current public catalogue:
 ${catalogContext}
 
 Relevant owner memory:
-${memory}`;
+${memory}
+
+Recent conversation:
+${formatConversationMemory(recentConversation)}`;
 
   for (const attempt of getModelAttempts()) {
     try {
@@ -228,13 +247,29 @@ async function lowStockSummary(): Promise<string> {
   return items.length ? ['Low stock:', ...items.map((item) => '- ' + item)].join('\n') : 'No low-stock products are currently set at 3 or fewer.';
 }
 
+async function recentOwnerActivity(chatId: number): Promise<string> {
+  const { data, error } = await getSupabaseAdmin()
+    .from('owner_agent_events')
+    .select('event_type, product_slug, created_at')
+    .eq('telegram_chat_id', chatId)
+    .order('created_at', { ascending: false })
+    .limit(10);
+  if (error) throw new Error(error.message);
+  if (!data?.length) return 'No owner-agent changes have been logged yet.';
+  return ['Latest owner-agent changes:', ...data.map((event) => {
+    const when = new Date(event.created_at).toLocaleString('en-KE', { timeZone: 'Africa/Nairobi' });
+    return `- ${when}: ${String(event.event_type).replace(/_/g, ' ')}${event.product_slug ? ` (${event.product_slug})` : ''}`;
+  })].join('\n');
+}
+
 export async function handleOwnerTelegramCommand(params: {
   chatId: number;
   text: string;
   photos?: TelegramPhoto[];
 }): Promise<OwnerCommandResult> {
   const { chatId, photos } = params;
-  const text = params.text.trim();
+  const confirmation = parseOwnerConfirmation(params.text);
+  const text = confirmation.command;
   const lower = text.toLowerCase();
 
   if (!isOwnerTelegramChat(chatId)) {
@@ -252,6 +287,18 @@ export async function handleOwnerTelegramCommand(params: {
 
     if (lower === '/lowstock' || lower === '/low-stock') {
       return { handled: true, response: await lowStockSummary() };
+    }
+
+    if (lower === '/activity') {
+      return { handled: true, response: await recentOwnerActivity(chatId) };
+    }
+
+    if (!confirmation.confirmed && MUTATING_COMMANDS.some((command) => lower.startsWith(command))) {
+      return { handled: true, response: confirmationPreview(text) };
+    }
+
+    if (confirmation.confirmed && !MUTATING_COMMANDS.some((command) => lower.startsWith(command))) {
+      return { handled: true, response: 'That is not a supported live-site action. Use /help to see the available commands.' };
     }
 
     if (lower.startsWith('/remember ')) {
