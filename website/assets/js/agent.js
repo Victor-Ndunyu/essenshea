@@ -194,9 +194,8 @@ function answerLocalAgentIntent(prompt) {
   }
 
   if (cleanPrompt.includes('order') || cleanPrompt.includes('buy') || cleanPrompt.includes('shop')) {
-    addAgentMessage('assistant', 'You can order from the shop, or browse the catalogue first and tap “Order this” on any product.', [
+    addAgentMessage('assistant', 'You can browse the full collection and build your request directly in the shop.', [
       { label: 'Open shop', href: '/shop' },
-      { label: 'Browse catalogue', href: '/catalog' },
     ]);
     return true;
   }

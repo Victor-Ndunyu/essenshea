@@ -20,12 +20,27 @@ const shopConcernChips = document.getElementById('shop-concern-chips');
 const shopResultsCount = document.getElementById('shop-results-count');
 const shopSearchToggle = document.getElementById('shop-search-toggle');
 const shopDiscoveryPanel = document.getElementById('shop-discovery-panel');
+const shopAvailabilitySelect = document.getElementById('shop-availability');
+const shopPriceSelect = document.getElementById('shop-price');
+const shopSortSelect = document.getElementById('shop-sort');
+const shopClearFilters = document.getElementById('shop-clear-filters');
 
 const shopCollections = [];
 const shopProducts = [];
 let activeConcern = 'all';
 let activeCategory = 'all';
 let categoryOptions = [];
+
+function extractVariants(product) {
+  if (Array.isArray(product.variants)) {
+    return product.variants.map(function(variant) {
+      return typeof variant === 'string' ? variant : [variant.size || variant.name, variant.price || variant.priceText].filter(Boolean).join(' — ');
+    }).filter(Boolean);
+  }
+  const text = String(product.description || '');
+  const matches = text.match(/\b\d+(?:\.\d+)?\s*(?:ml|g|kg|l)\s*(?:(?:-|–|—|:)\s*)?(?:ksh|kes)\s*[\d,]+/gi) || [];
+  return matches.slice(0, 6).map(function(value) { return value.replace(/\s+/g, ' ').trim(); });
+}
 
 const concernOptions = [
   { id: 'all', label: 'All products', terms: [] },
@@ -130,7 +145,7 @@ async function loadShopData() {
       shopCollections.push({
         title: category.title,
         copy: category.description || 'Discover premium Essenshea products.',
-        link: category.slug === 'fragrances' ? '/fragrances' : '/category/' + category.slug,
+        link: '/shop?category=' + encodeURIComponent(category.slug) + '#shop-products',
       });
 
       (category.products || []).forEach((product) => {
@@ -139,6 +154,8 @@ async function loadShopData() {
           title,
           category: category.title,
           priceValue: product.priceValue,
+          stock: product.stock,
+          availableByOrder: product.availableByOrder,
         });
 
         const mappedProduct = {
@@ -154,6 +171,8 @@ async function loadShopData() {
           image: product.image,
           available,
           stock: product.stock ?? null,
+          availableByOrder: Boolean(product.availableByOrder),
+          variants: extractVariants(product),
           stockText: typeof product.stock === 'number' ? 'In stock: ' + product.stock : '',
           note: '',
         };
@@ -244,11 +263,42 @@ function renderCategoryChips() {
 
 function getFilteredShopProducts() {
   const query = shopSearchInput ? shopSearchInput.value : '';
-  return shopProducts.filter(function(product) {
+  const availability = shopAvailabilitySelect ? shopAvailabilitySelect.value : 'all';
+  const price = shopPriceSelect ? shopPriceSelect.value : 'all';
+  const sort = shopSortSelect ? shopSortSelect.value : 'recommended';
+  const filtered = shopProducts.filter(function(product) {
     const matchesConcern = activeConcern === 'all' || product.concerns.includes(activeConcern);
     const matchesCategory = activeCategory === 'all' || product.categorySlug === activeCategory;
-    return matchesCategory && matchesConcern && productMatchesQuery(product, query);
+    const matchesAvailability = availability === 'all'
+      || (availability === 'available' && product.available && (typeof product.stock !== 'number' || product.stock > 3))
+      || (availability === 'low-stock' && typeof product.stock === 'number' && product.stock > 0 && product.stock <= 3)
+      || (availability === 'made-to-order' && product.availableByOrder)
+      || (availability === 'out' && typeof product.stock === 'number' && product.stock <= 0 && !product.availableByOrder);
+    const value = product.priceValue;
+    const matchesPrice = price === 'all'
+      || (price === 'request' && typeof value !== 'number')
+      || (price === 'under-500' && typeof value === 'number' && value < 500)
+      || (price === '500-1000' && typeof value === 'number' && value >= 500 && value <= 1000)
+      || (price === '1000-2000' && typeof value === 'number' && value > 1000 && value <= 2000)
+      || (price === 'over-2000' && typeof value === 'number' && value > 2000);
+    return matchesCategory && matchesConcern && matchesAvailability && matchesPrice && productMatchesQuery(product, query);
   });
+  return filtered.sort(function(a, b) {
+    if (sort === 'name-asc') return a.title.localeCompare(b.title, undefined, { sensitivity: 'base' });
+    if (sort === 'price-asc') return (typeof a.priceValue === 'number' ? a.priceValue : Number.MAX_SAFE_INTEGER) - (typeof b.priceValue === 'number' ? b.priceValue : Number.MAX_SAFE_INTEGER);
+    if (sort === 'price-desc') return (typeof b.priceValue === 'number' ? b.priceValue : -1) - (typeof a.priceValue === 'number' ? a.priceValue : -1);
+    return Number(b.available) - Number(a.available) || a.title.localeCompare(b.title, undefined, { sensitivity: 'base' });
+  });
+}
+
+function syncShopFiltersToUrl() {
+  const params = new URLSearchParams(window.location.search);
+  [['category', activeCategory], ['concern', activeConcern], ['availability', shopAvailabilitySelect && shopAvailabilitySelect.value], ['price', shopPriceSelect && shopPriceSelect.value], ['sort', shopSortSelect && shopSortSelect.value]].forEach(function(pair) {
+    if (pair[1] && pair[1] !== 'all' && pair[1] !== 'recommended') params.set(pair[0], pair[1]); else params.delete(pair[0]);
+  });
+  const query = shopSearchInput ? shopSearchInput.value.trim() : '';
+  if (query) params.set('q', query); else params.delete('q');
+  window.history.replaceState({}, '', window.location.pathname + (params.toString() ? '?' + params.toString() : '') + window.location.hash);
 }
 
 function renderShopProducts() {
@@ -269,6 +319,7 @@ function renderShopProducts() {
         + '<div class="product-card__content">'
         + '<h3>' + product.title + '</h3>'
         + '<p>' + product.descriptionExcerpt + '</p>'
+        + (product.variants.length ? '<span class="product-card__variants">Sizes: ' + product.variants.join(' · ') + '</span>' : '')
         + (tags ? '<div class="product-card__tags" aria-label="Best for">' + tags + '</div>' : '')
         + '</div>'
         + '<div class="product-card__meta">'
@@ -327,6 +378,7 @@ function openProductModal(productId) {
   modalImage.alt = product.title;
   modalDescription.textContent = product.description;
   modalDetails.textContent = [product.priceText, productStatusLabel(product), product.bestFor && product.bestFor.length ? 'Best for: ' + product.bestFor.join(', ') : '', productFulfilmentText(product)].filter(Boolean).join(' - ');
+  if (product.variants.length) modalDetails.textContent += ' - Size options: ' + product.variants.join(', ');
   modalAction.textContent = 'Add to request';
   modalAction.dataset.id = product.id;
   productModal.classList.remove('hidden');
@@ -374,6 +426,15 @@ function applyShopDeepLinks() {
   var fragrance = params.get('fragrance');
   var product = params.get('product');
   var focus = params.get('focus');
+  if (params.get('q') && shopSearchInput) shopSearchInput.value = params.get('q');
+  if (params.get('category') && categoryOptions.some(function(option) { return option.id === params.get('category'); })) activeCategory = params.get('category');
+  if (params.get('concern') && concernOptions.some(function(option) { return option.id === params.get('concern'); })) activeConcern = params.get('concern');
+  if (params.get('availability') && shopAvailabilitySelect) shopAvailabilitySelect.value = params.get('availability');
+  if (params.get('price') && shopPriceSelect) shopPriceSelect.value = params.get('price');
+  if (params.get('sort') && shopSortSelect) shopSortSelect.value = params.get('sort');
+  renderCategoryChips();
+  renderConcernChips();
+  renderShopProducts();
 
   if (fragrance) {
     var customFragrance = document.getElementById('custom-fragrance');
@@ -527,8 +588,21 @@ if (customRequestForm) {
 }
 
 if (shopSearchInput) {
-  shopSearchInput.addEventListener('input', renderShopProducts);
+  shopSearchInput.addEventListener('input', function() { renderShopProducts(); syncShopFiltersToUrl(); });
 }
+
+[shopAvailabilitySelect, shopPriceSelect, shopSortSelect].forEach(function(control) {
+  if (control) control.addEventListener('change', function() { renderShopProducts(); syncShopFiltersToUrl(); });
+});
+
+if (shopClearFilters) shopClearFilters.addEventListener('click', function() {
+  activeCategory = 'all'; activeConcern = 'all';
+  if (shopSearchInput) shopSearchInput.value = '';
+  if (shopAvailabilitySelect) shopAvailabilitySelect.value = 'all';
+  if (shopPriceSelect) shopPriceSelect.value = 'all';
+  if (shopSortSelect) shopSortSelect.value = 'recommended';
+  renderCategoryChips(); renderConcernChips(); renderShopProducts(); syncShopFiltersToUrl();
+});
 
 if (shopSearchToggle && shopDiscoveryPanel) {
   shopSearchToggle.addEventListener('click', function() {
@@ -545,6 +619,7 @@ if (shopConcernChips) {
     activeConcern = button.dataset.concern || 'all';
     renderConcernChips();
     renderShopProducts();
+    syncShopFiltersToUrl();
   });
 }
 
@@ -555,5 +630,6 @@ if (shopCategoryChips) {
     activeCategory = button.dataset.category || 'all';
     renderCategoryChips();
     renderShopProducts();
+    syncShopFiltersToUrl();
   });
 }

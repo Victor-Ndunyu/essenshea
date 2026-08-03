@@ -25,7 +25,6 @@
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
       </button>
       <nav class="topnav" aria-label="Primary navigation">
-        <a href="/catalog">Catalog</a>
         <a href="/shop" aria-current="page">Shop</a>
         <a href="/eco-rewards">Eco-Rewards</a>
         <a href="/about">About</a>
@@ -67,7 +66,12 @@
             <span class="form-label">Shop by need</span>
             <div id="shop-concern-chips" class="concern-chips" aria-label="Shop by need"></div>
           </div>
-          <p id="shop-results-count" class="body-sm" aria-live="polite"></p>
+          <div class="shop-filter-controls">
+            <label class="shop-select"><span class="form-label">Availability</span><select id="shop-availability" class="form-select"><option value="all">All availability</option><option value="available">Available now</option><option value="low-stock">Low stock</option><option value="made-to-order">Made to order</option><option value="out">Currently out</option></select></label>
+            <label class="shop-select"><span class="form-label">Price</span><select id="shop-price" class="form-select"><option value="all">Any price</option><option value="under-500">Under KSh 500</option><option value="500-1000">KSh 500–1,000</option><option value="1000-2000">KSh 1,000–2,000</option><option value="over-2000">Over KSh 2,000</option><option value="request">Price on request</option></select></label>
+            <label class="shop-select"><span class="form-label">Sort</span><select id="shop-sort" class="form-select"><option value="recommended">Recommended</option><option value="name-asc">Name: A–Z</option><option value="price-asc">Price: low to high</option><option value="price-desc">Price: high to low</option></select></label>
+          </div>
+          <div class="shop-filter-summary"><p id="shop-results-count" class="body-sm" aria-live="polite"></p><button id="shop-clear-filters" class="shop-clear-filters" type="button">Clear all</button></div>
         </div>
         <div id="shop-products-grid" class="shop-product-grid"></div>
       </section>
@@ -172,7 +176,6 @@
         <p class="footer-legal">&copy; 2026 Essenshea. All rights reserved.</p>
       </div>
       <nav class="footer-nav" aria-label="Footer navigation">
-        <a href="/catalog">Catalog</a>
         <a href="/shop">Shop</a>
         <a href="/eco-rewards">Eco-Rewards</a>
         <a href="/about">About</a>

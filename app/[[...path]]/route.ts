@@ -29,7 +29,6 @@ const MIME_TYPES: Record<string, string> = {
 const PAGE_ROUTES: Record<string, string> = {
   '': 'index.html',
   'shop': 'shop.html',
-  'catalog': 'catalog.html',
   'category': 'category.html',
   'about': 'about.html',
   'eco-rewards': 'eco-rewards.html',
@@ -45,6 +44,12 @@ export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const pathname = url.pathname;
   const cleanPath = pathname.replace(/^\//, '');
+
+  if (cleanPath === 'catalog' || cleanPath === 'catalog.html') {
+    const destination = new URL('/shop', req.url);
+    url.searchParams.forEach((value, key) => destination.searchParams.set(key, value));
+    return NextResponse.redirect(destination, 308);
+  }
 
   if (cleanPath === 'category' || cleanPath === 'category.html' || cleanPath.startsWith('category/') || cleanPath.startsWith('category.html/')) {
     const slug = cleanPath.startsWith('category/')
