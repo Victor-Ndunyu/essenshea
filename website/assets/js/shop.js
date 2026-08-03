@@ -301,6 +301,35 @@ function syncShopFiltersToUrl() {
   window.history.replaceState({}, '', window.location.pathname + (params.toString() ? '?' + params.toString() : '') + window.location.hash);
 }
 
+function hasActiveDiscovery() {
+  return Boolean(
+    (shopSearchInput && shopSearchInput.value.trim())
+    || activeCategory !== 'all'
+    || activeConcern !== 'all'
+    || (shopAvailabilitySelect && shopAvailabilitySelect.value !== 'all')
+    || (shopPriceSelect && shopPriceSelect.value !== 'all')
+    || (shopSortSelect && shopSortSelect.value !== 'recommended')
+  );
+}
+
+function renderProductCard(product) {
+  const tags = (product.bestFor || []).map(function(tag) { return '<span>' + tag + '</span>'; }).join('');
+  return '<article class="product-card" data-id="' + product.id + '">'
+    + '<img src="' + product.image + '" alt="' + product.title + '" loading="lazy" />'
+    + '<div class="product-card__content">'
+    + '<h3>' + product.title + '</h3>'
+    + '<p>' + product.descriptionExcerpt + '</p>'
+    + (product.variants.length ? '<span class="product-card__variants">Sizes: ' + product.variants.join(' · ') + '</span>' : '')
+    + (tags ? '<div class="product-card__tags" aria-label="Best for">' + tags + '</div>' : '')
+    + '</div>'
+    + '<div class="product-card__meta">'
+    + '<span class="product-card__price">' + product.priceText + '</span>'
+    + '<span class="product-card__flag">' + productStatusLabel(product) + '</span>'
+    + '<button class="btn btn--sm btn--secondary product-open" data-id="' + product.id + '">View</button>'
+    + '</div>'
+    + '</article>';
+}
+
 function renderShopProducts() {
   if (!shopProductsRoot) return;
   const filteredProducts = getFilteredShopProducts();
@@ -311,23 +340,27 @@ function renderShopProducts() {
     shopProductsRoot.innerHTML = '<div class="shop-empty-state"><h3>No exact match yet</h3><p>Try another product name, ingredient or goal - or request a custom product and Essenshea will guide you.</p><a class="btn btn--secondary" href="/shop?focus=custom#custom-care">Request custom care</a></div>';
     return;
   }
-  shopProductsRoot.innerHTML = filteredProducts
-    .map(function(product) {
-      const tags = (product.bestFor || []).map(function(tag) { return '<span>' + tag + '</span>'; }).join('');
-      return '<article class="product-card" data-id="' + product.id + '">'
-        + '<img src="' + product.image + '" alt="' + product.title + '" loading="lazy" />'
-        + '<div class="product-card__content">'
-        + '<h3>' + product.title + '</h3>'
-        + '<p>' + product.descriptionExcerpt + '</p>'
-        + (product.variants.length ? '<span class="product-card__variants">Sizes: ' + product.variants.join(' · ') + '</span>' : '')
-        + (tags ? '<div class="product-card__tags" aria-label="Best for">' + tags + '</div>' : '')
+  if (hasActiveDiscovery()) {
+    shopProductsRoot.classList.remove('shop-product-groups');
+    shopProductsRoot.classList.add('shop-product-grid');
+    shopProductsRoot.innerHTML = filteredProducts.map(renderProductCard).join('');
+    return;
+  }
+
+  shopProductsRoot.classList.remove('shop-product-grid');
+  shopProductsRoot.classList.add('shop-product-groups');
+  shopProductsRoot.innerHTML = categoryOptions
+    .filter(function(category) { return category.id !== 'all'; })
+    .map(function(category) {
+      const products = filteredProducts.filter(function(product) { return product.categorySlug === category.id; });
+      if (!products.length) return '';
+      return '<section class="shop-category-section" aria-labelledby="shop-category-' + category.id + '">'
+        + '<div class="shop-category-section__header">'
+        + '<div><span class="label">Collection</span><h3 id="shop-category-' + category.id + '">' + category.label + '</h3></div>'
+        + '<span class="shop-category-section__count">' + products.length + ' product' + (products.length === 1 ? '' : 's') + '</span>'
         + '</div>'
-        + '<div class="product-card__meta">'
-        + '<span class="product-card__price">' + product.priceText + '</span>'
-        + '<span class="product-card__flag">' + productStatusLabel(product) + '</span>'
-        + '<button class="btn btn--sm btn--secondary product-open" data-id="' + product.id + '">View</button>'
-        + '</div>'
-        + '</article>';
+        + '<div class="shop-product-grid">' + products.map(renderProductCard).join('') + '</div>'
+        + '</section>';
     })
     .join('');
 }
