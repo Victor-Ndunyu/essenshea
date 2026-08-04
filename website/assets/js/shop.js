@@ -36,6 +36,11 @@ let activeCategory = 'all';
 let categoryOptions = [];
 let modalReturnFocus = null;
 let searchRenderTimer = null;
+let lastNoResultSearch = '';
+
+function trackShopEvent(eventType, details) {
+  if (typeof window.essensheaTrack === 'function') window.essensheaTrack(eventType, details || {});
+}
 
 function escapeHtml(value) {
   return String(value == null ? '' : value)
@@ -461,6 +466,11 @@ function renderShopProducts() {
   }
   if (!filteredProducts.length) {
     shopProductsRoot.innerHTML = '<div class="shop-empty-state"><h3>No exact match yet</h3><p>Try another product name, ingredient or goal - or request a custom product and Essenshea will guide you.</p><a class="btn btn--secondary" href="/shop?focus=custom#custom-care">Request custom care</a></div>';
+    const emptyQuery = shopSearchInput ? normalizeSearchValue(shopSearchInput.value) : '';
+    if (emptyQuery.length >= 2 && emptyQuery !== lastNoResultSearch) {
+      lastNoResultSearch = emptyQuery;
+      trackShopEvent('search_no_results', { searchTerm: emptyQuery, metadata: { source: 'shop', resultCount: 0 } });
+    }
     return;
   }
   if (hasActiveDiscovery()) {
@@ -528,6 +538,7 @@ function renderCart() {
 function openProductModal(productId) {
   const product = shopProducts.find(function(item) { return item.id === productId || item.slug === productId; });
   if (!product || !productModal) return;
+  trackShopEvent('product_view', { productSlug: product.slug, categorySlug: product.categorySlug, metadata: { source: 'shop' } });
 
   modalTitle.textContent = product.title;
   modalImage.src = product.image;
@@ -585,6 +596,7 @@ function syncCartToWidget() {
 function addToCart(productId) {
   const product = shopProducts.find(function(item) { return item.id === productId || item.slug === productId; });
   if (!product) return;
+  trackShopEvent('request_item_added', { productSlug: product.slug, categorySlug: product.categorySlug, metadata: { source: 'shop' } });
 
   const existing = cart.find(function(item) { return item.id === productId; });
   if (existing) {

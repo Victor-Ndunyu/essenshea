@@ -469,6 +469,19 @@ function renderCartPopup() {
   if (checkout) checkout.disabled = false;
 }
 
+function trackEssensheaEvent(eventType, details) {
+  var payload = Object.assign({ eventType: eventType }, details || {});
+  try {
+    fetch('/api/analytics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    }).catch(function() {});
+  } catch (error) {}
+}
+window.essensheaTrack = trackEssensheaEvent;
+
 function submitCartPopup(event) {
   event.preventDefault();
   var cart = loadCartFromStorage();
@@ -479,6 +492,12 @@ function submitCartPopup(event) {
   if (!form || !form.reportValidity()) return;
   var formData = new FormData(form);
   if (formData.get('companyWebsite')) return;
+  trackEssensheaEvent('checkout_started', {
+    metadata: { source: 'website_cart', itemCount: cart.reduce(function(total, item) { return total + item.quantity; }, 0) },
+  });
+  if (formData.get('ecoRewardsOptIn') === 'on') {
+    trackEssensheaEvent('eco_rewards_interest', { metadata: { source: 'website_cart' } });
+  }
   if (checkout) { checkout.disabled = true; checkout.textContent = 'Sending\u2026'; }
   if (status) status.textContent = 'Saving your request and alerting Essenshea\u2026';
 

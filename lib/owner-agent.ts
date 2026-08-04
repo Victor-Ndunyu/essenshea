@@ -4,6 +4,7 @@ import { formatConversationMemory, loadRecentOwnerConversation, retrieveOwnerMem
 import { callChatModel, getModelAttempts } from './ai-providers';
 import { parseTelegramOwnerIds } from './security';
 import { parseOwnerConfirmation } from './owner-command';
+import { percentageChange } from './analytics';
 
 type TelegramPhoto = { file_id: string; file_size?: number; width?: number; height?: number };
 
@@ -47,6 +48,7 @@ function helpText(): string {
     '/remember note - store an owner note permanently',
     '/memory topic - retrieve owner memory',
     '/activity - show the latest owner-agent changes',
+    '/insights - show the latest 7-day storefront and order signals',
     '/setdesc product name | new description - preview a description update',
     '/addproduct category | name | price | description - add product as by order',
     '/hide product name - remove from public catalogue',
@@ -262,6 +264,63 @@ async function recentOwnerActivity(chatId: number): Promise<string> {
   })].join('\n');
 }
 
+type InsightEvent = {
+  event_type: string;
+  product_slug: string | null;
+  search_term: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+};
+
+function countInsightEvents(events: InsightEvent[], type: string): number {
+  return events.filter((event) => event.event_type === type).length;
+}
+
+function topInsightValues(values: Array<string | null>, limit = 3): string[] {
+  const counts = new Map<string, number>();
+  values.filter((value): value is string => Boolean(value)).forEach((value) => counts.set(value, (counts.get(value) || 0) + 1));
+  return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, limit).map(([value, count]) => `${value.replace(/-/g, ' ')} (${count})`);
+}
+
+async function ownerBusinessInsights(): Promise<string> {
+  const now = Date.now();
+  const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const fourteenDaysAgo = new Date(now - 14 * 24 * 60 * 60 * 1000).toISOString();
+  const { data, error } = await getSupabaseAdmin()
+    .from('analytics_events')
+    .select('event_type, product_slug, search_term, metadata, created_at')
+    .gte('created_at', fourteenDaysAgo)
+    .order('created_at', { ascending: false })
+    .limit(5000);
+  if (error) throw new Error(error.message);
+  const events = (data || []) as InsightEvent[];
+  const current = events.filter((event) => event.created_at >= sevenDaysAgo);
+  const previous = events.filter((event) => event.created_at < sevenDaysAgo);
+  const orders = countInsightEvents(current, 'order_submitted');
+  const previousOrders = countInsightEvents(previous, 'order_submitted');
+  const checkoutStarts = countInsightEvents(current, 'checkout_started');
+  const views = countInsightEvents(current, 'product_view');
+  const additions = countInsightEvents(current, 'request_item_added');
+  const rewardsInterest = countInsightEvents(current, 'eco_rewards_interest');
+  const noResults = countInsightEvents(current, 'search_no_results');
+  const topProducts = topInsightValues(current.filter((event) => event.event_type === 'product_view').map((event) => event.product_slug));
+  const missedSearches = topInsightValues(current.filter((event) => event.event_type === 'search_no_results').map((event) => event.search_term));
+  const lines = [
+    'Essenshea insights — last 7 days',
+    `Order requests: ${orders} (${percentageChange(orders, previousOrders)} vs previous 7 days)`,
+    `Product views: ${views}`,
+    `Items added to request lists: ${additions}`,
+    `Checkout starts: ${checkoutStarts}`,
+    `Eco-Rewards interest: ${rewardsInterest}`,
+    `Searches with no result: ${noResults}`,
+  ];
+  if (topProducts.length) lines.push(`Most viewed: ${topProducts.join(', ')}`);
+  if (missedSearches.length) lines.push(`Unmet searches: ${missedSearches.join(', ')}`);
+  if (!current.length) lines.push('No storefront analytics have been recorded yet. Signals will appear as customers use the updated site.');
+  lines.push('Counts are aggregate first-party signals; no customer contact details are stored in analytics.');
+  return lines.join('\n');
+}
+
 export async function handleOwnerTelegramCommand(params: {
   chatId: number;
   text: string;
@@ -291,6 +350,10 @@ export async function handleOwnerTelegramCommand(params: {
 
     if (lower === '/activity') {
       return { handled: true, response: await recentOwnerActivity(chatId) };
+    }
+
+    if (lower === '/insights' || lower === '/weekly') {
+      return { handled: true, response: await ownerBusinessInsights() };
     }
 
     if (!confirmation.confirmed && MUTATING_COMMANDS.some((command) => lower.startsWith(command))) {

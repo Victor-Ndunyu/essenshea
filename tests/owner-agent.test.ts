@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { parseTelegramOwnerIds, secretsMatch } from '../lib/security.ts';
 import { parseOwnerConfirmation } from '../lib/owner-command.ts';
+import { percentageChange } from '../lib/analytics.ts';
 
 test('owner telegram chat id parsing is strict', () => {
   const allowed = parseTelegramOwnerIds('12345, 777, -9, 12oops, 0');
@@ -40,4 +41,10 @@ test('owner live-site actions require an explicit confirmation wrapper', () => {
     confirmed: true,
     command: '/stock Glow Oil | 5',
   });
+});
+
+test('owner insight trend labels are honest when the baseline is empty', () => {
+  assert.equal(percentageChange(0, 0), 'no change');
+  assert.equal(percentageChange(3, 0), 'new activity');
+  assert.equal(percentageChange(4, 8), '-50%');
 });
