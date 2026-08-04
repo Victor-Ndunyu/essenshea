@@ -144,6 +144,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  await supabase.from('analytics_events').insert({
+    event_type: 'order_submitted',
+    metadata: {
+      source: order.source,
+      itemCount: order.items.reduce((total, item) => total + item.quantity, 0),
+      productSlugs: order.items.map((item) => item.productSlug).filter(Boolean).slice(0, 25),
+      fulfilmentMethod: order.customer.fulfilmentMethod,
+    },
+  }).then(({ error }) => {
+    if (error) console.error('Order analytics persistence failed:', error.message);
+  });
+
   const alertText = buildOwnerAlert(reference, order);
   const attempts = await notifyOwnerOfOrder({
     orderId: storedOrder.id,
