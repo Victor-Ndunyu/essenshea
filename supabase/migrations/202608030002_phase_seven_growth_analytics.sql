@@ -47,5 +47,5 @@ begin
       'select public.purge_expired_essenshea_analytics();'
     );
   end if;
-end
+end;
 $$;
