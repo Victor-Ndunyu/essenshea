@@ -95,7 +95,7 @@ function applyOverride(product: CatalogProduct, override: CatalogOverrideRow): C
   };
 }
 
-export async function getMergedCatalog(): Promise<CatalogData> {
+export async function getMergedCatalog(options: { includeHidden?: boolean } = {}): Promise<CatalogData> {
   const catalog = await loadStaticCatalog();
   const overrides = await loadCatalogOverrides();
   const categories = catalog.categories || [];
@@ -134,7 +134,7 @@ export async function getMergedCatalog(): Promise<CatalogData> {
 
   for (const category of categories) {
     category.products = (category.products || [])
-      .filter((product) => !product.hidden)
+      .filter((product) => options.includeHidden || !product.hidden)
       .sort((a, b) => String(a.name).localeCompare(String(b.name), undefined, { sensitivity: 'base' }));
     category.items = category.products.length;
     category.image = categoryFallbackImage(category);
@@ -159,20 +159,49 @@ export async function getCatalogSummary(): Promise<string> {
 }
 
 export async function findCatalogProduct(query: string): Promise<{ category: CatalogCategory; product: CatalogProduct } | null> {
-  const clean = query.toLowerCase().trim();
-  if (!clean) return null;
-  const catalog = await getMergedCatalog();
-  let best: { category: CatalogCategory; product: CatalogProduct; score: number } | null = null;
+  const result = await resolveCatalogProduct(query);
+  return result.status === 'matched' ? result.match : null;
+}
+
+export type CatalogResolution =
+  | { status: 'matched'; match: { category: CatalogCategory; product: CatalogProduct } }
+  | { status: 'ambiguous'; matches: Array<{ category: CatalogCategory; product: CatalogProduct }> }
+  | { status: 'not_found'; matches: [] };
+
+function normalizeCatalogQuery(value: string): string {
+  return value.toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+export async function resolveCatalogProduct(query: string): Promise<CatalogResolution> {
+  const clean = normalizeCatalogQuery(query);
+  if (!clean) return { status: 'not_found', matches: [] };
+  const catalog = await getMergedCatalog({ includeHidden: true });
+  const candidates: Array<{ category: CatalogCategory; product: CatalogProduct; score: number }> = [];
   for (const category of catalog.categories || []) {
     for (const product of category.products || []) {
-      const haystack = `${product.name} ${product.slug} ${category.title}`.toLowerCase();
-      let score = 0;
-      for (const word of clean.split(/\s+/).filter((item) => item.length > 2)) {
-        if (haystack.includes(word)) score += 1;
+      const normalizedName = normalizeCatalogQuery(product.name);
+      const normalizedSlug = normalizeCatalogQuery(product.slug);
+      if (clean === normalizedName || clean === normalizedSlug) {
+        return { status: 'matched', match: { category, product } };
       }
-      if (haystack.includes(clean)) score += 4;
-      if (!best || score > best.score) best = { category, product, score };
+      const haystack = normalizeCatalogQuery(`${product.name} ${product.slug} ${category.title}`);
+      let score = 0;
+      const words = clean.split(/\s+/).filter((item) => item.length > 1);
+      for (const word of words) {
+        if (haystack.split(' ').includes(word)) score += 2;
+        else if (haystack.includes(word)) score += 1;
+      }
+      if (normalizedName.includes(clean)) score += 6;
+      if (clean.includes(normalizedName)) score += 5;
+      if (score > 0) candidates.push({ category, product, score });
     }
   }
-  return best && best.score > 0 ? { category: best.category, product: best.product } : null;
+  candidates.sort((a, b) => b.score - a.score || a.product.name.localeCompare(b.product.name));
+  if (!candidates.length) return { status: 'not_found', matches: [] };
+  const bestScore = candidates[0].score;
+  const plausible = candidates.filter((candidate) => candidate.score >= Math.max(3, bestScore - 1)).slice(0, 5);
+  if (plausible.length !== 1) {
+    return { status: 'ambiguous', matches: plausible.map(({ category, product }) => ({ category, product })) };
+  }
+  return { status: 'matched', match: { category: plausible[0].category, product: plausible[0].product } };
 }

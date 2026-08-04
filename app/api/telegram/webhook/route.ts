@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   sendTelegramMessage,
   sendTypingIndicator,
-  callBusinessAgent,
 } from '../../../../lib/telegram';
-import { getOrCreateSession } from '../../../../lib/telegram-sessions';
 import { handleOwnerTelegramCommand } from '../../../../lib/owner-agent';
 import { recordOperationalEvent } from '../../../../lib/operational-events';
 import { secretsMatch } from '../../../../lib/security';
@@ -59,6 +57,10 @@ async function handleMessage(
   try {
     await sendTypingIndicator(chatId);
     const canUseOwnerDesk = chatType === 'private' && senderId === chatId;
+    if (canUseOwnerDesk && userMessage.toLowerCase() === '/id') {
+      await sendTelegramMessage(chatId, `Your Telegram ID is ${chatId}. Add it to the server-only OWNER_TELEGRAM_CHAT_IDS allowlist to authorize this private owner desk.`);
+      return;
+    }
     const ownerResult = canUseOwnerDesk
       ? await handleOwnerTelegramCommand({ chatId, text: userMessage, photos })
       : { handled: false, response: '' };
@@ -66,15 +68,18 @@ async function handleMessage(
       await sendTelegramMessage(chatId, ownerResult.response);
       return;
     }
-
-    const sessionId = await getOrCreateSession(chatId);
-    const agentResponse = await callBusinessAgent(userMessage, sessionId);
-    await sendTelegramMessage(chatId, agentResponse);
+    await recordOperationalEvent({
+      eventType: 'telegram_owner_access_denied',
+      severity: 'warning',
+      safeMessage: 'An unauthorized or non-private Telegram chat attempted to use the owner desk',
+      metadata: { chatType: chatType || 'unknown', directPrivateChat: canUseOwnerDesk },
+    });
+    await sendTelegramMessage(chatId, 'This is Essenshea’s private owner desk. This Telegram account is not authorized. Customer assistance is available on the Essenshea website.');
   } catch (error) {
     console.error('Telegram message processing failed:', error);
     await sendTelegramMessage(
       chatId,
-      'The Essenshea assistant is temporarily unavailable. Please try again or contact +254 727 349 749.',
+      'The Essenshea owner desk is temporarily unavailable. Please try again shortly.',
     ).catch((sendError) => console.error('Telegram error reply failed:', sendError));
   }
 }

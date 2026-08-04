@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { parseTelegramOwnerIds, secretsMatch } from '../lib/security.ts';
-import { parseOwnerConfirmation } from '../lib/owner-command.ts';
+import { ownerLowStockThreshold, parseNaturalOwnerMutation, parseOwnerActionApproval } from '../lib/owner-command.ts';
 import { percentageChange } from '../lib/analytics.ts';
 
 test('owner telegram chat id parsing is strict', () => {
@@ -32,15 +32,31 @@ test('catalog slug generation is stable for owner-added products', () => {
   assert.equal(slugify('  New Glow Oil 100ml  '), 'new-glow-oil-100ml');
 });
 
-test('owner live-site actions require an explicit confirmation wrapper', () => {
-  assert.deepEqual(parseOwnerConfirmation('/stock Glow Oil | 5'), {
-    confirmed: false,
-    command: '/stock Glow Oil | 5',
-  });
-  assert.deepEqual(parseOwnerConfirmation('/confirm /stock Glow Oil | 5'), {
-    confirmed: true,
-    command: '/stock Glow Oil | 5',
-  });
+test('owner action approvals require an exact one-time token shape', () => {
+  assert.deepEqual(parseOwnerActionApproval('/confirm A1B2C3D4'), { action: 'confirm', token: 'A1B2C3D4' });
+  assert.deepEqual(parseOwnerActionApproval('/cancel a1b2c3d4'), { action: 'cancel', token: 'A1B2C3D4' });
+  assert.equal(parseOwnerActionApproval('/confirm /stock Glow Oil | 5'), null);
+  assert.equal(parseOwnerActionApproval('/confirm SHORT'), null);
+});
+
+test('natural owner edits translate to safe structured commands', () => {
+  assert.equal(parseNaturalOwnerMutation('Change the stock of Glow Oil to 8'), '/stock Glow Oil | 8');
+  assert.equal(parseNaturalOwnerMutation('Mark Vanilla Mist as available by order'), '/order Vanilla Mist');
+  assert.equal(parseNaturalOwnerMutation('Hide product Rose Balm from the shop'), '/hide Rose Balm');
+  assert.equal(parseNaturalOwnerMutation('Show me the description of Glow Oil'), null);
+  assert.equal(parseNaturalOwnerMutation('Restore product Rose Balm'), '/show Rose Balm');
+  assert.equal(parseNaturalOwnerMutation('Update the description of Glow Oil to A lighter daily oil'), '/setdesc Glow Oil | A lighter daily oil');
+  assert.equal(parseNaturalOwnerMutation('Tell me about Glow Oil'), null);
+});
+
+test('low-stock threshold is bounded and defaults safely', () => {
+  const previous = process.env.OWNER_LOW_STOCK_THRESHOLD;
+  process.env.OWNER_LOW_STOCK_THRESHOLD = '8';
+  assert.equal(ownerLowStockThreshold(), 8);
+  process.env.OWNER_LOW_STOCK_THRESHOLD = '9999';
+  assert.equal(ownerLowStockThreshold(), 3);
+  if (previous === undefined) delete process.env.OWNER_LOW_STOCK_THRESHOLD;
+  else process.env.OWNER_LOW_STOCK_THRESHOLD = previous;
 });
 
 test('owner insight trend labels are honest when the baseline is empty', () => {
