@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /eco-rewards-admin
+Disallow: /api/
+
+Sitemap: https://essenshea.vercel.app/sitemap.xml
