@@ -45,7 +45,7 @@ function createAgentMarkup() {
   wrapper.id = 'agent-widget';
   wrapper.innerHTML = `
     <button id="agent-launcher" class="agent-launcher" aria-label="Toggle Essenshea assistant">
-      <span class="agent-launcher-mark" aria-hidden="true">&#10022;</span>
+      <span class="agent-launcher-mark" aria-hidden="true">&#128519;</span>
       <span class="agent-launcher-text">Ask Essenshea</span>
     </button>
     <aside id="agent-panel" class="agent-panel hidden" aria-hidden="true">
