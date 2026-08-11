@@ -24,7 +24,7 @@ test('all published opening hours use the new schedule', async () => {
 test('contact section contains an accessible shop map and directions link', async () => {
   const html = await readFile(new URL('../website/index.html', import.meta.url), 'utf8');
   assert.match(html, /title="Map showing Essenshea at Kimathi House"/);
-  assert.match(html, /google\.com\/maps\?q=Kimathi\+House/);
+  assert.match(html, /google\.com\/maps\?q=-1\.283961%2C36\.823267/);
   assert.match(html, /google\.com\/maps\/search\/\?api=1/);
   assert.match(html, /loading="lazy"/);
 });
