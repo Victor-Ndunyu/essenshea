@@ -45,7 +45,7 @@ function createAgentMarkup() {
   wrapper.id = 'agent-widget';
   wrapper.innerHTML = `
     <button id="agent-launcher" class="agent-launcher" aria-label="Toggle Essenshea assistant">
-      <span class="agent-launcher-mark" aria-hidden="true">&#128519;</span>
+      <span class="agent-launcher-mark" aria-hidden="true"><img src="/assets/images/angel-assistant.svg" alt="" /></span>
       <span class="agent-launcher-text">Ask Essenshea</span>
     </button>
     <aside id="agent-panel" class="agent-panel hidden" aria-hidden="true">
@@ -319,10 +319,24 @@ async function initializeAgent() {
 
 initializeAgent();
 
+function ensureAccountNavigation() {
+  document.querySelectorAll('.topnav').forEach(function(nav) {
+    if (nav.querySelector('a[href="/account"]')) return;
+    var link = document.createElement('a');
+    link.href = '/account';
+    link.textContent = 'My account';
+    nav.appendChild(link);
+  });
+}
+
+ensureAccountNavigation();
+
 // ── Cart Widget ──
 
 var CART_STORAGE_KEY = 'essenshea_cart';
 var CHECKOUT_DRAFT_KEY = 'essenshea_checkout_draft';
+var customerCartIsConnected = false;
+var customerCartSyncTimer = null;
 
 function loadCartFromStorage() {
   try {
@@ -333,6 +347,73 @@ function loadCartFromStorage() {
 
 function saveCartToStorage(cart) {
   try { localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart)); } catch (e) {}
+}
+
+function normalizeSyncedCart(cart) {
+  return (Array.isArray(cart) ? cart : []).filter(function(item) {
+    return item && item.id && item.title && Number(item.quantity) > 0;
+  }).slice(0, 50).map(function(item) {
+    return {
+      id: String(item.id).slice(0, 180),
+      slug: item.slug ? String(item.slug).slice(0, 180) : null,
+      title: String(item.title).slice(0, 180),
+      quantity: Math.max(1, Math.min(20, Number(item.quantity) || 1)),
+      priceText: String(item.priceText || 'Price on request').slice(0, 80),
+      available: item.available === true,
+    };
+  });
+}
+
+function mergeCustomerCarts(localItems, accountItems) {
+  var merged = new Map();
+  normalizeSyncedCart(accountItems).forEach(function(item) { merged.set(item.id, item); });
+  normalizeSyncedCart(localItems).forEach(function(item) {
+    var existing = merged.get(item.id);
+    merged.set(item.id, existing ? Object.assign({}, existing, item, { quantity: Math.max(existing.quantity, item.quantity) }) : item);
+  });
+  return Array.from(merged.values());
+}
+
+function syncCustomerCartSoon() {
+  if (!customerCartIsConnected) return;
+  window.clearTimeout(customerCartSyncTimer);
+  customerCartSyncTimer = window.setTimeout(function() {
+    fetch('/api/customer/cart', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: normalizeSyncedCart(loadCartFromStorage()) }),
+    }).catch(function() {});
+  }, 350);
+}
+
+async function connectCustomerExperience() {
+  try {
+    var responses = await Promise.all([fetch('/api/customer/cart'), fetch('/api/customer/account')]);
+    if (!responses[0].ok || !responses[1].ok) return;
+    var cartData = await responses[0].json();
+    var accountData = await responses[1].json();
+    customerCartIsConnected = true;
+    var merged = mergeCustomerCarts(loadCartFromStorage(), cartData.items || []);
+    saveCartToStorage(merged);
+    window.dispatchEvent(new CustomEvent('essenshea-cart-update'));
+
+    var profile = accountData.profile || {};
+    var checkoutForm = document.getElementById('cart-popup-form');
+    if (checkoutForm) {
+      var values = {
+        name: profile.full_name || '',
+        phone: profile.phone || '',
+        fulfilmentMethod: profile.default_fulfilment_method || 'delivery',
+        deliveryLocation: profile.default_delivery_location || '',
+        notes: profile.delivery_notes || '',
+      };
+      Object.keys(values).forEach(function(key) {
+        var field = checkoutForm.elements.namedItem(key);
+        if (field && !field.value) field.value = values[key];
+      });
+    }
+    syncCustomerCartSoon();
+  } catch (error) {}
 }
 
 function loadCheckoutDraft() {
@@ -531,6 +612,11 @@ function submitCartPopup(event) {
     if (result.success) {
       showSiteNotice(result.message);
       localStorage.removeItem(CART_STORAGE_KEY);
+      if (customerCartIsConnected) {
+        fetch('/api/customer/cart', {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items: [] }),
+        }).catch(function() {});
+      }
       updateCartWidget();
       renderCartPopup();
       form.reset();
@@ -619,6 +705,7 @@ function initializeCartWidget() {
 
   window.addEventListener('essenshea-cart-update', function() {
     updateCartWidget();
+    syncCustomerCartSoon();
     if (popup && !popup.classList.contains('hidden')) {
       renderCartPopup();
     }
@@ -654,3 +741,5 @@ function initializeCartWidget() {
 }
 
 initializeCartWidget();
+connectCustomerExperience();
+window.addEventListener('essenshea-account-change', connectCustomerExperience);

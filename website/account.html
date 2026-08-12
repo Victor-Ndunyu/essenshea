@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My account - Essenshea</title>
+  <meta name="description" content="Sign in to save your Essenshea cart, follow orders, manage delivery preferences and view your Eco-Rewards card." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" href="/assets/images/star-mark.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/css/style-new.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Essenshea home">
+        <img class="brand-logo" src="/assets/images/essenshea-logo.jpg" alt="Essenshea logo" />
+        <span class="brand-text"><strong>Essenshea</strong><small>Perfect for skin and hair</small></span>
+      </a>
+      <button class="nav-toggle" aria-label="Open navigation" aria-expanded="false" onclick="document.querySelector('.topnav').classList.toggle('is-open'); this.setAttribute('aria-expanded', document.querySelector('.topnav').classList.contains('is-open'))">Menu</button>
+      <nav class="topnav" aria-label="Primary navigation">
+        <a href="/shop">Shop</a>
+        <a href="/eco-rewards">Eco-Rewards</a>
+        <a href="/about">About</a>
+        <a href="/account" aria-current="page">My account</a>
+      </nav>
+    </header>
+
+    <main class="account-main">
+      <section class="account-hero">
+        <div>
+          <span class="label">Your Essenshea space</span>
+          <h1 class="display-lg">Care that remembers the details.</h1>
+          <p class="body-lg">Keep your request cart across devices, follow every order, save delivery preferences and carry your Eco-Rewards card in one calm place.</p>
+        </div>
+        <div class="account-benefits" aria-label="Account benefits">
+          <span>Saved cart</span><span>Order updates</span><span>Eco-Rewards</span><span>Faster requests</span>
+        </div>
+      </section>
+
+      <section id="account-loading" class="account-loading" aria-live="polite">
+        <span class="account-loader" aria-hidden="true"></span>
+        <p>Opening your account…</p>
+      </section>
+
+      <section id="account-auth" class="account-auth hidden" aria-labelledby="account-auth-title">
+        <div class="account-auth__intro">
+          <span class="label">Customer account</span>
+          <h2 id="account-auth-title" class="display-md">Sign in or create your space.</h2>
+          <p class="body">Guest shopping still works. An account simply keeps your cart and customer history safely connected to you.</p>
+        </div>
+        <div class="account-auth__card">
+          <div class="account-tabs" role="tablist" aria-label="Account access">
+            <button class="is-active" type="button" role="tab" aria-selected="true" data-auth-tab="signin">Sign in</button>
+            <button type="button" role="tab" aria-selected="false" data-auth-tab="signup">Create account</button>
+          </div>
+          <form id="signin-form" class="account-form" data-auth-panel="signin">
+            <label>Email address<input class="form-input" name="email" type="email" autocomplete="email" required /></label>
+            <label>Password<input class="form-input" name="password" type="password" autocomplete="current-password" minlength="8" required /></label>
+            <button class="btn btn--primary" type="submit">Sign in</button>
+            <button id="recover-password" class="account-text-button" type="button">Email me a password reset link</button>
+          </form>
+          <form id="signup-form" class="account-form hidden" data-auth-panel="signup">
+            <label>Full name<input class="form-input" name="fullName" type="text" autocomplete="name" maxlength="120" required /></label>
+            <label>Email address<input class="form-input" name="email" type="email" autocomplete="email" required /></label>
+            <label>Password<input class="form-input" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required /></label>
+            <p class="body-sm">Use at least 8 characters. You may need to confirm your email before signing in.</p>
+            <button class="btn btn--primary" type="submit">Create my account</button>
+          </form>
+          <p id="auth-status" class="form-status" role="status" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <section id="account-dashboard" class="account-dashboard hidden">
+        <div class="account-welcome">
+          <div><span class="label">Welcome back</span><h2 id="account-welcome-name" class="display-md">Your account</h2><p id="account-email" class="body-sm"></p></div>
+          <button id="account-signout" class="btn btn--secondary" type="button">Sign out</button>
+        </div>
+
+        <nav class="account-section-nav" aria-label="Account sections">
+          <a href="#saved-cart">Saved cart</a><a href="#orders">Orders</a><a href="#rewards">Eco-Rewards</a><a href="#preferences">Preferences</a>
+        </nav>
+
+        <div class="account-grid">
+          <article id="saved-cart" class="account-panel account-panel--cart">
+            <span class="label">Saved cart</span>
+            <h3>Your request list</h3>
+            <div id="account-cart" class="account-list"></div>
+            <a class="btn btn--primary" href="/shop">Continue shopping</a>
+          </article>
+
+          <article id="rewards" class="account-panel account-panel--rewards">
+            <span class="label">Eco-Rewards</span>
+            <h3>Your digital card</h3>
+            <div id="account-rewards"></div>
+            <form id="link-rewards-form" class="account-form hidden">
+              <p class="body-sm">Link the card issued at the shop once. Your private code prevents someone else from claiming it.</p>
+              <label>Registered phone number<input class="form-input" name="phone" type="tel" autocomplete="tel" required /></label>
+              <label>Private access code<input class="form-input" name="code" type="password" autocomplete="one-time-code" required /></label>
+              <button class="btn btn--secondary" type="submit">Link my card</button>
+            </form>
+            <p id="rewards-status" class="form-status" role="status" aria-live="polite"></p>
+          </article>
+
+          <article id="orders" class="account-panel account-panel--wide">
+            <span class="label">Order history</span>
+            <h3>Follow your requests</h3>
+            <div id="account-orders" class="account-orders"></div>
+          </article>
+
+          <article id="preferences" class="account-panel account-panel--wide">
+            <span class="label">Personal details</span>
+            <h3>Make your next request faster</h3>
+            <form id="profile-form" class="account-profile-form">
+              <label>Full name<input class="form-input" name="fullName" type="text" autocomplete="name" required /></label>
+              <label>Phone or WhatsApp<input class="form-input" name="phone" type="tel" autocomplete="tel" /></label>
+              <label>Preferred contact<select class="form-select" name="preferredContact"><option value="whatsapp">WhatsApp</option><option value="phone">Phone call</option><option value="email">Email</option></select></label>
+              <label>Usual fulfilment<select class="form-select" name="defaultFulfilmentMethod"><option value="delivery">Delivery</option><option value="pickup">Pickup</option><option value="discuss">Decide each time</option></select></label>
+              <label class="account-field--wide">Default delivery town or area<input class="form-input" name="defaultDeliveryLocation" type="text" autocomplete="address-level2" /></label>
+              <label class="account-field--wide">Delivery notes<textarea class="form-textarea" name="deliveryNotes" maxlength="500" placeholder="Landmark, preferred time, or instructions"></textarea></label>
+              <label class="consent-check account-field--wide"><input name="marketingConsent" type="checkbox" /> <span>Send me occasional product and Eco-Rewards updates. I can change this anytime.</span></label>
+              <button class="btn btn--primary" type="submit">Save preferences</button>
+              <p id="profile-status" class="form-status" role="status" aria-live="polite"></p>
+            </form>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__brand"><img class="site-footer__logo" src="/assets/images/essenshea-logo.jpg" alt="Essenshea logo" /><strong>Essenshea</strong><p>Natural luxury, rooted in intention.</p><p class="footer-legal">&copy; 2026 Essenshea.</p></div>
+      <nav class="footer-nav" aria-label="Footer navigation"><a href="/shop">Shop</a><a href="/eco-rewards">Eco-Rewards</a><a href="/about">About</a><a href="/#contact">Contact</a></nav>
+    </footer>
+  </div>
+  <script src="/assets/js/account.js"></script>
+  <script src="/assets/js/agent-config.js"></script>
+  <script src="/assets/js/agent.js"></script>
+</body>
+</html>

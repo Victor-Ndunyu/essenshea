@@ -10,6 +10,10 @@ import { getClientAddress, checkRateLimit } from '../../../lib/rate-limit';
 import { checkMemoryRateLimit } from '../../../lib/memory-rate-limit';
 import { notifyOwnerOfOrder, sendOperationalAlert } from '../../../lib/notifications';
 import { getSupabaseAdmin } from '../../../lib/supabase-admin';
+import {
+  attachRefreshedCustomerSession,
+  authenticateCustomer,
+} from '../../../lib/customer-auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -91,6 +95,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  const customerAuth = await authenticateCustomer(req);
   const supabase = getSupabaseAdmin();
   const reference = createOrderReference();
   const { data: storedOrder, error: orderError } = await supabase
@@ -109,6 +114,7 @@ export async function POST(req: NextRequest) {
       delivery_location: order.customer.deliveryLocation,
       customer_notes: order.customer.notes,
       eco_rewards_opt_in: order.customer.ecoRewardsOptIn,
+      customer_user_id: customerAuth.user?.id || null,
       eco_rewards_eligible_until: null,
       data_retention_until: null,
       notification_status: 'pending',
@@ -189,7 +195,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  return response(
+  const successResponse = response(
     {
       success: true,
       reference,
@@ -197,4 +203,5 @@ export async function POST(req: NextRequest) {
     },
     201,
   );
+  return attachRefreshedCustomerSession(successResponse, customerAuth);
 }

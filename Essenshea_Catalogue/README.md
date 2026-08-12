@@ -8,7 +8,7 @@ Complete product catalogue extracted from WhatsApp Business.
 - **Body Oils & Tonics** (9 products)
 - **Haircare** (3 products)
 - **Essential Oils** (16 products)
-- **Carrier Oils** (40 products)
+- **Carrier Oils** (39 products)
 - **Gift Sets** (5 products)
 - **Gels & Hydrosols** (1 products)
 - **Raw Butters** (4 products)

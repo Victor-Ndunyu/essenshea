@@ -33,6 +33,7 @@ const PAGE_ROUTES: Record<string, string> = {
   'category': 'category.html',
   'about': 'about.html',
   'eco-rewards': 'eco-rewards.html',
+  'account': 'account.html',
   'eco-rewards-admin': 'eco-rewards-admin.html',
 };
 
