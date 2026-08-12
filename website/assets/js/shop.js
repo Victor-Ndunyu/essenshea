@@ -583,6 +583,7 @@ function syncCartToWidget() {
   var cartData = cart.map(function(item) {
     return {
       id: item.id,
+      slug: item.slug,
       title: item.title,
       quantity: item.quantity,
       available: item.available,
