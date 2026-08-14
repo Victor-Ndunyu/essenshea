@@ -79,6 +79,45 @@ function createAgentMarkup() {
   body.appendChild(wrapper);
 }
 
+function updateAgentViewportOffset() {
+  const viewport = window.visualViewport;
+  if (!viewport) {
+    document.documentElement.style.setProperty('--agent-viewport-bottom', '0px');
+    return;
+  }
+  const obscuredBottom = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
+  document.documentElement.style.setProperty('--agent-viewport-bottom', `${Math.round(obscuredBottom)}px`);
+}
+
+function enhanceMobileNavigation() {
+  document.querySelectorAll('.topbar').forEach((header) => {
+    const toggle = header.querySelector('.nav-toggle');
+    const nav = header.querySelector('.topnav');
+    if (!toggle || !nav) return;
+
+    toggle.removeAttribute('onclick');
+    const setOpen = (open) => {
+      nav.classList.toggle('is-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+    };
+
+    toggle.addEventListener('click', (event) => {
+      event.stopPropagation();
+      setOpen(!nav.classList.contains('is-open'));
+    });
+    nav.addEventListener('click', (event) => {
+      if (event.target.closest('a')) setOpen(false);
+    });
+    document.addEventListener('click', (event) => {
+      if (!header.contains(event.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') setOpen(false);
+    });
+  });
+}
+
 function setAgentPanelVisible(visible) {
   const panel = document.getElementById('agent-panel');
   const launcher = document.getElementById('agent-launcher');
@@ -274,6 +313,10 @@ function getSiteProducts(rawCatalog) {
 async function initializeAgent() {
   createAgentMarkup();
   setAgentPanelVisible(false);
+  updateAgentViewportOffset();
+  window.visualViewport?.addEventListener('resize', updateAgentViewportOffset);
+  window.visualViewport?.addEventListener('scroll', updateAgentViewportOffset);
+  window.addEventListener('orientationchange', updateAgentViewportOffset);
 
   var launcher = document.getElementById('agent-launcher');
   var panel = document.getElementById('agent-panel');
@@ -330,6 +373,7 @@ function ensureAccountNavigation() {
 }
 
 ensureAccountNavigation();
+enhanceMobileNavigation();
 
 // ── Cart Widget ──
 
