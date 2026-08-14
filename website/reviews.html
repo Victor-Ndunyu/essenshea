@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="icon" href="assets/images/star-mark.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="assets/css/style-new.css" />
-  <link rel="stylesheet" href="assets/css/luxury-refinement.css?v=3" />
+  <link rel="stylesheet" href="assets/css/luxury-refinement.css?v=4" />
 </head>
 <body>
   <div class="page-shell">
@@ -88,7 +88,7 @@
       card.className = 'review-card';
       const text = document.createElement('p');
       text.className = 'review-card__text';
-      text.textContent = review.text;
+      appendReviewText(text, review.text);
       card.appendChild(text);
       const author = document.createElement('div');
       author.className = 'review-card__author';
@@ -101,6 +101,22 @@
         card.appendChild(role);
       }
       return card;
+    }
+
+    function appendReviewText(element, value) {
+      const clean = String(value || '');
+      const emoji = /\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic})*/gu;
+      let start = 0;
+      clean.replace(emoji, (match, offset) => {
+        if (offset > start) element.appendChild(document.createTextNode(clean.slice(start, offset)));
+        const span = document.createElement('span');
+        span.className = 'review-emoji';
+        span.textContent = match;
+        element.appendChild(span);
+        start = offset + match.length;
+        return match;
+      });
+      if (start < clean.length) element.appendChild(document.createTextNode(clean.slice(start)));
     }
 
     fetch('/api/reviews')
@@ -117,6 +133,6 @@
       });
   </script>
   <script src="assets/js/agent-config.js"></script>
-  <script src="assets/js/agent.js?v=3"></script>
+  <script src="assets/js/agent.js?v=4"></script>
 </body>
 </html>

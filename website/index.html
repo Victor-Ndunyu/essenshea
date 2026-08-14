@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="icon" href="assets/images/star-mark.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="assets/css/style-new.css" />
-  <link rel="stylesheet" href="assets/css/luxury-refinement.css?v=3" />
+  <link rel="stylesheet" href="assets/css/luxury-refinement.css?v=4" />
 </head>
 <body>
   <div class="page-shell">
@@ -74,44 +74,25 @@
         </div>
       </section>
 
-      <!-- -- Featured Care (linked product cards) -- -->
-      <section class="section section--divider">
-        <div style="max-width:520px">
-          <span class="label">Featured care</span>
-          <h2 class="display-lg">Three essentials for a complete care package.</h2>
-          <p class="body">From body to hair to scent&thinsp;-&thinsp;each formula is crafted with a single purpose: to make you feel held.</p>
+      <!-- -- Featured Care (daily edit linked to the shared shop detail modal) -- -->
+      <section class="section section--divider" id="featured-care">
+        <div class="featured-care-head">
+          <div>
+            <span class="label">Featured care</span>
+            <h2 class="display-lg">Three considered rituals, selected for today.</h2>
+          </div>
+          <div class="featured-care-note">
+            <span>Today&rsquo;s edit</span>
+            <p>A calm botanical, a hair ritual and a sensorial body oil&thinsp;-&thinsp;refreshed every day from the Essenshea catalogue.</p>
+            <small id="featured-care-date">Refreshed daily</small>
+          </div>
         </div>
-        <div class="product-trio">
-          <a class="product-trio__card" href="/shop">
-            <img src="../Essenshea_Catalogue/Body_Butters_and_Balms/images/lavender_whipped_shea_butter_250ml.jpg" alt="Lavender whipped shea butter in a glass jar with dried lavender" loading="lazy" />
-            <div class="product-trio__body">
-              <h3>Lavender Whipped Shea</h3>
-              <p>Calming shea butter with lavender essential oil for relaxation and daily glow.</p>
-              <span class="product-trio__price">From KES 850</span>
-            </div>
-          </a>
-          <a class="product-trio__card" href="/shop">
-            <img src="../Essenshea_Catalogue/Haircare/images/hair_growth_serum_100ml.jpg" alt="Hair growth serum in amber bottle" loading="lazy" />
-            <div class="product-trio__body">
-              <h3>Hair Growth Serum</h3>
-              <p>Plant-based oils that repair, strengthen and restore natural hair growth.</p>
-              <span class="product-trio__price">KES 900</span>
-            </div>
-          </a>
-          <a class="product-trio__card" href="/shop">
-            <img src="../Essenshea_Catalogue/Body_Oils_and_Tonics/images/fruits_lilies_body_oil_150ml.jpg" alt="Fruits and lilies body oil in glass bottle" loading="lazy" />
-            <div class="product-trio__body">
-              <h3>Fruits &amp; Lilies Body Oil</h3>
-              <p>Lightweight, non-greasy botanical oil that leaves skin silky and scented.</p>
-              <span class="product-trio__price">KES 1,080</span>
-            </div>
-          </a>
-        </div>
+        <div class="product-trio" id="featured-care-grid" aria-live="polite" aria-busy="true"></div>
       </section>
 
       <!-- -- Collections (category tiles) -- -->
       <section class="section section--divider" id="collections">
-        <div style="max-width:480px">
+        <div class="home-section-heading">
           <span class="label">Collections</span>
           <h2 class="display-lg">A catalogue shaped for self-care routines and gifting moments.</h2>
         </div>
@@ -154,16 +135,28 @@
           <a href="/category/carrier-oils" class="collection-tile">
             <img src="../Essenshea_Catalogue/Carrier_Oils/images/aloe_vera_oil.jpg" alt="Carrier and essential oils collection" loading="lazy" />
             <div class="collection-tile__overlay">
-              <h3>Oils &amp; Essentials</h3>
-              <span>55 products</span>
+              <h3>Carrier Oils</h3>
+              <span>39 products</span>
             </div>
+          </a>
+          <a href="/category/essential-oils" class="collection-tile">
+            <img src="../Essenshea_Catalogue/Essential_Oils/images/bergamot_essential_oil.jpg" alt="Essential oils collection" loading="lazy" />
+            <div class="collection-tile__overlay"><h3>Essential Oils</h3><span>16 products</span></div>
+          </a>
+          <a href="/category/gels-and-hydrosols" class="collection-tile">
+            <img src="../Essenshea_Catalogue/Gels_and_Hydrosols/images/aloe_vera_gel.jpg" alt="Gels and hydrosols collection" loading="lazy" />
+            <div class="collection-tile__overlay"><h3>Gels &amp; Hydrosols</h3><span>1 product</span></div>
+          </a>
+          <a href="/category/raw-butters" class="collection-tile">
+            <img src="../Essenshea_Catalogue/Raw_Butters/images/raw_ghana_shea_butter.jpg" alt="Raw butters collection" loading="lazy" />
+            <div class="collection-tile__overlay"><h3>Raw Butters</h3><span>4 products</span></div>
           </a>
         </div>
       </section>
 
       <!-- -- Reviews -- -->
       <section class="section section--divider" id="home-reviews">
-        <div class="testimonials">
+        <div class="testimonials home-section-heading home-section-heading--reviews">
           <span class="label">What our customers say</span>
           <h2 class="display-md">Real words from the Essenshea community.</h2>
         </div>
@@ -323,7 +316,8 @@
   </div>
 
   <script src="assets/js/agent-config.js"></script>
-  <script src="assets/js/agent.js?v=3"></script>
+  <script src="assets/js/agent.js?v=4"></script>
+  <script src="assets/js/featured-care.js?v=1"></script>
   <script>
     const form = document.getElementById('main-inquiry-form');
     const status = document.getElementById('inquiry-status');
@@ -378,7 +372,7 @@
       c.className = 'review-card';
       var t = document.createElement('p');
       t.className = 'review-card__text';
-      t.textContent = r.text;
+      appendReviewText(t, r.text);
       c.appendChild(t);
       var a = document.createElement('div');
       a.className = 'review-card__author';
@@ -391,6 +385,29 @@
         c.appendChild(o);
       }
       return c;
+    }
+
+    function appendReviewText(element, value) {
+      var clean = String(value || '')
+        .replace(/[\uFFFD\u25A1]/g, '')
+        .replace(/!{3,}/g, '!!')
+        .replace(/\?{3,}/g, '??')
+        .replace(/\s+([,.!?;:])/g, '$1')
+        .replace(/([,.!?;:])(?!\s|$)/g, '$1 ')
+        .replace(/\s{2,}/g, ' ')
+        .trim();
+      var emoji = /\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic})*/gu;
+      var start = 0;
+      clean.replace(emoji, function(match, offset) {
+        if (offset > start) element.appendChild(document.createTextNode(clean.slice(start, offset)));
+        var span = document.createElement('span');
+        span.className = 'review-emoji';
+        span.textContent = match;
+        element.appendChild(span);
+        start = offset + match.length;
+        return match;
+      });
+      if (start < clean.length) element.appendChild(document.createTextNode(clean.slice(start)));
     }
 
     function populateReviews() {

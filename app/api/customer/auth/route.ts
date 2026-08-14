@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
   attachCustomerSession,
+  authenticateCustomer,
   clearCustomerSession,
   cleanCustomerText,
   createCustomerAuthClient,
@@ -45,6 +46,41 @@ export async function POST(req: NextRequest) {
   const action = cleanCustomerText(raw.action, 20).toLowerCase();
   if (action === 'signout') {
     return clearCustomerSession(NextResponse.json({ success: true }));
+  }
+
+  if (action === 'change-password') {
+    const authenticated = await authenticateCustomer(req);
+    if (!authenticated.user?.email) {
+      return NextResponse.json({ error: 'Sign in again to change your password' }, { status: 401 });
+    }
+    const currentPassword = typeof raw.currentPassword === 'string' ? raw.currentPassword : '';
+    const newPassword = typeof raw.newPassword === 'string' ? raw.newPassword : '';
+    if (currentPassword.length < 8 || currentPassword.length > 128 || newPassword.length < 8 || newPassword.length > 128) {
+      return NextResponse.json({ error: 'Passwords must be between 8 and 128 characters' }, { status: 400 });
+    }
+    if (currentPassword === newPassword) {
+      return NextResponse.json({ error: 'Choose a new password that is different from your current password' }, { status: 400 });
+    }
+
+    const passwordClient = createCustomerAuthClient();
+    const { data: signInData, error: signInError } = await passwordClient.auth.signInWithPassword({
+      email: authenticated.user.email,
+      password: currentPassword,
+    });
+    if (signInError || !signInData.session || signInData.user.id !== authenticated.user.id) {
+      return NextResponse.json({ error: 'Your current password is incorrect' }, { status: 401 });
+    }
+    const { error: updateError } = await passwordClient.auth.updateUser({
+      password: newPassword,
+      current_password: currentPassword,
+    });
+    if (updateError) {
+      return NextResponse.json({ error: updateError.message || 'We could not update your password' }, { status: 400 });
+    }
+    return attachCustomerSession(
+      NextResponse.json({ success: true, message: 'Your password has been updated.' }),
+      signInData.session,
+    );
   }
 
   const email = validEmail(raw.email);
@@ -109,4 +145,3 @@ export async function POST(req: NextRequest) {
     data.session,
   );
 }
-

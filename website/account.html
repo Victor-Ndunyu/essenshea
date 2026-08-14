@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="icon" href="/assets/images/star-mark.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/assets/css/style-new.css" />
-  <link rel="stylesheet" href="/assets/css/luxury-refinement.css?v=3" />
+  <link rel="stylesheet" href="/assets/css/luxury-refinement.css?v=4" />
 </head>
 <body>
   <div class="page-shell">
@@ -37,8 +37,15 @@
           <h1 class="display-lg">Care that remembers the details.</h1>
           <p class="body-lg">Keep your request cart across devices, follow every order, save delivery preferences and carry your Eco-Rewards card in one calm place.</p>
         </div>
-        <div class="account-benefits" aria-label="Account benefits">
-          <span>Saved cart</span><span>Order updates</span><span>Eco-Rewards</span><span>Faster requests</span>
+        <div class="account-visual">
+          <div class="account-slideshow" aria-label="Essenshea care collection">
+            <figure class="account-slide is-active"><img src="../Essenshea_Catalogue/Body_Butters_and_Balms/images/lavender_whipped_shea_butter_250ml.jpg" alt="Lavender whipped shea butter" /><figcaption>Quiet rituals</figcaption></figure>
+            <figure class="account-slide"><img src="../Essenshea_Catalogue/Gift_Sets/images/gift_set_2.jpg" alt="Essenshea gift set" /><figcaption>Thoughtful gifting</figcaption></figure>
+            <figure class="account-slide"><img src="../Essenshea_Catalogue/Body_Oils_and_Tonics/images/fruits_lilies_body_oil_150ml.jpg" alt="Fruits and lilies body oil" /><figcaption>Personal care</figcaption></figure>
+          </div>
+          <div class="account-benefits" aria-label="Account benefits">
+            <span>Saved cart</span><span>Live order history</span><span>Eco-Rewards</span><span>Faster requests</span>
+          </div>
         </div>
       </section>
 
@@ -82,7 +89,7 @@
         </div>
 
         <nav class="account-section-nav" aria-label="Account sections">
-          <a href="#saved-cart">Saved cart</a><a href="#orders">Orders</a><a href="#rewards">Eco-Rewards</a><a href="#preferences">Preferences</a>
+          <a href="#saved-cart">Saved cart</a><a href="#orders">Orders</a><a href="#rewards">Eco-Rewards</a><a href="#preferences">Preferences</a><a href="#security">Security</a>
         </nav>
 
         <div class="account-grid">
@@ -127,6 +134,21 @@
               <p id="profile-status" class="form-status" role="status" aria-live="polite"></p>
             </form>
           </article>
+
+          <article id="security" class="account-panel account-panel--wide account-panel--security">
+            <div class="account-security-copy">
+              <span class="label">Account security</span>
+              <h3>Change your password</h3>
+              <p class="body-sm">Confirm your current password, then choose a new one with at least 8 characters.</p>
+            </div>
+            <form id="change-password-form" class="account-form account-password-form">
+              <label>Current password<input class="form-input" name="currentPassword" type="password" autocomplete="current-password" minlength="8" maxlength="128" required /></label>
+              <label>New password<input class="form-input" name="newPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" required /></label>
+              <label>Confirm new password<input class="form-input" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" required /></label>
+              <button class="btn btn--primary" type="submit">Update password</button>
+              <p id="password-status" class="form-status" role="status" aria-live="polite"></p>
+            </form>
+          </article>
         </div>
       </section>
     </main>
@@ -136,8 +158,8 @@
       <nav class="footer-nav" aria-label="Footer navigation"><a href="/shop">Shop</a><a href="/eco-rewards">Eco-Rewards</a><a href="/about">About</a><a href="/#contact">Contact</a></nav>
     </footer>
   </div>
-  <script src="/assets/js/account.js"></script>
+  <script src="/assets/js/account.js?v=2"></script>
   <script src="/assets/js/agent-config.js"></script>
-  <script src="/assets/js/agent.js?v=3"></script>
+  <script src="/assets/js/agent.js?v=4"></script>
 </body>
 </html>

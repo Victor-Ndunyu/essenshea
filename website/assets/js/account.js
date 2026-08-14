@@ -4,6 +4,8 @@ const accountDashboard = document.getElementById('account-dashboard');
 const authStatus = document.getElementById('auth-status');
 const CART_KEY = 'essenshea_cart';
 const CHECKOUT_KEY = 'essenshea_checkout_draft';
+const ORDER_REFRESH_KEY = 'essenshea_order_refresh';
+let orderRefreshInFlight = false;
 
 function showAccountView(view) {
   accountLoading.classList.toggle('hidden', view !== 'loading');
@@ -75,7 +77,7 @@ function renderCart(items) {
   });
 }
 
-function renderOrders(orders) {
+function renderOrders(orders, highlightReference) {
   const root = document.getElementById('account-orders');
   root.replaceChildren();
   if (!orders.length) {
@@ -88,6 +90,7 @@ function renderOrders(orders) {
   orders.forEach(function(order) {
     const card = document.createElement('article');
     card.className = 'account-order';
+    if (highlightReference && order.reference === highlightReference) card.classList.add('is-new');
     const header = document.createElement('div');
     header.className = 'account-order__header';
     const identity = document.createElement('div');
@@ -112,6 +115,25 @@ function renderOrders(orders) {
     card.append(header, items, detail);
     root.append(card);
   });
+}
+
+async function refreshOrderHistory(options) {
+  if (orderRefreshInFlight || accountDashboard.classList.contains('hidden')) return;
+  orderRefreshInFlight = true;
+  var root = document.getElementById('account-orders');
+  if (root) root.setAttribute('aria-busy', 'true');
+  try {
+    const account = await requestJson('/api/customer/account');
+    renderOrders(account.orders || [], options && options.reference);
+    if (options && options.scroll) {
+      document.getElementById('orders').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  } catch (error) {
+    if (error.status === 401) showAccountView('auth');
+  } finally {
+    if (root) root.setAttribute('aria-busy', 'false');
+    orderRefreshInFlight = false;
+  }
 }
 
 function renderRewards(rewards) {
@@ -320,6 +342,61 @@ document.getElementById('link-rewards-form').addEventListener('submit', async fu
   }
 });
 
+document.getElementById('change-password-form').addEventListener('submit', async function(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const status = document.getElementById('password-status');
+  const submit = form.querySelector('button[type="submit"]');
+  const currentPassword = form.elements.currentPassword.value;
+  const newPassword = form.elements.newPassword.value;
+  if (newPassword !== form.elements.confirmPassword.value) {
+    return setStatus(status, 'The new passwords do not match.', true);
+  }
+  submit.disabled = true;
+  setStatus(status, 'Updating your password…');
+  try {
+    const data = await requestJson('/api/customer/auth', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'change-password', currentPassword: currentPassword, newPassword: newPassword }),
+    });
+    form.reset();
+    setStatus(status, data.message);
+  } catch (error) {
+    setStatus(status, error.message, true);
+  } finally {
+    submit.disabled = false;
+  }
+});
+
+window.addEventListener('essenshea-order-submitted', function(event) {
+  refreshOrderHistory({ scroll: true, reference: event.detail && event.detail.reference });
+});
+
+window.addEventListener('storage', function(event) {
+  if (event.key !== ORDER_REFRESH_KEY || !event.newValue) return;
+  try {
+    const detail = JSON.parse(event.newValue);
+    refreshOrderHistory({ scroll: false, reference: detail.reference });
+  } catch (error) {
+    refreshOrderHistory({ scroll: false });
+  }
+});
+
+window.addEventListener('focus', function() { refreshOrderHistory({ scroll: false }); });
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible') refreshOrderHistory({ scroll: false });
+});
+
+(function initializeAccountSlideshow() {
+  var slides = Array.from(document.querySelectorAll('.account-slide'));
+  if (slides.length < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var active = 0;
+  window.setInterval(function() {
+    slides[active].classList.remove('is-active');
+    active = (active + 1) % slides.length;
+    slides[active].classList.add('is-active');
+  }, 7000);
+})();
+
 showAccountView('loading');
 loadDashboard();
-

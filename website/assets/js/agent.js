@@ -655,6 +655,13 @@ function submitCartPopup(event) {
   .then(function(result) {
     if (result.success) {
       showSiteNotice(result.message);
+      try {
+        localStorage.setItem('essenshea_order_refresh', JSON.stringify({
+          reference: result.reference || '',
+          at: Date.now(),
+        }));
+      } catch (error) {}
+      window.dispatchEvent(new CustomEvent('essenshea-order-submitted', { detail: result }));
       localStorage.removeItem(CART_STORAGE_KEY);
       if (customerCartIsConnected) {
         fetch('/api/customer/cart', {

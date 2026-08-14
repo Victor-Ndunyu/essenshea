@@ -10,6 +10,18 @@ function cleanText(value: unknown, max: number): string {
   return String(value || '').trim().slice(0, max);
 }
 
+export function cleanReviewText(value: unknown): string {
+  return cleanText(value, 2000)
+    .normalize('NFKC')
+    .replace(/[\u0000-\u001F\u007F\uFFFD\u25A1]/g, ' ')
+    .replace(/!{3,}/g, '!!')
+    .replace(/\?{3,}/g, '??')
+    .replace(/\s+([,.!?;:])/g, '$1')
+    .replace(/([,.!?;:])(?!\s|$)/g, '$1 ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 function authorized(req: NextRequest): boolean {
   const expected = process.env.ECO_REWARDS_ADMIN_KEY || '';
   const supplied = req.headers.get('x-eco-admin-key') || '';
@@ -30,7 +42,9 @@ export async function GET(req: NextRequest) {
   if (limit > 0) query = query.limit(limit);
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: 'Could not load reviews' }, { status: 503 });
-  return NextResponse.json({ reviews: data || [] });
+  return NextResponse.json({
+    reviews: (data || []).map((review) => ({ ...review, text: cleanReviewText(review.text) })),
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -48,7 +62,7 @@ export async function POST(req: NextRequest) {
   if (action === 'add') {
     const author = cleanText(body.author, 120);
     const role = cleanText(body.role, 120);
-    const text = cleanText(body.text, 2000);
+    const text = cleanReviewText(body.text);
     if (!author || !text) return NextResponse.json({ error: 'Author and text are required' }, { status: 400 });
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
