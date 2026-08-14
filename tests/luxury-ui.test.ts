@@ -19,6 +19,9 @@ test('every storefront surface loads the final calm-luxury design layer', async 
   for (const page of pages) {
     const html = await readFile(new URL(`../website/${page}`, import.meta.url), 'utf8');
     assert.match(html, /luxury-refinement\.css\?v=2/, `${page} is missing the current design layer`);
+    if (page !== 'eco-rewards-admin.html') {
+      assert.match(html, /agent\.js\?v=2/, `${page} is missing the current assistant bundle`);
+    }
   }
 });
 
