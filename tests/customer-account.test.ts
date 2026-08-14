@@ -59,13 +59,30 @@ test('customer account storage is ownership-scoped and order history is linked s
   assert.match(lockdown, /set search_path = ''/i);
 });
 
-test('account page exposes saved cart, orders, rewards and preferences', async () => {
+test('account page exposes saved cart, live orders, rewards, preferences and security', async () => {
   const html = await readFile(path.join(root, 'website/account.html'), 'utf8');
   assert.match(html, /id="saved-cart"/);
   assert.match(html, /id="orders"/);
   assert.match(html, /id="rewards"/);
   assert.match(html, /id="preferences"/);
+  assert.match(html, /id="change-password-form"/);
+  assert.match(html, /account-slideshow/);
   assert.match(html, /noindex, nofollow/);
+  const accountScript = await readFile(path.join(root, 'website/assets/js/account.js'), 'utf8');
+  assert.match(accountScript, /essenshea-order-submitted/);
+  assert.match(accountScript, /refreshOrderHistory/);
+});
+
+test('homepage daily edit covers every catalogue and opens shared shop details', async () => {
+  const [html, script] = await Promise.all([
+    readFile(path.join(root, 'website/index.html'), 'utf8'),
+    readFile(path.join(root, 'website/assets/js/featured-care.js'), 'utf8'),
+  ]);
+  assert.equal((html.match(/class="collection-tile"/g) || []).length, 9);
+  assert.match(html, /id="featured-care-grid"/);
+  assert.match(script, /Africa\/Nairobi/);
+  assert.match(script, /\/shop\?product=/);
+  assert.match(script, /body-oils-and-tonics/);
 });
 
 test('assistant uses the miniature angel image instead of an emoji glyph', async () => {
