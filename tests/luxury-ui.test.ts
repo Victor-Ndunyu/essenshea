@@ -34,3 +34,27 @@ test('the final design layer keeps content visible and styles interactive contro
   assert.match(css, /\.contact-card\s*\{[\s\S]*grid-template-columns/);
   assert.match(css, /@media \(max-width: 560px\)/);
 });
+
+test('navigation keeps the original understated link treatment', async () => {
+  const css = await readFile(
+    new URL('../website/assets/css/luxury-refinement.css', import.meta.url),
+    'utf8',
+  );
+
+  assert.match(css, /\.topnav\s*\{[\s\S]*background:\s*transparent/);
+  assert.match(css, /\.topnav a\s*\{[\s\S]*border-bottom:\s*1px solid transparent/);
+  assert.match(css, /border-bottom-color:\s*var\(--gold\)/);
+});
+
+test('angel artwork and mobile assistant have deliberate detail', async () => {
+  const [css, svg] = await Promise.all([
+    readFile(new URL('../website/assets/css/luxury-refinement.css', import.meta.url), 'utf8'),
+    readFile(new URL('../website/assets/images/angel-assistant.svg', import.meta.url), 'utf8'),
+  ]);
+
+  assert.match(svg, /id="robe"/);
+  assert.match(svg, /gold halo, leafy wings/);
+  assert.match(css, /\.agent-launcher::after/);
+  assert.match(css, /env\(safe-area-inset-bottom\)/);
+  assert.match(css, /\.agent-quick-actions\s*\{[\s\S]*overflow-x:\s*auto/);
+});
