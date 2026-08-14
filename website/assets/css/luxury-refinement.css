@@ -4,6 +4,7 @@
  */
 
 :root {
+  color-scheme: only light;
   --ivory: #faf8f3;
   --ink: #24251f;
   --ink-soft: rgba(36, 37, 31, 0.69);
@@ -25,14 +26,14 @@
 }
 
 html {
-  background: var(--ivory);
+  background: var(--ivory) !important;
 }
 
 body {
   color: var(--ink);
   background:
     radial-gradient(circle at 92% -8%, rgba(226, 212, 187, 0.24), transparent 32rem),
-    var(--ivory);
+    var(--ivory) !important;
   font-family: var(--font-body);
   font-size: 16px;
   font-weight: 400;
@@ -837,6 +838,8 @@ body {
   }
 
   .topbar {
+    position: relative;
+    z-index: 40;
     min-height: 74px;
     flex-wrap: wrap;
   }
@@ -848,34 +851,84 @@ body {
     min-height: 44px;
     border: 1px solid var(--ink-border);
     border-radius: 50%;
+    background: rgba(255, 254, 250, 0.72);
+    box-shadow: 0 8px 22px rgba(36, 37, 31, 0.06);
+    transition: color 180ms ease, background 180ms ease, transform 180ms ease;
+  }
+
+  .nav-toggle[aria-expanded='true'] {
+    color: var(--white);
+    background: var(--olive);
+    transform: rotate(90deg);
   }
 
   .topnav {
     display: none;
-    width: 100%;
-    gap: 0;
-    padding: 8px 0 4px;
-    border-top: 1px solid var(--ink-border);
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    right: 0;
+    width: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    padding: 18px;
+    border: 1px solid rgba(36, 37, 31, 0.1);
+    border-radius: 22px;
+    background: rgba(250, 248, 243, 0.98);
+    box-shadow: 0 24px 60px rgba(36, 37, 31, 0.18);
+    backdrop-filter: blur(18px);
+  }
+
+  .topnav::before {
+    content: 'Explore Essenshea';
+    grid-column: 1 / -1;
+    margin-bottom: 2px;
+    color: var(--gold);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
   }
 
   .topnav.is-open {
     display: grid;
+    animation: nav-panel-in 180ms ease-out both;
   }
 
   .topnav a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
     width: 100%;
-    padding: 13px 2px 11px;
-    border-bottom: 1px solid rgba(36, 37, 31, 0.08);
+    min-height: 52px;
+    padding: 12px 13px;
+    border: 1px solid rgba(36, 37, 31, 0.08);
+    border-radius: 14px;
+    background: rgba(255, 254, 250, 0.86);
     text-align: left;
+  }
+
+  .topnav a::after {
+    content: '↗';
+    color: var(--gold);
+    font-size: 0.9rem;
+  }
+
+  .topnav a:last-child {
+    grid-column: 1 / -1;
   }
 
   .topnav a:hover,
   .topnav a[aria-current='page'] {
-    border-bottom-color: var(--gold);
+    border-color: rgba(163, 131, 87, 0.34);
     color: var(--olive);
+    background: #f1eadf;
+  }
+
+  @keyframes nav-panel-in {
+    from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
   }
 
   .hero,
@@ -898,6 +951,32 @@ body {
   .eco-hero,
   .category-hero {
     padding: 44px 0 64px !important;
+  }
+
+  .hero,
+  .section,
+  .asymmetric,
+  #craft {
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  main .hero__content > *,
+  main .hero__visual,
+  main .section > *,
+  main .asymmetric > *,
+  main .product-trio > *,
+  main .collection-grid > *,
+  main .instagram-strip > * {
+    animation: none !important;
+    animation-timeline: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .product-card {
+    content-visibility: visible;
+    contain-intrinsic-size: auto;
   }
 
   .hero__visual,
@@ -985,7 +1064,7 @@ body {
   .site-footer { grid-template-columns: 1fr; gap: 30px; }
   .agent-launcher {
     right: max(14px, env(safe-area-inset-right));
-    bottom: max(14px, env(safe-area-inset-bottom));
+    bottom: calc(max(14px, env(safe-area-inset-bottom)) + var(--agent-viewport-bottom, 0px));
     width: 60px;
     min-width: 60px;
     height: 60px;
@@ -1022,7 +1101,7 @@ body {
   .agent-panel {
     left: 10px;
     right: 10px;
-    bottom: calc(84px + env(safe-area-inset-bottom));
+    bottom: calc(84px + env(safe-area-inset-bottom) + var(--agent-viewport-bottom, 0px));
     width: auto;
     max-height: min(720px, calc(100dvh - 104px - env(safe-area-inset-bottom)));
     border: 1px solid rgba(36, 37, 31, 0.1);

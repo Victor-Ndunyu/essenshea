@@ -18,9 +18,10 @@ const pages = [
 test('every storefront surface loads the final calm-luxury design layer', async () => {
   for (const page of pages) {
     const html = await readFile(new URL(`../website/${page}`, import.meta.url), 'utf8');
-    assert.match(html, /luxury-refinement\.css\?v=2/, `${page} is missing the current design layer`);
+    assert.match(html, /luxury-refinement\.css\?v=3/, `${page} is missing the current design layer`);
+    assert.match(html, /name="color-scheme" content="light only"/, `${page} can be auto-darkened`);
     if (page !== 'eco-rewards-admin.html') {
-      assert.match(html, /agent\.js\?v=2/, `${page} is missing the current assistant bundle`);
+      assert.match(html, /agent\.js\?v=3/, `${page} is missing the current assistant bundle`);
     }
   }
 });
@@ -47,6 +48,8 @@ test('navigation keeps the original understated link treatment', async () => {
   assert.match(css, /\.topnav\s*\{[\s\S]*background:\s*transparent/);
   assert.match(css, /\.topnav a\s*\{[\s\S]*border-bottom:\s*1px solid transparent/);
   assert.match(css, /border-bottom-color:\s*var\(--gold\)/);
+  assert.match(css, /content:\s*'Explore Essenshea'/);
+  assert.match(css, /grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
 });
 
 test('angel artwork and mobile assistant have deliberate detail', async () => {
@@ -62,4 +65,9 @@ test('angel artwork and mobile assistant have deliberate detail', async () => {
   assert.match(css, /\.agent-launcher::after/);
   assert.match(css, /env\(safe-area-inset-bottom\)/);
   assert.match(css, /\.agent-quick-actions\s*\{[\s\S]*overflow-x:\s*auto/);
+  assert.match(css, /--agent-viewport-bottom/);
+  assert.match(agent, /window\.visualViewport/);
+  assert.match(agent, /enhanceMobileNavigation\(\)/);
+  assert.match(css, /color-scheme:\s*only light/);
+  assert.match(css, /main \.section > \*[\s\S]*opacity:\s*1 !important/);
 });
