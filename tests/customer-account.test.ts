@@ -67,10 +67,20 @@ test('account page exposes saved cart, live orders, rewards, preferences and sec
   assert.match(html, /id="preferences"/);
   assert.match(html, /id="change-password-form"/);
   assert.match(html, /account-slideshow/);
+  assert.equal((html.match(/data-account-section=/g) || []).length, 5);
+  assert.match(html, /role="tablist"/);
+  assert.match(html, /id="account-cart-visual"/);
+  assert.match(html, />Drop</);
+  assert.match(html, />Inspect</);
+  assert.match(html, />Sanitise</);
+  assert.match(html, />Refill</);
   assert.match(html, /noindex, nofollow/);
   const accountScript = await readFile(path.join(root, 'website/assets/js/account.js'), 'utf8');
   assert.match(accountScript, /essenshea-order-submitted/);
   assert.match(accountScript, /refreshOrderHistory/);
+  assert.match(accountScript, /activateAccountSection/);
+  assert.match(accountScript, /renderCartVisual/);
+  assert.match(accountScript, /\/api\/catalog/);
 });
 
 test('homepage daily edit covers every catalogue and opens shared shop details', async () => {
@@ -83,6 +93,31 @@ test('homepage daily edit covers every catalogue and opens shared shop details',
   assert.match(script, /Africa\/Nairobi/);
   assert.match(script, /\/shop\?product=/);
   assert.match(script, /body-oils-and-tonics/);
+});
+
+test('friendly care wording replaces ritual language across the storefront', async () => {
+  const files = [
+    'website/index.html',
+    'website/account.html',
+    'website/assets/js/featured-care.js',
+    'website/assets/js/shop.js',
+  ];
+  for (const file of files) {
+    const content = await readFile(path.join(root, file), 'utf8');
+    assert.doesNotMatch(content, /\brituals?\b/i, `${file} still contains ritual wording`);
+  }
+});
+
+test('About page centres its section copy and uses the botanical hero image', async () => {
+  const [html, css] = await Promise.all([
+    readFile(path.join(root, 'website/about.html'), 'utf8'),
+    readFile(path.join(root, 'website/assets/css/luxury-refinement.css'), 'utf8'),
+  ]);
+  assert.match(html, /about-section-heading/);
+  assert.match(html, /about-philosophy__support/);
+  assert.match(html, /lavender_whipped_shea_butter_250ml\.jpg/);
+  assert.match(css, /\.about-philosophy \.label,[\s\S]*margin-inline:\s*auto/);
+  assert.match(css, /\.about-philosophy \.body,[\s\S]*text-align:\s*center/);
 });
 
 test('assistant uses the miniature angel image instead of an emoji glyph', async () => {

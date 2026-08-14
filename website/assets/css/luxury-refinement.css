@@ -594,6 +594,33 @@ body {
 
 .about-philosophy {
   max-width: 760px;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.about-philosophy .label,
+.about-section-heading .label {
+  margin-inline: auto;
+}
+
+.about-philosophy .body,
+.about-philosophy .body-lg {
+  margin-inline: auto;
+  text-align: center;
+}
+
+.about-philosophy__support {
+  margin-top: 20px;
+}
+
+.about-section-heading {
+  max-width: 820px;
+  margin: 0 auto 48px;
+  text-align: center;
+}
+
+.about-section-heading .display-md {
+  margin-inline: auto;
 }
 
 .principles-list {
@@ -839,6 +866,127 @@ body {
 
 .account-dashboard {
   padding: clamp(54px, 7vw, 88px) 0 0;
+}
+
+.account-section-nav {
+  gap: 10px;
+  padding-bottom: 22px;
+}
+
+.account-section-nav button {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 10px 17px;
+  border: 1px solid rgba(36, 37, 31, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 254, 250, 0.72);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 180ms ease, background 180ms ease, color 180ms ease;
+}
+
+.account-section-nav button:hover,
+.account-section-nav button:focus-visible {
+  border-color: var(--gold);
+  outline: none;
+}
+
+.account-section-nav button.is-active {
+  border-color: var(--olive);
+  background: var(--olive);
+  color: var(--white);
+}
+
+.account-workspace {
+  min-height: 520px;
+}
+
+.account-workspace > .account-panel {
+  width: 100%;
+  min-height: 500px;
+}
+
+.account-panel-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.78fr);
+  gap: clamp(30px, 6vw, 78px);
+  align-items: stretch;
+  min-height: 430px;
+}
+
+.account-panel__content {
+  align-self: center;
+  min-width: 0;
+}
+
+.account-section-visual {
+  position: relative;
+  min-height: 390px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(226, 212, 187, 0.44), transparent 48%),
+    #ece6db;
+}
+
+.account-section-visual__logo {
+  width: min(58%, 230px);
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 20px 50px rgba(36, 37, 31, 0.12);
+}
+
+.account-section-visual__caption {
+  position: absolute;
+  bottom: 24px;
+  color: var(--olive);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.account-cart-slide {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.account-cart-slide.is-active { opacity: 1; }
+.account-cart-slide img { width: 100%; height: 100%; object-fit: cover; }
+
+.account-cart-slide::after {
+  content: '';
+  position: absolute;
+  inset: 48% 0 0;
+  background: linear-gradient(transparent, rgba(22, 25, 19, 0.68));
+}
+
+.account-cart-slide figcaption {
+  position: absolute;
+  z-index: 1;
+  left: 22px;
+  right: 22px;
+  bottom: 20px;
+  color: var(--white);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.account-eco-cycle {
+  align-self: stretch;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.account-eco-cycle div {
+  min-height: 185px;
 }
 
 .account-panel--security {
@@ -1125,6 +1273,10 @@ body {
   .display-md { font-size: clamp(2.2rem, 10vw, 3.25rem); }
 
   .account-panel--security { grid-template-columns: 1fr; }
+  .account-panel-stage { grid-template-columns: 1fr; min-height: 0; }
+  .account-section-visual { min-height: 330px; }
+  .account-workspace,
+  .account-workspace > .account-panel { min-height: 0; }
 
   .featured-care-head {
     grid-template-columns: 1fr;
@@ -1202,6 +1354,11 @@ body {
   .account-benefits { grid-template-columns: 1fr 1fr; }
   .account-benefits span { min-height: 74px; padding: 14px; }
   .account-slideshow { min-height: 220px; border-radius: 20px; }
+  .account-section-nav { margin-inline: -2px; }
+  .account-section-nav button { min-height: 42px; padding: 9px 14px; }
+  .account-section-visual { min-height: 290px; border-radius: 18px; }
+  .account-eco-cycle { grid-template-columns: 1fr 1fr; }
+  .account-eco-cycle div { min-height: 148px; padding: 17px; }
   .contact-card { margin-inline: -4px; padding: 26px 18px; border-radius: 22px; }
   .contact-card .form-wrap { padding: 22px 18px; }
   .site-footer { grid-template-columns: 1fr; gap: 30px; }
@@ -1340,5 +1497,10 @@ body {
   *, *::before, *::after {
     animation: none !important;
     scroll-behavior: auto !important;
+  }
+
+  .account-cart-slide,
+  .account-slide {
+    transition: none !important;
   }
 }

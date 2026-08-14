@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="icon" href="/assets/images/star-mark.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/assets/css/style-new.css" />
-  <link rel="stylesheet" href="/assets/css/luxury-refinement.css?v=4" />
+  <link rel="stylesheet" href="/assets/css/luxury-refinement.css?v=5" />
 </head>
 <body>
   <div class="page-shell">
@@ -39,7 +39,7 @@
         </div>
         <div class="account-visual">
           <div class="account-slideshow" aria-label="Essenshea care collection">
-            <figure class="account-slide is-active"><img src="../Essenshea_Catalogue/Body_Butters_and_Balms/images/lavender_whipped_shea_butter_250ml.jpg" alt="Lavender whipped shea butter" /><figcaption>Quiet rituals</figcaption></figure>
+            <figure class="account-slide is-active"><img src="../Essenshea_Catalogue/Body_Butters_and_Balms/images/lavender_whipped_shea_butter_250ml.jpg" alt="Lavender whipped shea butter" /><figcaption>Quiet care</figcaption></figure>
             <figure class="account-slide"><img src="../Essenshea_Catalogue/Gift_Sets/images/gift_set_2.jpg" alt="Essenshea gift set" /><figcaption>Thoughtful gifting</figcaption></figure>
             <figure class="account-slide"><img src="../Essenshea_Catalogue/Body_Oils_and_Tonics/images/fruits_lilies_body_oil_150ml.jpg" alt="Fruits and lilies body oil" /><figcaption>Personal care</figcaption></figure>
           </div>
@@ -88,38 +88,59 @@
           <button id="account-signout" class="btn btn--secondary" type="button">Sign out</button>
         </div>
 
-        <nav class="account-section-nav" aria-label="Account sections">
-          <a href="#saved-cart">Saved cart</a><a href="#orders">Orders</a><a href="#rewards">Eco-Rewards</a><a href="#preferences">Preferences</a><a href="#security">Security</a>
+        <nav class="account-section-nav" aria-label="Account sections" role="tablist">
+          <button id="account-tab-saved-cart" class="is-active" type="button" role="tab" aria-selected="true" aria-controls="saved-cart" data-account-section="saved-cart">Saved cart</button>
+          <button id="account-tab-orders" type="button" role="tab" aria-selected="false" aria-controls="orders" data-account-section="orders" tabindex="-1">Orders</button>
+          <button id="account-tab-rewards" type="button" role="tab" aria-selected="false" aria-controls="rewards" data-account-section="rewards" tabindex="-1">Eco-Rewards</button>
+          <button id="account-tab-preferences" type="button" role="tab" aria-selected="false" aria-controls="preferences" data-account-section="preferences" tabindex="-1">Preferences</button>
+          <button id="account-tab-security" type="button" role="tab" aria-selected="false" aria-controls="security" data-account-section="security" tabindex="-1">Security</button>
         </nav>
 
-        <div class="account-grid">
-          <article id="saved-cart" class="account-panel account-panel--cart">
-            <span class="label">Saved cart</span>
-            <h3>Your request list</h3>
-            <div id="account-cart" class="account-list"></div>
-            <a class="btn btn--primary" href="/shop">Continue shopping</a>
+        <div class="account-workspace">
+          <article id="saved-cart" class="account-panel account-panel--cart" role="tabpanel" aria-labelledby="account-tab-saved-cart" tabindex="0">
+            <div class="account-panel-stage">
+              <div class="account-panel__content">
+                <span class="label">Saved cart</span>
+                <h3>Your request list</h3>
+                <div id="account-cart" class="account-list"></div>
+                <a class="btn btn--primary" href="/shop">Continue shopping</a>
+              </div>
+              <aside id="account-cart-visual" class="account-section-visual" aria-label="Saved cart product preview">
+                <img class="account-section-visual__logo" src="/assets/images/essenshea-logo.jpg" alt="Essenshea" />
+              </aside>
+            </div>
           </article>
 
-          <article id="rewards" class="account-panel account-panel--rewards">
-            <span class="label">Eco-Rewards</span>
-            <h3>Your digital card</h3>
-            <div id="account-rewards"></div>
-            <form id="link-rewards-form" class="account-form hidden">
-              <p class="body-sm">Link the card issued at the shop once. Your private code prevents someone else from claiming it.</p>
-              <label>Registered phone number<input class="form-input" name="phone" type="tel" autocomplete="tel" required /></label>
-              <label>Private access code<input class="form-input" name="code" type="password" autocomplete="one-time-code" required /></label>
-              <button class="btn btn--secondary" type="submit">Link my card</button>
-            </form>
-            <p id="rewards-status" class="form-status" role="status" aria-live="polite"></p>
-          </article>
-
-          <article id="orders" class="account-panel account-panel--wide">
+          <article id="orders" class="account-panel hidden" role="tabpanel" aria-labelledby="account-tab-orders" tabindex="0">
             <span class="label">Order history</span>
             <h3>Follow your requests</h3>
             <div id="account-orders" class="account-orders"></div>
           </article>
 
-          <article id="preferences" class="account-panel account-panel--wide">
+          <article id="rewards" class="account-panel account-panel--rewards hidden" role="tabpanel" aria-labelledby="account-tab-rewards" tabindex="0">
+            <div class="account-panel-stage account-panel-stage--rewards">
+              <div class="account-panel__content">
+                <span class="label">Eco-Rewards</span>
+                <h3>Your digital card</h3>
+                <div id="account-rewards"></div>
+                <form id="link-rewards-form" class="account-form hidden">
+                  <p class="body-sm">Link the card issued at the shop once. Your private code prevents someone else from claiming it.</p>
+                  <label>Registered phone number<input class="form-input" name="phone" type="tel" autocomplete="tel" required /></label>
+                  <label>Private access code<input class="form-input" name="code" type="password" autocomplete="one-time-code" required /></label>
+                  <button class="btn btn--secondary" type="submit">Link my card</button>
+                </form>
+                <p id="rewards-status" class="form-status" role="status" aria-live="polite"></p>
+              </div>
+              <aside class="eco-cycle account-eco-cycle" aria-label="Eco-Rewards refill cycle">
+                <div><span>01</span><strong>Drop</strong><small>Bring or deliver your labelled Essenshea container.</small></div>
+                <div><span>02</span><strong>Inspect</strong><small>We approve labelled containers that are in good condition.</small></div>
+                <div><span>03</span><strong>Sanitise</strong><small>Approved containers are safely cleaned and prepared.</small></div>
+                <div><span>04</span><strong>Refill</strong><small>Complete your refill and collect your next reward punch.</small></div>
+              </aside>
+            </div>
+          </article>
+
+          <article id="preferences" class="account-panel hidden" role="tabpanel" aria-labelledby="account-tab-preferences" tabindex="0">
             <span class="label">Personal details</span>
             <h3>Make your next request faster</h3>
             <form id="profile-form" class="account-profile-form">
@@ -135,7 +156,7 @@
             </form>
           </article>
 
-          <article id="security" class="account-panel account-panel--wide account-panel--security">
+          <article id="security" class="account-panel account-panel--security hidden" role="tabpanel" aria-labelledby="account-tab-security" tabindex="0">
             <div class="account-security-copy">
               <span class="label">Account security</span>
               <h3>Change your password</h3>
@@ -158,7 +179,7 @@
       <nav class="footer-nav" aria-label="Footer navigation"><a href="/shop">Shop</a><a href="/eco-rewards">Eco-Rewards</a><a href="/about">About</a><a href="/#contact">Contact</a></nav>
     </footer>
   </div>
-  <script src="/assets/js/account.js?v=2"></script>
+  <script src="/assets/js/account.js?v=3"></script>
   <script src="/assets/js/agent-config.js"></script>
   <script src="/assets/js/agent.js?v=4"></script>
 </body>
