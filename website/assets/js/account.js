@@ -6,6 +6,7 @@ const CART_KEY = 'essenshea_cart';
 const CHECKOUT_KEY = 'essenshea_checkout_draft';
 const ORDER_REFRESH_KEY = 'essenshea_order_refresh';
 let orderRefreshInFlight = false;
+let cartVisualTimer = null;
 
 function showAccountView(view) {
   accountLoading.classList.toggle('hidden', view !== 'loading');
@@ -55,9 +56,89 @@ function switchAuthTab(tab) {
   setStatus(authStatus, '');
 }
 
+function activateAccountSection(sectionId, options) {
+  const panel = document.getElementById(sectionId);
+  if (!panel || !panel.matches('.account-panel')) return;
+  document.querySelectorAll('.account-panel[role="tabpanel"]').forEach(function(section) {
+    const active = section.id === sectionId;
+    section.classList.toggle('hidden', !active);
+    section.setAttribute('aria-hidden', String(!active));
+  });
+  document.querySelectorAll('[data-account-section]').forEach(function(button) {
+    const active = button.dataset.accountSection === sectionId;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-selected', String(active));
+    button.tabIndex = active ? 0 : -1;
+  });
+  if (!options || options.updateHash !== false) {
+    window.history.replaceState(null, '', '#' + sectionId);
+  }
+  if (options && options.focusPanel) panel.focus({ preventScroll: true });
+}
+
+function catalogueProductId(categoryTitle, productName) {
+  return String(categoryTitle + '-' + productName)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
+
+function addCartImages(items, catalogue) {
+  const products = [];
+  (catalogue.categories || []).forEach(function(category) {
+    (category.products || []).forEach(function(product) {
+      products.push({
+        id: catalogueProductId(category.title, product.name),
+        slug: product.slug,
+        image: product.image,
+      });
+    });
+  });
+  return items.map(function(item) {
+    const match = products.find(function(product) {
+      return (item.slug && product.slug === item.slug) || product.id === item.id;
+    });
+    return Object.assign({}, item, { image: match && match.image ? match.image : '' });
+  });
+}
+
+function renderCartVisual(items) {
+  const root = document.getElementById('account-cart-visual');
+  if (!root) return;
+  if (cartVisualTimer) window.clearInterval(cartVisualTimer);
+  cartVisualTimer = null;
+  const pictured = items.filter(function(item) { return item.image; });
+  if (!pictured.length) {
+    root.innerHTML = '<img class="account-section-visual__logo" src="/assets/images/essenshea-logo.jpg" alt="Essenshea" /><span class="account-section-visual__caption">Your care, kept together</span>';
+    return;
+  }
+  root.replaceChildren();
+  const slides = pictured.map(function(item, index) {
+    const figure = document.createElement('figure');
+    figure.className = 'account-cart-slide' + (index === 0 ? ' is-active' : '');
+    const image = document.createElement('img');
+    image.src = item.image;
+    image.alt = item.title;
+    image.loading = index === 0 ? 'eager' : 'lazy';
+    const caption = document.createElement('figcaption');
+    caption.textContent = item.quantity + ' × ' + item.title;
+    figure.append(image, caption);
+    root.append(figure);
+    return figure;
+  });
+  if (slides.length < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let active = 0;
+  cartVisualTimer = window.setInterval(function() {
+    slides[active].classList.remove('is-active');
+    active = (active + 1) % slides.length;
+    slides[active].classList.add('is-active');
+  }, 5200);
+}
+
 function renderCart(items) {
   const root = document.getElementById('account-cart');
   root.replaceChildren();
+  renderCartVisual(items);
   if (!items.length) {
     const empty = document.createElement('p');
     empty.className = 'account-empty';
@@ -126,7 +207,8 @@ async function refreshOrderHistory(options) {
     const account = await requestJson('/api/customer/account');
     renderOrders(account.orders || [], options && options.reference);
     if (options && options.scroll) {
-      document.getElementById('orders').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      activateAccountSection('orders');
+      document.querySelector('.account-section-nav').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   } catch (error) {
     if (error.status === 401) showAccountView('auth');
@@ -188,12 +270,13 @@ function fillProfile(profile) {
 async function loadDashboard() {
   showAccountView('loading');
   try {
-    const [account, cart] = await Promise.all([
+    const [account, cart, catalogue] = await Promise.all([
       requestJson('/api/customer/account'),
       requestJson('/api/customer/cart').catch(function(error) {
         if (error.status === 401) return { items: [] };
         throw error;
       }),
+      requestJson('/api/catalog').catch(function() { return { categories: [] }; }),
     ]);
     document.getElementById('account-welcome-name').textContent = account.profile.full_name
       ? 'Hello, ' + account.profile.full_name.split(' ')[0] + '.'
@@ -202,8 +285,10 @@ async function loadDashboard() {
     fillProfile(account.profile);
     renderOrders(account.orders || []);
     renderRewards(account.rewards);
-    renderCart(cart.items || []);
+    renderCart(addCartImages(cart.items || [], catalogue));
     showAccountView('dashboard');
+    const requestedSection = window.location.hash.replace('#', '');
+    activateAccountSection(document.getElementById(requestedSection) ? requestedSection : 'saved-cart', { updateHash: false });
   } catch (error) {
     if (error.status === 401) {
       showAccountView('auth');
@@ -217,6 +302,41 @@ async function loadDashboard() {
 document.querySelectorAll('[data-auth-tab]').forEach(function(button) {
   button.addEventListener('click', function() { switchAuthTab(button.dataset.authTab); });
 });
+
+document.querySelectorAll('[data-account-section]').forEach(function(button) {
+  button.addEventListener('click', function() {
+    activateAccountSection(button.dataset.accountSection);
+  });
+  button.addEventListener('keydown', function(event) {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const tabs = Array.from(document.querySelectorAll('[data-account-section]'));
+    const current = tabs.indexOf(button);
+    const next = event.key === 'Home' ? 0
+      : event.key === 'End' ? tabs.length - 1
+      : event.key === 'ArrowRight' ? (current + 1) % tabs.length
+      : (current - 1 + tabs.length) % tabs.length;
+    tabs[next].focus();
+    activateAccountSection(tabs[next].dataset.accountSection);
+  });
+});
+
+window.addEventListener('hashchange', function() {
+  const section = window.location.hash.replace('#', '');
+  if (document.getElementById(section)?.matches('.account-panel')) {
+    activateAccountSection(section, { updateHash: false });
+  }
+});
+
+async function refreshSavedCart() {
+  if (accountDashboard.classList.contains('hidden')) return;
+  try {
+    const [cart, catalogue] = await Promise.all([
+      requestJson('/api/customer/cart'), requestJson('/api/catalog'),
+    ]);
+    renderCart(addCartImages(cart.items || [], catalogue));
+  } catch (error) {}
+}
 
 document.getElementById('signin-form').addEventListener('submit', async function(event) {
   event.preventDefault();
@@ -373,6 +493,10 @@ window.addEventListener('essenshea-order-submitted', function(event) {
 });
 
 window.addEventListener('storage', function(event) {
+  if (event.key === CART_KEY) {
+    refreshSavedCart();
+    return;
+  }
   if (event.key !== ORDER_REFRESH_KEY || !event.newValue) return;
   try {
     const detail = JSON.parse(event.newValue);
@@ -381,6 +505,8 @@ window.addEventListener('storage', function(event) {
     refreshOrderHistory({ scroll: false });
   }
 });
+
+window.addEventListener('essenshea-cart-update', refreshSavedCart);
 
 window.addEventListener('focus', function() { refreshOrderHistory({ scroll: false }); });
 document.addEventListener('visibilitychange', function() {

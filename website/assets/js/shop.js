@@ -109,8 +109,8 @@ const concernOptions = [
 ];
 
 const routineOptions = [
-  { id: 'dry-skin', title: 'Daily moisture ritual', copy: 'Layer a nourishing oil with a body butter to help seal in moisture.', concerns: ['dry-skin'], categories: ['body-oils-and-tonics', 'body-butters-and-balms'], limit: 2 },
-  { id: 'hair-growth', title: 'Scalp and hair ritual', copy: 'Pair targeted scalp care with a nourishing hair product for a simple weekly routine.', concerns: ['hair-growth', 'scalp-comfort'], categories: ['haircare', 'carrier-oils'], limit: 2 },
+  { id: 'dry-skin', title: 'Daily moisture pairing', copy: 'Layer a nourishing oil with a body butter to help seal in moisture.', concerns: ['dry-skin'], categories: ['body-oils-and-tonics', 'body-butters-and-balms'], limit: 2 },
+  { id: 'hair-growth', title: 'Scalp and hair pairing', copy: 'Pair targeted scalp care with a nourishing hair product for a simple weekly routine.', concerns: ['hair-growth', 'scalp-comfort'], categories: ['haircare', 'carrier-oils'], limit: 2 },
   { id: 'glow', title: 'Body glow pairing', copy: 'Combine lightweight body care products selected for radiance and everyday softness.', concerns: ['glow'], categories: ['body-oils-and-tonics', 'body-butters-and-balms'], limit: 2 },
   { id: 'gift', title: 'Easy gifting edit', copy: 'A small, thoughtful selection that makes choosing an Essenshea gift less complicated.', concerns: ['gifts', 'fragrance'], categories: ['gift-sets', 'fragrances'], limit: 2 },
 ];

@@ -94,7 +94,7 @@
     var seed = dayNumber(day);
     var choices = [
       { product: pick(calmPool, seed, 0), theme: 'Calm & lavender' },
-      { product: pick(hairPool, seed, 1), theme: 'Hair & scalp ritual' },
+      { product: pick(hairPool, seed, 1), theme: 'Hair & scalp care' },
       { product: pick(bodyOilPool, seed, 2), theme: 'Body oil edit' },
     ].filter(function(choice) { return choice.product; });
 
