@@ -18,7 +18,7 @@ const pages = [
 test('every storefront surface loads the final calm-luxury design layer', async () => {
   for (const page of pages) {
     const html = await readFile(new URL(`../website/${page}`, import.meta.url), 'utf8');
-    assert.match(html, /luxury-refinement\.css\?v=5/, `${page} is missing the current design layer`);
+    assert.match(html, /luxury-refinement\.css\?v=6/, `${page} is missing the current design layer`);
     assert.match(html, /name="color-scheme" content="light only"/, `${page} can be auto-darkened`);
     if (page !== 'eco-rewards-admin.html') {
       assert.match(html, /agent\.js\?v=4/, `${page} is missing the current assistant bundle`);
@@ -70,4 +70,19 @@ test('angel artwork and mobile assistant have deliberate detail', async () => {
   assert.match(agent, /enhanceMobileNavigation\(\)/);
   assert.match(css, /color-scheme:\s*only light/);
   assert.match(css, /main \.section > \*[\s\S]*opacity:\s*1 !important/);
+});
+
+test('mobile Why Essenshea rail reveals a complete premium catalogue menu', async () => {
+  const [html, css] = await Promise.all([
+    readFile(new URL('../website/index.html', import.meta.url), 'utf8'),
+    readFile(new URL('../website/assets/css/luxury-refinement.css', import.meta.url), 'utf8'),
+  ]);
+
+  assert.match(html, /class="asymmetric craft-rail"/);
+  assert.match(html, /class="craft-catalogue"/);
+  assert.equal((html.match(/class="craft-catalogue__nav"[\s\S]*?<\/nav>/)?.[0].match(/<a href=/g) || []).length, 9);
+  assert.match(html, /Swipe to explore catalogues/);
+  assert.match(css, /#craft \.craft-rail\s*\{[\s\S]*overflow-x:\s*auto/);
+  assert.match(css, /scroll-snap-type:\s*inline mandatory/);
+  assert.match(css, /grid-auto-columns:\s*calc\(100% - 34px\)/);
 });
