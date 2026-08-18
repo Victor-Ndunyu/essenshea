@@ -293,6 +293,10 @@ body {
   gap: 18px;
 }
 
+.craft-story { display: contents; }
+.craft-catalogue,
+.craft-rail-cue { display: none; }
+
 .product-trio,
 .collection-grid,
 .catalog-collections,
@@ -1272,6 +1276,214 @@ body {
   .display-lg { max-width: 15ch; font-size: clamp(2.7rem, 12vw, 4rem); }
   .display-md { font-size: clamp(2.2rem, 10vw, 3.25rem); }
 
+  #craft {
+    width: 100%;
+    min-width: 0;
+    padding-top: 46px;
+  }
+
+  #craft .craft-rail {
+    display: grid;
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: calc(100% - 34px);
+    gap: 14px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 1px 18px;
+    scroll-padding-inline: 1px;
+    scroll-snap-type: inline mandatory;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #craft .craft-rail::-webkit-scrollbar { display: none; }
+
+  .craft-story,
+  .craft-catalogue {
+    display: grid;
+    min-width: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    border-radius: 26px;
+    overflow: hidden;
+  }
+
+  .craft-story {
+    grid-template-rows: auto 1fr;
+    background: rgba(241, 237, 228, 0.76);
+    border: 1px solid rgba(163, 131, 87, 0.16);
+    box-shadow: 0 20px 54px rgba(43, 43, 36, 0.09);
+  }
+
+  #craft .craft-story .asymmetric__visual {
+    width: 100%;
+    max-height: none;
+    min-height: 0;
+    aspect-ratio: 16 / 10;
+    border-radius: 0;
+  }
+
+  #craft .craft-story .asymmetric__copy {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    padding: clamp(28px, 7vw, 42px) clamp(22px, 6vw, 34px) clamp(32px, 8vw, 48px);
+  }
+
+  #craft .craft-story .display-lg {
+    max-width: 12ch;
+    margin-right: 0;
+    overflow-wrap: normal;
+  }
+
+  .craft-catalogue {
+    position: relative;
+    align-content: start;
+    padding: clamp(30px, 7vw, 42px) clamp(20px, 5vw, 30px);
+    color: #fffaf0;
+    border: 1px solid rgba(223, 198, 150, 0.24);
+    background:
+      radial-gradient(circle at 92% 7%, rgba(202, 172, 118, 0.23), transparent 28%),
+      linear-gradient(155deg, #414a35 0%, #263020 58%, #1d241a 100%);
+    box-shadow: 0 24px 58px rgba(33, 39, 28, 0.24);
+  }
+
+  .craft-catalogue::before {
+    content: '';
+    position: absolute;
+    top: -54px;
+    right: -48px;
+    width: 170px;
+    height: 170px;
+    border: 1px solid rgba(227, 205, 165, 0.15);
+    border-radius: 50%;
+    box-shadow: 0 0 0 28px rgba(227, 205, 165, 0.035), 0 0 0 58px rgba(227, 205, 165, 0.025);
+    pointer-events: none;
+  }
+
+  .craft-catalogue__intro { position: relative; z-index: 1; }
+
+  .craft-catalogue__eyebrow {
+    color: #d8bd8b;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.19em;
+    text-transform: uppercase;
+  }
+
+  .craft-catalogue h3 {
+    max-width: 10ch;
+    margin: 13px 0 11px;
+    font-family: var(--font-display);
+    font-size: clamp(2.35rem, 11vw, 3.45rem);
+    font-weight: 500;
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+  }
+
+  .craft-catalogue__intro p {
+    max-width: 31ch;
+    margin: 0;
+    color: rgba(255, 250, 240, 0.68);
+    line-height: 1.58;
+  }
+
+  .craft-catalogue__nav {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    margin-top: 26px;
+  }
+
+  .craft-catalogue__nav a {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto 1fr;
+    gap: 9px 8px;
+    min-height: 105px;
+    padding: 14px;
+    color: #fffaf0;
+    border: 1px solid rgba(227, 205, 165, 0.15);
+    border-radius: 16px;
+    background: rgba(255, 253, 246, 0.055);
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+  }
+
+  .craft-catalogue__nav a:active {
+    transform: scale(0.975);
+    border-color: rgba(227, 205, 165, 0.42);
+    background: rgba(255, 253, 246, 0.1);
+  }
+
+  .craft-catalogue__nav span {
+    color: #d8bd8b;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+  }
+
+  .craft-catalogue__nav strong {
+    align-self: end;
+    font-family: var(--font-display);
+    font-size: 1.03rem;
+    font-weight: 600;
+    line-height: 1.08;
+  }
+
+  .craft-catalogue__nav i {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: end;
+    color: rgba(255, 250, 240, 0.58);
+    font-style: normal;
+  }
+
+  .craft-catalogue__all {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 50px;
+    margin-top: 13px;
+    padding: 0 4px;
+    color: #e5cca0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .craft-rail-cue {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 2px;
+    color: var(--ink-soft);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .craft-rail-cue i {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(163, 131, 87, 0.18), rgba(163, 131, 87, 0.66));
+  }
+
+  .craft-rail-cue b {
+    color: var(--gold);
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
   .account-panel--security { grid-template-columns: 1fr; }
   .account-panel-stage { grid-template-columns: 1fr; min-height: 0; }
   .account-section-visual { min-height: 330px; }
@@ -1321,6 +1533,11 @@ body {
   .brand-text strong { font-size: 1.2rem; }
   .brand-text small { display: none; }
   .section { padding: 52px 0; }
+
+  #craft .craft-rail { grid-auto-columns: calc(100% - 26px); gap: 11px; }
+  #craft .craft-story .asymmetric__copy { padding-inline: 21px; }
+  .craft-catalogue { padding-inline: 18px; }
+  .craft-catalogue__nav a { min-height: 100px; padding: 13px 12px; }
 
   .display-xl { font-size: clamp(2.85rem, 14vw, 3.8rem); line-height: 0.96; }
   .display-lg { font-size: clamp(2.6rem, 13vw, 3.55rem); line-height: 0.98; }
