@@ -18,12 +18,34 @@ const pages = [
 test('every storefront surface loads the final calm-luxury design layer', async () => {
   for (const page of pages) {
     const html = await readFile(new URL(`../website/${page}`, import.meta.url), 'utf8');
-    assert.match(html, /luxury-refinement\.css\?v=6/, `${page} is missing the current design layer`);
+    assert.match(html, /luxury-refinement\.css\?v=11/, `${page} is missing the current design layer`);
+    assert.match(html, /design-system\.js\?v=1/, `${page} is missing the atelier interaction layer`);
     assert.match(html, /name="color-scheme" content="light only"/, `${page} can be auto-darkened`);
     if (page !== 'eco-rewards-admin.html') {
       assert.match(html, /agent\.js\?v=4/, `${page} is missing the current assistant bundle`);
     }
   }
+});
+
+test('fashion atelier system reaches forms, overlays, scrollbar and reduced motion', async () => {
+  const [css, script] = await Promise.all([
+    readFile(new URL('../website/assets/css/luxury-refinement.css', import.meta.url), 'utf8'),
+    readFile(new URL('../website/assets/js/design-system.js', import.meta.url), 'utf8'),
+  ]);
+
+  assert.match(css, /--botanical-deep:\s*#315e53/);
+  assert.match(css, /--marigold:\s*#b58d3b/);
+  assert.match(css, /html::-webkit-scrollbar-thumb/);
+  assert.match(css, /\.modal-card::before/);
+  assert.match(css, /\.hero__visual\s*\{[\s\S]*border-radius:\s*48% 48% 32px 32px/);
+  assert.match(css, /\.atelier-progress\s*\{\s*display:\s*none/);
+  assert.match(css, /\.site-footer\s*\{[\s\S]*width:\s*100vw[\s\S]*margin:\s*28px 0 0 -50vw/);
+  assert.match(css, /\.cart-popup\s*\{/);
+  assert.match(css, /\.agent-panel\s*\{/);
+  assert.match(css, /\.form-input,[\s\S]*border-width:\s*0 0 1px/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.atelier-reveal/);
+  assert.match(script, /IntersectionObserver/);
+  assert.match(script, /MutationObserver/);
 });
 
 test('the final design layer keeps content visible and styles interactive controls', async () => {
