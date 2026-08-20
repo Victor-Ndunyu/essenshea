@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="icon" href="assets/images/star-mark.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="assets/css/style-new.css" />
-  <link rel="stylesheet" href="assets/css/luxury-refinement.css?v=12" />
+  <link rel="stylesheet" href="assets/css/luxury-refinement.css?v=13" />
 </head>
 <body>
   <div class="page-shell">
@@ -338,7 +338,7 @@
     </footer>
   </div>
 
-  <script src="assets/js/design-system.js?v=2"></script>
+  <script src="assets/js/design-system.js?v=4"></script>
   <script src="assets/js/agent-config.js"></script>
   <script src="assets/js/agent.js?v=5"></script>
   <script src="assets/js/featured-care.js?v=1"></script>
@@ -446,13 +446,32 @@
     }
 
     var homeSection = document.getElementById('home-reviews');
+    var reduceReviewMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var parallaxFrame = 0;
 
     function updateParallax() {
-      if (parallaxInner) parallaxInner.style.transform = '';
+      parallaxFrame = 0;
+      if (!viewport || !parallaxInner || reduceReviewMotion) {
+        if (parallaxInner) parallaxInner.style.removeProperty('--reviews-parallax-y');
+        return;
+      }
+      var rect = viewport.getBoundingClientRect();
+      var wh = window.innerHeight;
+      if (rect.bottom < 0 || rect.top > wh) return;
+      var progress = (wh - rect.top) / (wh + rect.height);
+      progress = Math.max(0, Math.min(1, progress));
+      var offset = (0.5 - progress) * 28;
+      parallaxInner.style.setProperty('--reviews-parallax-y', offset.toFixed(2) + 'px');
+    }
+
+    function requestParallaxUpdate() {
+      if (parallaxFrame || reduceReviewMotion) return;
+      parallaxFrame = window.requestAnimationFrame(updateParallax);
     }
 
     populateReviews();
-    window.addEventListener('resize', updateParallax);
+    window.addEventListener('scroll', requestParallaxUpdate, { passive: true });
+    window.addEventListener('resize', requestParallaxUpdate, { passive: true });
 
     if (glow && viewport) {
       viewport.addEventListener('mousemove', function(e) {

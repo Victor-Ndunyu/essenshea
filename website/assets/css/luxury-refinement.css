@@ -2928,13 +2928,14 @@ html { background: #294f46 !important; }
 }
 .topbar.is-scrolled,
 .eco-admin-topbar.is-scrolled {
-  min-height: 80px;
-  background: rgba(255, 254, 251, .97);
-  backdrop-filter: blur(10px) saturate(110%);
+  min-height: 92px;
+  background: rgba(255, 254, 251, .78);
+  backdrop-filter: blur(18px) saturate(120%);
 }
 .topbar.is-scrolled.is-compact,
 .eco-admin-topbar.is-scrolled.is-compact {
-  min-height: 66px;
+  min-height: 68px;
+  background: rgba(255, 254, 251, .86);
   box-shadow: 0 8px 28px rgba(55, 91, 77, .08);
 }
 .topbar.is-compact .brand-logo,
@@ -3008,6 +3009,16 @@ html { background: #294f46 !important; }
   transition-delay: 0ms !important;
 }
 
+/* Restored editorial movement, kept to one composited review layer. */
+.reviews-viewport {
+  overflow: hidden;
+  padding-block: 18px;
+}
+.reviews-parallax-inner {
+  transform: translate3d(0, var(--reviews-parallax-y, 0), 0) !important;
+  will-change: transform;
+}
+
 @media (max-width: 1024px) {
   .hero__badge { left: -22px; }
   .collection-tile:nth-child(even) { margin-top: 34px; }
@@ -3021,6 +3032,10 @@ html { background: #294f46 !important; }
   .hero__badge { right: 14px; bottom: 14px; left: 14px; }
   .modal-card { border-radius: 28px 28px 0 0; }
   .account-panel-stage { min-height: 0; }
+  .topbar.is-scrolled,
+  .eco-admin-topbar.is-scrolled { min-height: 76px; }
+  .topbar.is-scrolled.is-compact,
+  .eco-admin-topbar.is-scrolled.is-compact { min-height: 62px; }
 }
 
 @media (max-width: 560px) {
@@ -3035,4 +3050,11 @@ html { background: #294f46 !important; }
   .agent-panel { border-radius: 24px 24px 0 0; }
   .instagram-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .instagram-strip a:last-child { grid-column: 1 / -1; aspect-ratio: 2 / 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reviews-parallax-inner {
+    transform: none !important;
+    will-change: auto;
+  }
 }
