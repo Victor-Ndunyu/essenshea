@@ -2470,7 +2470,10 @@ body::before {
   --radius-sm: 16px;
 }
 
-html { scrollbar-color: var(--marigold) #edf0e8; }
+html {
+  overflow-x: clip;
+  scrollbar-color: var(--marigold) #edf0e8;
+}
 html::-webkit-scrollbar { width: 9px; }
 html::-webkit-scrollbar-track { background: #edf0e8; }
 html::-webkit-scrollbar-thumb {
