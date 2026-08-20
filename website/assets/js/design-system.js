@@ -36,6 +36,25 @@
   window.addEventListener('resize', updateScrollState, { passive: true });
   updateScrollState();
 
+  const careTiles = document.querySelectorAll('#collections .collection-tile');
+  if (!reduceMotion && 'IntersectionObserver' in window && careTiles.length) {
+    const careObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('care-tile-visible');
+        careObserver.unobserve(entry.target);
+      });
+    }, { rootMargin: '0px 0px -12% 0px', threshold: 0.14 });
+
+    careTiles.forEach((tile, index) => {
+      tile.classList.add('care-tile-reveal');
+      tile.style.setProperty('--care-order', String(index));
+      careObserver.observe(tile);
+    });
+  } else {
+    careTiles.forEach((tile) => tile.classList.add('care-tile-visible'));
+  }
+
   const revealSelector = [
     'main > section',
     '.product-trio__card',
