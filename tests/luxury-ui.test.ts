@@ -18,8 +18,8 @@ const pages = [
 test('every storefront surface loads the final calm-luxury design layer', async () => {
   for (const page of pages) {
     const html = await readFile(new URL(`../website/${page}`, import.meta.url), 'utf8');
-    assert.match(html, /luxury-refinement\.css\?v=13/, `${page} is missing the current design layer`);
-    assert.match(html, /design-system\.js\?v=4/, `${page} is missing the atelier interaction layer`);
+    assert.match(html, /luxury-refinement\.css\?v=14/, `${page} is missing the current design layer`);
+    assert.match(html, /design-system\.js\?v=5/, `${page} is missing the atelier interaction layer`);
     assert.match(html, /name="color-scheme" content="light only"/, `${page} can be auto-darkened`);
     if (page !== 'eco-rewards-admin.html') {
       assert.match(html, /agent\.js\?v=5/, `${page} is missing the current assistant bundle`);
@@ -51,6 +51,10 @@ test('fashion atelier system reaches forms, overlays, scrollbar and reduced moti
   assert.match(script, /is-compact/);
   assert.match(script, /'\.product-card'/);
   assert.match(script, /revealMutationObserver\.observe/);
+  assert.match(script, /careObserver/);
+  assert.match(css, /#collections \.collection-tile\.care-tile-reveal/);
+  assert.match(css, /body:has\(\.site-footer\)[\s\S]*overflow-y:\s*visible/);
+  assert.match(css, /\.topbar\s*\{[\s\S]*position:\s*fixed/);
   assert.match(css, /\.topbar\.is-scrolled\.is-compact[\s\S]*rgba\(255, 254, 251, \.86\)/);
 });
 

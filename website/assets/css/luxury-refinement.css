@@ -2920,10 +2920,32 @@ body::before { opacity: .1; }
 }
 
 /* Lightweight, persistent navigation. */
-html { background: #294f46 !important; }
-.topbar,
+html {
+  overflow-x: clip;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+  background: #294f46 !important;
+}
+body,
+body:has(.site-footer) {
+  overflow-x: clip;
+  overflow-y: visible;
+}
+.page-shell { padding-top: 92px; }
+.topbar {
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 50%;
+  width: min(calc(100% - (2 * var(--page-pad))), 1440px);
+  transform: translateX(-50%) translateZ(0);
+  contain: layout style;
+}
 .eco-admin-topbar {
   transform: translateZ(0);
+}
+.topbar,
+.eco-admin-topbar {
   transition: min-height 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
 }
 .topbar.is-scrolled,
@@ -3009,6 +3031,27 @@ html { background: #294f46 !important; }
   transition-delay: 0ms !important;
 }
 
+/* Style Your Care enters like an editorial lookbook, one image at a time. */
+#collections .collection-tile.care-tile-reveal {
+  --care-x: -22px;
+  opacity: 0 !important;
+  transform: translate3d(var(--care-x), 34px, 0) scale(.985) !important;
+  filter: saturate(.7) contrast(.98);
+  transition:
+    opacity 680ms ease,
+    transform 880ms var(--ease-atelier),
+    filter 880ms ease !important;
+  transition-delay: calc(var(--care-order, 0) * 62ms) !important;
+  will-change: transform, opacity;
+}
+#collections .collection-tile.care-tile-reveal:nth-child(even) { --care-x: 22px; }
+#collections .collection-tile.care-tile-reveal.care-tile-visible {
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) scale(1) !important;
+  filter: saturate(.86) contrast(1.02);
+  will-change: auto;
+}
+
 /* Restored editorial movement, kept to one composited review layer. */
 .reviews-viewport {
   overflow: hidden;
@@ -3025,6 +3068,8 @@ html { background: #294f46 !important; }
 }
 
 @media (max-width: 820px) {
+  .page-shell { padding-top: 76px; }
+  .topbar { width: calc(100% - 32px); }
   .topnav { border-radius: 24px; background: rgba(255, 254, 251, .98); }
   .topnav a { border-radius: 14px; }
   .hero::after { right: -30%; width: 78vw; }
@@ -3039,6 +3084,8 @@ html { background: #294f46 !important; }
 }
 
 @media (max-width: 560px) {
+  .page-shell { padding-top: 76px; }
+  .topbar { width: calc(100% - 24px); }
   .display-xl { font-size: clamp(3.15rem, 15vw, 4.25rem); line-height: .91; }
   .display-lg { font-size: clamp(2.75rem, 13vw, 3.8rem); line-height: .94; }
   .display-md { font-size: clamp(2.2rem, 10.5vw, 3rem); }
@@ -3053,6 +3100,13 @@ html { background: #294f46 !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  #collections .collection-tile.care-tile-reveal,
+  #collections .collection-tile.care-tile-reveal.care-tile-visible {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: saturate(.86) contrast(1.02);
+    transition: none !important;
+  }
   .reviews-parallax-inner {
     transform: none !important;
     will-change: auto;
