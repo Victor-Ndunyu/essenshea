@@ -8,11 +8,13 @@ import {
   ValidationError,
 } from '../lib/order-validation.ts';
 import { createOrderReference } from '../lib/order-reference.ts';
+import { normalizeKenyanPhone } from '../lib/mpesa.ts';
 
 function validPayload() {
   return {
     type: 'cart',
     source: 'website_cart',
+    paymentMethod: 'manual',
     customer: {
       name: 'Amina Njeri',
       phone: '+254 727 349 749',
@@ -46,6 +48,20 @@ test('maps the existing custom form type to custom_request', () => {
   const payload = validPayload();
   payload.type = 'custom';
   assert.equal(validateOrderPayload(payload).type, 'custom_request');
+});
+
+test('accepts M-Pesa only when explicitly selected', () => {
+  const payload = validPayload();
+  payload.paymentMethod = 'mpesa';
+  assert.equal(validateOrderPayload(payload).paymentMethod, 'mpesa');
+  payload.paymentMethod = 'something-else';
+  assert.equal(validateOrderPayload(payload).paymentMethod, 'manual');
+});
+
+test('normalizes common Safaricom numbers for Daraja', () => {
+  assert.equal(normalizeKenyanPhone('0727 349 749'), '254727349749');
+  assert.equal(normalizeKenyanPhone('+254 110 123 456'), '254110123456');
+  assert.throws(() => normalizeKenyanPhone('020 123 4567'), /Safaricom phone number/i);
 });
 
 test('requires a delivery location for delivery orders', () => {

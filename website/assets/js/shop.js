@@ -588,6 +588,7 @@ function syncCartToWidget() {
       quantity: item.quantity,
       available: item.available,
       priceText: item.priceText,
+      priceValue: item.priceValue,
     };
   });
   try { localStorage.setItem('essenshea_cart', JSON.stringify(cartData)); } catch (e) {}

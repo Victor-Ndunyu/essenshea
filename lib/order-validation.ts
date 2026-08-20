@@ -26,6 +26,7 @@ export type ValidatedOrderItem = {
 export type ValidatedOrder = {
   type: string;
   source: string;
+  paymentMethod: 'mpesa' | 'manual';
   customer: {
     name: string;
     phone: string | null;
@@ -159,6 +160,7 @@ export function validateOrderPayload(payload: unknown): ValidatedOrder {
   return {
     type: normalizeType(body.type),
     source: cleanText(body.source, 40) || 'website',
+    paymentMethod: cleanText(body.paymentMethod, 20).toLowerCase() === 'mpesa' ? 'mpesa' : 'manual',
     customer: {
       name,
       phone,

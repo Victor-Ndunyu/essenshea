@@ -14,6 +14,8 @@ import {
   attachRefreshedCustomerSession,
   authenticateCustomer,
 } from '../../../lib/customer-auth';
+import { priceOrderForPayment } from '../../../lib/order-pricing';
+import { initiateStkPush } from '../../../lib/mpesa';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -65,6 +67,20 @@ export async function POST(req: NextRequest) {
     return response({ error: 'The order request is not valid JSON' }, 400);
   }
 
+  let totalAmount: number | null = null;
+  if (order.paymentMethod === 'mpesa') {
+    if (!order.customer.phone) {
+      return response({ error: 'A Safaricom phone number is required for M-Pesa payment' }, 400);
+    }
+    try {
+      const priced = await priceOrderForPayment(order.items);
+      order = { ...order, items: priced.items };
+      totalAmount = priced.total;
+    } catch (error) {
+      return response({ error: error instanceof Error ? error.message : 'This cart cannot be paid online yet' }, 400);
+    }
+  }
+
   const ip = getClientAddress(req.headers);
   try {
     const allowed = await checkRateLimit({
@@ -114,6 +130,9 @@ export async function POST(req: NextRequest) {
       delivery_location: order.customer.deliveryLocation,
       customer_notes: order.customer.notes,
       eco_rewards_opt_in: order.customer.ecoRewardsOptIn,
+      total_amount: totalAmount,
+      payment_method: order.paymentMethod,
+      payment_status: order.paymentMethod === 'mpesa' ? 'awaiting_payment' : 'awaiting_confirmation',
       customer_user_id: customerAuth.user?.id || null,
       eco_rewards_eligible_until: null,
       data_retention_until: null,
@@ -178,6 +197,33 @@ export async function POST(req: NextRequest) {
     })
     .eq('id', storedOrder.id);
 
+  let payment: null | { checkoutRequestId: string; customerMessage: string } = null;
+  let paymentError: string | null = null;
+  if (order.paymentMethod === 'mpesa' && totalAmount && order.customer.phone) {
+    try {
+      const stk = await initiateStkPush({
+        amount: totalAmount,
+        phone: order.customer.phone,
+        reference,
+      });
+      const { error: paymentInsertError } = await supabase.from('mpesa_payments').insert({
+        order_id: storedOrder.id,
+        checkout_request_id: stk.checkoutRequestId,
+        merchant_request_id: stk.merchantRequestId,
+        amount: totalAmount,
+        phone_number: order.customer.phone.replace(/\D/g, ''),
+        status: 'pending',
+      });
+      if (paymentInsertError) throw new Error('The payment prompt was sent but its tracking record could not be saved');
+      payment = { checkoutRequestId: stk.checkoutRequestId, customerMessage: stk.customerMessage };
+    } catch (error) {
+      paymentError = error instanceof Error ? error.message : 'M-Pesa could not start';
+      console.error(`M-Pesa initiation failed for ${reference}:`, paymentError);
+      await supabase.from('orders').update({ payment_status: 'failed' }).eq('id', storedOrder.id);
+      await sendOperationalAlert('Essenshea M-Pesa initiation failure', `Order ${reference}: ${paymentError}`);
+    }
+  }
+
   if (!delivered) {
     console.error(`All owner notification channels failed for ${reference}`);
     await sendOperationalAlert(
@@ -188,6 +234,8 @@ export async function POST(req: NextRequest) {
       {
         saved: true,
         reference,
+        payment,
+        paymentError,
         error:
           'Your request was saved, but we could not alert the Essenshea team. Please contact us on WhatsApp and share this reference.',
       },
@@ -197,11 +245,19 @@ export async function POST(req: NextRequest) {
 
   const successResponse = response(
     {
-      success: true,
+      success: !paymentError,
+      saved: true,
       reference,
-      message: `Request received. Essenshea will confirm availability and payment before delivery. Your reference is ${reference}.`,
+      payment,
+      paymentStatus: payment ? 'pending' : paymentError ? 'failed' : 'awaiting_confirmation',
+      message: payment
+        ? `Order ${reference} is saved. Check your phone and enter your M-Pesa PIN to pay KES ${totalAmount}.`
+        : paymentError
+          ? `Order ${reference} is saved, but the M-Pesa prompt could not start. Please try again later or contact Essenshea.`
+          : `Request received. Essenshea will confirm availability and payment before delivery. Your reference is ${reference}.`,
+      error: paymentError || undefined,
     },
-    201,
+    paymentError ? 502 : 201,
   );
   return attachRefreshedCustomerSession(successResponse, customerAuth);
 }

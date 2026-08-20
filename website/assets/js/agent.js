@@ -403,6 +403,7 @@ function normalizeSyncedCart(cart) {
       title: String(item.title).slice(0, 180),
       quantity: Math.max(1, Math.min(20, Number(item.quantity) || 1)),
       priceText: String(item.priceText || 'Price on request').slice(0, 80),
+      priceValue: typeof item.priceValue === 'number' && isFinite(item.priceValue) ? item.priceValue : null,
       available: item.available === true,
     };
   });
@@ -517,6 +518,10 @@ function createCartWidgetMarkup() {
     + '</div>'
     + '<label for="cart-order-notes">Order notes <span>(optional)</span></label>'
     + '<textarea id="cart-order-notes" name="notes" rows="2" maxlength="500" placeholder="Delivery instructions, preferred contact time, or anything we should know"></textarea>'
+    + '<fieldset class="cart-payment-choice"><legend>Payment</legend>'
+    + '<label><input type="radio" name="paymentMethod" value="mpesa" checked /> <span><strong>Pay securely with M-Pesa</strong><small id="cart-mpesa-total">An STK prompt will be sent to your phone.</small></span></label>'
+    + '<label><input type="radio" name="paymentMethod" value="manual" /> <span><strong>Request confirmation first</strong><small>Use this for custom or unpriced products.</small></span></label>'
+    + '</fieldset>'
     + '<label class="consent-check"><input name="ecoRewardsOptIn" type="checkbox" /> <span>Keep my purchase history so Essenshea can check Eco-Rewards refill eligibility.</span></label>'
     + '<div class="form-honeypot" aria-hidden="true"><input name="companyWebsite" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" /></div>'
     + '<button id="cart-popup-checkout" class="btn btn--primary" type="submit" disabled>Send request</button>'
@@ -590,8 +595,40 @@ function renderCartPopup() {
 
   var total = cart.reduce(function(s, i) { return s + i.quantity; }, 0);
   if (count) count.textContent = total + ' item' + (total === 1 ? '' : 's');
-  if (note) note.textContent = 'Ready to submit. We will contact you to confirm pricing and availability.';
+  var allPriced = cart.every(function(item) { return typeof item.priceValue === 'number' && isFinite(item.priceValue) && item.priceValue > 0; });
+  var amount = cart.reduce(function(sum, item) { return sum + (Number(item.priceValue) || 0) * item.quantity; }, 0);
+  var mpesa = document.querySelector('input[name="paymentMethod"][value="mpesa"]');
+  var manual = document.querySelector('input[name="paymentMethod"][value="manual"]');
+  var totalLabel = document.getElementById('cart-mpesa-total');
+  if (mpesa) mpesa.disabled = !allPriced;
+  if (!allPriced && manual) manual.checked = true;
+  if (allPriced && totalLabel) totalLabel.textContent = 'Pay KES ' + amount.toLocaleString('en-KE') + ' from the phone number above.';
+  if (!allPriced && totalLabel) totalLabel.textContent = 'Unavailable until every product has a confirmed price.';
+  if (note) note.textContent = allPriced ? 'Ready for secure M-Pesa checkout.' : 'Essenshea will confirm pricing before payment.';
   if (checkout) checkout.disabled = false;
+}
+
+function waitForMpesaPayment(reference, status) {
+  var attempts = 0;
+  return new Promise(function(resolve) {
+    function check() {
+      attempts += 1;
+      fetch('/api/payments/mpesa/status?reference=' + encodeURIComponent(reference), { cache: 'no-store' })
+        .then(function(response) { return response.json(); })
+        .then(function(result) {
+          if (result.paymentStatus === 'paid') return resolve('paid');
+          if (result.paymentStatus === 'failed') return resolve('failed');
+          if (status) status.textContent = 'Waiting for M-Pesa confirmation… Keep this page open.';
+          if (attempts >= 30) return resolve('pending');
+          window.setTimeout(check, 3000);
+        })
+        .catch(function() {
+          if (attempts >= 30) return resolve('pending');
+          window.setTimeout(check, 3000);
+        });
+    }
+    window.setTimeout(check, 2500);
+  });
 }
 
 function trackEssensheaEvent(eventType, details) {
@@ -636,6 +673,7 @@ function submitCartPopup(event) {
           title: i.title,
           quantity: i.quantity,
           priceText: i.priceText,
+          unitPrice: i.priceValue,
         };
       }),
       customer: {
@@ -649,10 +687,11 @@ function submitCartPopup(event) {
       },
       type: 'cart',
       source: 'website_cart',
+      paymentMethod: String(formData.get('paymentMethod') || 'manual'),
     }),
   })
   .then(function(r) { return r.json(); })
-  .then(function(result) {
+  .then(async function(result) {
     if (result.success) {
       showSiteNotice(result.message);
       try {
@@ -662,6 +701,19 @@ function submitCartPopup(event) {
         }));
       } catch (error) {}
       window.dispatchEvent(new CustomEvent('essenshea-order-submitted', { detail: result }));
+      if (result.payment && result.paymentStatus === 'pending') {
+        if (status) status.textContent = 'M-Pesa prompt sent. Enter your PIN on your phone.';
+        var paymentOutcome = await waitForMpesaPayment(result.reference, status);
+        if (paymentOutcome === 'failed') {
+          if (status) status.textContent = 'M-Pesa payment was not completed. Your cart is still saved.';
+          return;
+        }
+        if (paymentOutcome === 'pending') {
+          if (status) status.textContent = 'Payment is still pending. Keep reference ' + result.reference + ' and do not submit a duplicate order.';
+          return;
+        }
+        showSiteNotice('Payment received. Thank you — order ' + result.reference + ' is confirmed.');
+      }
       localStorage.removeItem(CART_STORAGE_KEY);
       if (customerCartIsConnected) {
         fetch('/api/customer/cart', {
@@ -674,7 +726,9 @@ function submitCartPopup(event) {
       localStorage.removeItem(CHECKOUT_DRAFT_KEY);
       if (status) status.textContent = result.message;
     } else {
-      if (status) status.textContent = (result.error || 'We could not submit the request.');
+      if (status) status.textContent = result.saved
+        ? (result.message || result.error || 'Your order was saved, but payment could not start.')
+        : (result.error || 'We could not submit the request.');
     }
   })
   .catch(function(error) {

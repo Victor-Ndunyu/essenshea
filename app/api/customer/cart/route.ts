@@ -19,13 +19,18 @@ function cleanCartItems(value: unknown) {
     const id = cleanCustomerText(item.id, 180);
     const title = cleanCustomerText(item.title, 180);
     const quantity = Number(item.quantity);
+    const priceValue = item.priceValue === null || item.priceValue === undefined
+      ? null
+      : Number(item.priceValue);
     if (!id || !title || !Number.isInteger(quantity) || quantity < 1 || quantity > 20) return null;
+    if (priceValue !== null && (!Number.isFinite(priceValue) || priceValue < 0)) return null;
     return {
       id,
       slug: cleanCustomerText(item.slug, 180) || null,
       title,
       quantity,
       priceText: cleanCustomerText(item.priceText, 80) || 'Price on request',
+      priceValue,
       available: item.available === true,
     };
   });
@@ -69,4 +74,3 @@ export async function PUT(req: NextRequest) {
   if (error) return NextResponse.json({ error: 'We could not sync your cart' }, { status: 503 });
   return attachRefreshedCustomerSession(NextResponse.json({ success: true }), auth);
 }
-
