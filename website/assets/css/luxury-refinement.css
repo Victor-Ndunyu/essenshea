@@ -2946,7 +2946,22 @@ body:has(.site-footer) {
 }
 .topbar,
 .eco-admin-topbar {
-  transition: min-height 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+  transition:
+    min-height 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 320ms var(--ease-atelier),
+    opacity 220ms ease;
+}
+.topbar.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(calc(-100% - 14px)) translateZ(0);
+}
+.topbar.is-hidden:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0) translateZ(0);
 }
 .topbar.is-scrolled,
 .eco-admin-topbar.is-scrolled {
@@ -2967,6 +2982,13 @@ body:has(.site-footer) {
 }
 .topbar.is-compact .topnav a { padding-block: 8px; }
 .brand-logo { transition: width 180ms ease, height 180ms ease, transform 360ms var(--ease-atelier); }
+
+/* The hero copy shares the image's editorial edge instead of sitting as a loose text block. */
+.hero__copy {
+  max-width: 46ch;
+  margin: 28px 0 34px clamp(36px, 4vw, 68px);
+  text-wrap: pretty;
+}
 
 /* Password visibility controls on every password or private-code field. */
 .password-input-shell {
@@ -3081,6 +3103,10 @@ body:has(.site-footer) {
   .eco-admin-topbar.is-scrolled { min-height: 76px; }
   .topbar.is-scrolled.is-compact,
   .eco-admin-topbar.is-scrolled.is-compact { min-height: 62px; }
+  .hero__copy {
+    max-width: 48ch;
+    margin: 24px 0 30px;
+  }
 }
 
 @media (max-width: 560px) {
@@ -3100,6 +3126,7 @@ body:has(.site-footer) {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .topbar { transition: none; }
   #collections .collection-tile.care-tile-reveal,
   #collections .collection-tile.care-tile-reveal.care-tile-visible {
     opacity: 1 !important;

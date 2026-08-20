@@ -16,6 +16,13 @@
       const isPastTop = scrollTop > 24;
       header.classList.toggle('is-scrolled', isPastTop);
 
+      const navigationIsActive = header.matches(':focus-within') || Boolean(header.querySelector('.topnav.is-open'));
+      if (!isPastTop || moved < -5 || navigationIsActive) {
+        header.classList.remove('is-hidden');
+      } else if (scrollTop > 140 && moved > 8) {
+        header.classList.add('is-hidden');
+      }
+
       if (!isPastTop || moved < -6) {
         header.classList.remove('is-compact');
       } else if (scrollTop > 120 && moved > 6) {
