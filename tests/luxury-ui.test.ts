@@ -37,6 +37,7 @@ test('fashion atelier system reaches forms, overlays, scrollbar and reduced moti
   assert.match(css, /html::-webkit-scrollbar-thumb/);
   assert.match(css, /\.modal-card::before/);
   assert.match(css, /\.hero__badge\s*\{[\s\S]*left:\s*18px/);
+  assert.match(css, /\.site-footer\s*\{[\s\S]*width:\s*100vw[\s\S]*margin:\s*28px 0 0 -50vw/);
   assert.match(css, /\.cart-popup\s*\{/);
   assert.match(css, /\.agent-panel\s*\{/);
   assert.match(css, /\.form-input,[\s\S]*border-width:\s*0 0 1px/);

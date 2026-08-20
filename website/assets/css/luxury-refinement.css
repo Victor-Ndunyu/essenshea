@@ -2322,7 +2322,10 @@ body::before {
 
 .site-footer {
   position: relative;
-  margin-inline: calc(-1 * var(--page-pad));
+  left: 50%;
+  right: auto;
+  width: 100vw;
+  margin: 28px 0 0 -50vw;
   padding: clamp(62px, 8vw, 110px) var(--page-pad) 42px;
   border: 0;
   background: var(--ink);
@@ -2400,7 +2403,7 @@ body::before {
   .catalog-hero::after,
   .reviews-hero::after { display: none; }
   .modal-card { max-height: 92svh; clip-path: none; }
-  .site-footer { margin-inline: -16px; padding-inline: 16px; }
+  .site-footer { margin-left: -50vw; margin-right: 0; padding-inline: 16px; }
 }
 
 @media (max-width: 560px) {
@@ -2428,7 +2431,7 @@ body::before {
   .account-eco-cycle { grid-template-columns: 1fr; }
   .agent-launcher { border-radius: 50%; }
   .agent-panel { left: 8px; right: 8px; border-radius: 0; }
-  .site-footer { margin-inline: -12px; padding-inline: 20px; }
+  .site-footer { margin-left: -50vw; margin-right: 0; padding-inline: 20px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
