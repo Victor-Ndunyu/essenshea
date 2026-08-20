@@ -18,7 +18,7 @@ const pages = [
 test('every storefront surface loads the final calm-luxury design layer', async () => {
   for (const page of pages) {
     const html = await readFile(new URL(`../website/${page}`, import.meta.url), 'utf8');
-    assert.match(html, /luxury-refinement\.css\?v=10/, `${page} is missing the current design layer`);
+    assert.match(html, /luxury-refinement\.css\?v=11/, `${page} is missing the current design layer`);
     assert.match(html, /design-system\.js\?v=1/, `${page} is missing the atelier interaction layer`);
     assert.match(html, /name="color-scheme" content="light only"/, `${page} can be auto-darkened`);
     if (page !== 'eco-rewards-admin.html') {
