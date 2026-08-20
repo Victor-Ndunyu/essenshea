@@ -1721,3 +1721,718 @@ body {
     transition: none !important;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Essenshea Atelier — fashion-led art direction
+   The final cascade deliberately turns the catalogue into an editorial shop.
+   -------------------------------------------------------------------------- */
+
+:root {
+  --ivory: #f5f0e8;
+  --paper: #fbf8f2;
+  --white: #fffdf9;
+  --ink: #191714;
+  --ink-soft: rgba(25, 23, 20, 0.68);
+  --ink-border: rgba(25, 23, 20, 0.15);
+  --olive: #4a2528;
+  --gold: #9b6b47;
+  --gold-light: #dac1a0;
+  --card: #e9e0d5;
+  --oxblood: #4a1f27;
+  --rouge: #8c3244;
+  --blush: #d9b8b2;
+  --shadow: 0 24px 70px rgba(50, 30, 25, 0.1);
+  --shadow-lg: 0 40px 110px rgba(45, 22, 20, 0.18);
+  --ease-atelier: cubic-bezier(0.22, 1, 0.36, 1);
+  --radius: 2px;
+  --radius-sm: 1px;
+}
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--oxblood) #ded4c8;
+}
+
+html::-webkit-scrollbar { width: 10px; height: 10px; }
+html::-webkit-scrollbar-track { background: #ded4c8; }
+html::-webkit-scrollbar-thumb {
+  border: 2px solid #ded4c8;
+  border-radius: 0;
+  background: linear-gradient(180deg, var(--rouge), var(--oxblood));
+}
+html::-webkit-scrollbar-thumb:hover { background: var(--ink); }
+
+body {
+  overflow-x: hidden;
+  background:
+    linear-gradient(90deg, transparent calc(50% - .5px), rgba(74, 31, 39, .035) 50%, transparent calc(50% + .5px)),
+    var(--ivory) !important;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  opacity: .22;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.13'/%3E%3C/svg%3E");
+}
+
+::selection { color: var(--white); background: var(--rouge); }
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--rouge) !important;
+  outline-offset: 4px;
+}
+
+.page-shell { width: min(calc(100% - (2 * var(--page-pad))), 1440px); }
+
+.atelier-progress {
+  position: fixed;
+  z-index: 120;
+  top: 50%;
+  left: 12px;
+  width: 1px;
+  height: 28vh;
+  transform: translateY(-50%);
+  background: rgba(74, 31, 39, .18);
+  pointer-events: none;
+}
+
+.atelier-progress::before,
+.atelier-progress::after {
+  position: absolute;
+  left: -3px;
+  color: var(--oxblood);
+  font-size: .48rem;
+  letter-spacing: .14em;
+  writing-mode: vertical-rl;
+}
+.atelier-progress::before { content: 'ESSENSHEA'; bottom: calc(100% + 16px); }
+.atelier-progress::after { content: 'ATELIER 01'; top: calc(100% + 16px); }
+.atelier-progress span {
+  display: block;
+  width: 100%;
+  height: calc(var(--page-progress, 0) * 100%);
+  background: var(--rouge);
+  transition: height 80ms linear;
+}
+
+.topbar,
+.eco-admin-topbar {
+  position: sticky;
+  z-index: 100;
+  top: 0;
+  min-height: 92px;
+  padding-inline: clamp(8px, 1.4vw, 20px);
+  border-bottom-color: rgba(74, 31, 39, .16);
+  background: rgba(245, 240, 232, .82);
+  backdrop-filter: blur(16px) saturate(120%);
+  transition: min-height 300ms var(--ease-atelier), background 300ms ease, box-shadow 300ms ease;
+}
+
+.topbar.is-scrolled,
+.eco-admin-topbar.is-scrolled {
+  min-height: 72px;
+  background: rgba(251, 248, 242, .95);
+  box-shadow: 0 10px 38px rgba(51, 29, 26, .08);
+}
+
+.brand { gap: 14px; }
+.brand-logo {
+  width: 50px;
+  height: 50px;
+  border: 0;
+  border-radius: 50%;
+  filter: saturate(.82) contrast(1.04);
+  transition: transform 500ms var(--ease-atelier);
+}
+.brand:hover .brand-logo { transform: rotate(-8deg) scale(1.04); }
+.brand-text strong {
+  font-size: 1.48rem;
+  font-style: italic;
+  letter-spacing: -.025em;
+}
+.brand-text small { color: var(--rouge); letter-spacing: .2em; }
+
+.topnav { gap: clamp(22px, 3vw, 48px); }
+.topnav a {
+  overflow: hidden;
+  padding-block: 12px;
+  border: 0;
+  color: rgba(25, 23, 20, .76);
+  font-size: .73rem;
+  font-weight: 600;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+.topnav a::before {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 7px;
+  left: 0;
+  height: 1px;
+  transform: scaleX(0);
+  transform-origin: right;
+  background: var(--rouge);
+  transition: transform 320ms var(--ease-atelier);
+}
+.topnav a:hover::before,
+.topnav a[aria-current='page']::before { transform: scaleX(1); transform-origin: left; }
+.topnav a:hover,
+.topnav a[aria-current='page'] { border: 0; color: var(--oxblood); }
+
+.label {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--rouge);
+  font-size: .64rem;
+  letter-spacing: .24em;
+}
+.label::before {
+  content: '';
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  margin: 0 11px 3px 0;
+  background: currentColor;
+}
+
+.display-xl,
+.display-lg,
+.display-md,
+.heading-md { color: var(--ink); font-weight: 500; }
+.display-xl { font-size: clamp(4rem, 7.3vw, 7.55rem); line-height: .84; letter-spacing: -.055em; }
+.display-lg { font-size: clamp(3.35rem, 6vw, 6.3rem); line-height: .9; letter-spacing: -.05em; }
+.display-md { font-size: clamp(2.5rem, 4.3vw, 4.65rem); line-height: .94; letter-spacing: -.042em; }
+.display-xl em,
+.display-lg em { color: var(--rouge); font-weight: 500; }
+
+.btn {
+  position: relative;
+  min-height: 50px;
+  overflow: hidden;
+  padding: 15px 26px;
+  border-radius: 0;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  transition: color 280ms ease, border-color 280ms ease, transform 280ms var(--ease-atelier), background 280ms ease;
+}
+.btn::after {
+  content: '↗';
+  margin-left: 16px;
+  font-size: .85rem;
+  transition: transform 280ms var(--ease-atelier);
+}
+.btn:hover::after { transform: translate(3px, -3px); }
+.btn:hover { transform: translateY(-2px); }
+.btn--primary { border: 1px solid var(--oxblood); background: var(--oxblood); color: var(--white); }
+.btn--primary:hover { border-color: var(--rouge); background: var(--rouge); box-shadow: none; }
+.btn--ghost,
+.btn--secondary { border: 1px solid rgba(74, 31, 39, .3); background: transparent; color: var(--oxblood); }
+.btn--ghost:hover,
+.btn--secondary:hover { border-color: var(--oxblood); background: var(--oxblood); color: var(--white); }
+
+.hero {
+  position: relative;
+  min-height: calc(100svh - 92px);
+  grid-template-columns: minmax(0, 1.08fr) minmax(420px, .74fr);
+  gap: clamp(36px, 6vw, 100px);
+  padding: clamp(58px, 8vh, 110px) 0 clamp(72px, 9vh, 120px);
+}
+.hero::before {
+  content: 'BEAUTY / 01';
+  position: absolute;
+  right: calc(46% + 10px);
+  bottom: 30px;
+  color: rgba(74, 31, 39, .48);
+  font-size: .55rem;
+  letter-spacing: .25em;
+  writing-mode: vertical-rl;
+}
+.hero__content { max-width: 780px; }
+.hero .display-xl { max-width: 9.5ch; }
+.hero__copy {
+  max-width: 50ch;
+  margin: 34px 0 38px;
+  font-size: clamp(1.05rem, 1.35vw, 1.24rem);
+  line-height: 1.75;
+}
+.hero__visual,
+.about-hero__visual,
+.fragrance-hero__mark,
+.category-hero > div:last-child {
+  border-radius: 0 !important;
+  box-shadow: none;
+}
+.hero__visual {
+  max-height: none;
+  aspect-ratio: 3 / 4.15;
+  clip-path: polygon(0 0, 91% 0, 100% 8%, 100% 100%, 0 100%);
+}
+.hero__visual::before {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(145deg, transparent 42%, rgba(64, 25, 31, .18));
+  pointer-events: none;
+}
+.hero__visual img { filter: saturate(.88) contrast(1.04); }
+.hero__badge {
+  z-index: 2;
+  right: auto;
+  bottom: 24px;
+  left: -38px;
+  width: min(88%, 360px);
+  padding: 22px 24px;
+  border: 0;
+  border-left: 3px solid var(--rouge);
+  border-radius: 0;
+  background: rgba(251, 248, 242, .94);
+  box-shadow: 0 22px 60px rgba(44, 24, 22, .15);
+  backdrop-filter: blur(14px);
+}
+.hero__badge-label { color: var(--rouge); letter-spacing: .19em; }
+.hero__badge-title { margin-block: 5px; font-size: 1.36rem; font-style: italic; }
+
+.section { padding-block: clamp(84px, 10vw, 150px); }
+.section--divider { border-top-color: rgba(74, 31, 39, .16); }
+
+.asymmetric { gap: clamp(50px, 9vw, 130px); }
+.asymmetric__visual { border-radius: 0; clip-path: polygon(0 0, 100% 5%, 93% 100%, 0 95%); }
+.asymmetric__copy { position: relative; }
+.asymmetric__copy::after {
+  content: 'Made to be\A remembered.';
+  white-space: pre;
+  display: block;
+  margin-top: clamp(34px, 5vw, 70px);
+  color: var(--oxblood);
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3vw, 3.3rem);
+  font-style: italic;
+  line-height: .95;
+}
+
+.featured-care-head,
+.fragrance-browser-head { align-items: start; }
+.featured-care-note { border-color: var(--rouge); }
+
+.product-trio,
+.collection-grid,
+.catalog-collections,
+.shop-product-grid,
+.reviews-page .reviews-grid { gap: clamp(12px, 1.8vw, 26px); }
+
+.product-trio__card,
+.catalog-collection-card,
+.product-card,
+.category-product-card,
+.review-card,
+.fragrance-note-card {
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.product-trio__card:nth-child(2),
+.product-card:nth-child(3n + 2),
+.category-product-card:nth-child(3n + 2) { transform: translateY(clamp(18px, 3vw, 46px)); }
+.product-trio__card img,
+.catalog-collection-card img,
+.product-card img,
+.category-product-card img {
+  border-radius: 0;
+  filter: saturate(.82) contrast(1.04);
+  transition: transform 900ms var(--ease-atelier), filter 500ms ease;
+}
+.product-trio__card:hover img,
+.catalog-collection-card:hover img,
+.product-card:hover img,
+.category-product-card:hover img { transform: scale(1.035); filter: saturate(1) contrast(1.02); }
+.product-trio__body,
+.catalog-collection-card__body,
+.product-card__content,
+.category-product-card__body { padding: 20px 2px 24px; }
+.product-trio__body h3,
+.catalog-collection-card__body h3,
+.product-card__content h3,
+.category-product-card__body h3 { font-size: clamp(1.45rem, 2vw, 2rem); font-weight: 500; }
+
+.collection-grid {
+  grid-template-columns: repeat(12, 1fr);
+  align-items: start;
+}
+.collection-tile {
+  grid-column: span 4;
+  border-radius: 0;
+  aspect-ratio: 3 / 4;
+  clip-path: none;
+}
+.collection-tile:nth-child(1),
+.collection-tile:nth-child(5),
+.collection-tile:nth-child(9) { grid-column: span 7; aspect-ratio: 16 / 10; }
+.collection-tile:nth-child(2),
+.collection-tile:nth-child(6) { grid-column: span 5; margin-top: clamp(60px, 8vw, 130px); }
+.collection-tile img { filter: saturate(.72) contrast(1.07); transition: transform 1s var(--ease-atelier), filter 500ms ease; }
+.collection-tile:hover img { transform: scale(1.045); filter: saturate(.98); }
+.collection-tile__overlay {
+  padding: 100px 24px 24px;
+  background: linear-gradient(transparent, rgba(20, 12, 12, .78));
+}
+.collection-tile__overlay h3 { max-width: 10ch; font-size: clamp(1.6rem, 2.4vw, 2.7rem); font-weight: 500; line-height: .95; }
+.collection-tile__overlay span { color: rgba(255, 250, 244, .7); letter-spacing: .16em; text-transform: uppercase; }
+
+.shop-hero,
+.catalog-hero {
+  position: relative;
+  max-width: none;
+  padding: clamp(80px, 10vw, 150px) 0 clamp(72px, 9vw, 130px);
+}
+.shop-hero::after,
+.catalog-hero::after,
+.reviews-hero::after {
+  content: 'ESSENSHEA — PRIVATE BEAUTY EDIT';
+  position: absolute;
+  right: 0;
+  bottom: 42px;
+  color: rgba(74, 31, 39, .43);
+  font-size: .57rem;
+  letter-spacing: .24em;
+}
+.shop-hero .display-lg,
+.catalog-hero .display-lg { max-width: 10ch; }
+
+.shop-discovery,
+.shop-guide,
+.form-wrap,
+.account-auth__card,
+.account-panel,
+.eco-admin-panel,
+.eco-admin-detail {
+  border: 1px solid rgba(74, 31, 39, .18);
+  border-radius: 0;
+  background: rgba(251, 248, 242, .8);
+  box-shadow: none;
+}
+.shop-discovery { border-left: 4px solid var(--rouge); }
+.shop-search-toggle,
+.filter-pill,
+.concern-chip,
+.account-section-nav button,
+.account-tabs,
+.account-tabs button { border-radius: 0 !important; }
+.filter-pill.is-active,
+.concern-chip.is-active,
+.account-section-nav button.is-active,
+.account-tabs button.is-active { background: var(--oxblood); color: var(--white); }
+
+.form-wrap { position: relative; padding: clamp(26px, 4vw, 48px); }
+.form-wrap::before {
+  content: 'PRIVATE REQUEST';
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  color: rgba(74, 31, 39, .38);
+  font-size: .5rem;
+  letter-spacing: .22em;
+}
+.form-label { color: var(--oxblood); font-size: .64rem; letter-spacing: .16em; text-transform: uppercase; }
+.form-input,
+.form-select,
+.form-textarea,
+.cart-popup-form input,
+.cart-popup-form select,
+.cart-popup-form textarea {
+  min-height: 52px;
+  padding-inline: 0;
+  border-width: 0 0 1px;
+  border-color: rgba(74, 31, 39, .28);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+.form-textarea,
+.cart-popup-form textarea { padding-top: 15px; }
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus,
+.cart-popup-form input:focus,
+.cart-popup-form select:focus,
+.cart-popup-form textarea:focus {
+  border-color: var(--rouge);
+  outline: none !important;
+  box-shadow: 0 1px 0 var(--rouge);
+}
+.form-status:not(:empty) { margin-top: 14px; padding: 13px 15px; border-left: 2px solid var(--rouge); background: rgba(217, 184, 178, .19); }
+
+.modal-overlay {
+  padding: clamp(12px, 3vw, 42px);
+  background: rgba(24, 13, 14, .76);
+  backdrop-filter: blur(14px) saturate(.8);
+}
+.modal-card {
+  position: relative;
+  max-width: min(980px, 96vw);
+  max-height: min(88svh, 900px);
+  border: 1px solid rgba(255, 248, 238, .2);
+  border-radius: 0;
+  background: var(--paper);
+  box-shadow: var(--shadow-lg);
+  clip-path: polygon(0 0, calc(100% - 34px) 0, 100% 34px, 100% 100%, 0 100%);
+}
+.modal-card::before {
+  content: 'ESSENSHEA / PRODUCT EDIT';
+  position: absolute;
+  z-index: 1;
+  top: 19px;
+  left: 24px;
+  color: var(--rouge);
+  font-size: .52rem;
+  letter-spacing: .2em;
+}
+.modal-header { padding: 43px 24px 18px; border-bottom: 1px solid var(--ink-border); }
+.modal-header h2 { max-width: 18ch; font-family: var(--font-display); font-size: clamp(2rem, 4vw, 3.4rem); font-weight: 500; line-height: .95; }
+.modal-close,
+.cart-popup-close,
+.agent-panel-close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(74, 31, 39, .22);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--oxblood);
+}
+.modal-close:hover,
+.cart-popup-close:hover,
+.agent-panel-close:hover { background: var(--oxblood); color: var(--white); transform: rotate(90deg); }
+.modal-body { gap: clamp(24px, 4vw, 56px); padding: clamp(24px, 4vw, 48px); }
+.modal-image { border-radius: 0; clip-path: polygon(0 0, 100% 5%, 94% 100%, 0 100%); }
+.modal-footer { padding: 18px 24px 26px; border-top: 1px solid var(--ink-border); }
+.has-atelier-modal { overflow: hidden; }
+
+.cart-widget { border-radius: 0; background: var(--oxblood); }
+.cart-popup {
+  border: 1px solid rgba(74, 31, 39, .2);
+  border-radius: 0;
+  background: var(--paper);
+  box-shadow: var(--shadow-lg);
+}
+.cart-popup-header { border-bottom: 1px solid var(--ink-border); background: var(--oxblood); color: var(--white); }
+.cart-popup-header h2 { font-family: var(--font-display); font-size: 1.8rem; font-weight: 500; }
+.cart-popup-header .cart-popup-close { border-color: rgba(255,255,255,.3); color: var(--white); }
+.cart-item { border-radius: 0; background: #eee6dc; }
+
+.contact-card {
+  position: relative;
+  border-radius: 0;
+  clip-path: polygon(0 0, calc(100% - 54px) 0, 100% 54px, 100% 100%, 0 100%);
+  background:
+    radial-gradient(circle at 82% 10%, rgba(217, 184, 178, .18), transparent 34rem),
+    var(--oxblood);
+}
+.contact-card::before {
+  content: 'PRIVATE COMMISSIONS / WHOLESALE / GIFTING';
+  position: absolute;
+  top: 22px;
+  right: 66px;
+  color: rgba(255,255,255,.44);
+  font-size: .53rem;
+  letter-spacing: .2em;
+}
+.contact-card .form-wrap { background: var(--paper); }
+
+.about-hero,
+.fragrance-hero,
+.eco-hero,
+.category-hero { position: relative; }
+.about-hero__visual,
+.fragrance-hero__mark,
+.category-hero > div:last-child { clip-path: polygon(0 0, 100% 0, 100% 93%, 8% 100%, 0 100%); }
+.about-philosophy { max-width: 880px; }
+.about-philosophy .body-lg { font-family: var(--font-display); font-size: clamp(1.55rem, 2.6vw, 2.7rem); line-height: 1.22; color: var(--ink); }
+.principles-list { max-width: 1180px; counter-reset: principles; }
+.principles-list__item { position: relative; counter-increment: principles; border-color: rgba(74,31,39,.19); }
+.principles-list__item::before {
+  content: '0' counter(principles);
+  position: absolute;
+  top: 29px;
+  right: 0;
+  color: var(--rouge);
+  font: italic 1.2rem/1 var(--font-display);
+}
+.principles-list__icon { border-radius: 50%; background: transparent; color: var(--rouge); }
+
+.fragrance-hero__mark { background: var(--oxblood); }
+.fragrance-note-card { position: relative; min-height: 230px; padding: 26px; border: 1px solid rgba(74,31,39,.16); }
+.fragrance-note-card::after {
+  content: 'SCENT NOTE';
+  position: absolute;
+  right: 20px;
+  bottom: 17px;
+  color: rgba(74,31,39,.4);
+  font-size: .48rem;
+  letter-spacing: .19em;
+}
+.fragrance-note-card:hover { border-color: var(--rouge); background: var(--oxblood) !important; color: var(--white); transform: translateY(-5px); }
+.fragrance-note-card:hover p,
+.fragrance-note-card:hover::after { color: rgba(255,255,255,.68); }
+.fragrance-note-card:hover h3 { color: var(--white); }
+
+.eco-cycle { border-radius: 0; background: var(--oxblood); }
+.eco-cycle div { border-radius: 0; }
+.eco-card-photo { border-radius: 0; box-shadow: none; }
+.eco-milestone__number,
+.eco-cycle span { color: var(--blush); }
+
+.review-card { position: relative; min-height: 250px; padding: clamp(25px, 3vw, 38px); border-top: 1px solid rgba(74,31,39,.25); }
+.review-card::before { content: '“'; position: absolute; top: 13px; right: 18px; color: var(--blush); font: 5rem/.8 var(--font-display); }
+.review-card__text { font-size: clamp(1.18rem, 1.55vw, 1.5rem); line-height: 1.42; }
+.review-card:nth-child(3n + 2) { margin-top: clamp(25px, 4vw, 65px); }
+
+.account-hero { grid-template-columns: minmax(0, 1.05fr) minmax(360px, .8fr); }
+.account-benefits span { border-radius: 0; border-top: 2px solid var(--rouge); background: transparent; box-shadow: none; }
+.account-slideshow,
+.account-section-visual { border-radius: 0; }
+.account-section-nav { border-bottom: 1px solid var(--ink-border); }
+.account-section-nav button { border-width: 0 0 1px; background: transparent; }
+.account-section-nav button.is-active { border-color: var(--rouge); background: transparent; color: var(--rouge); }
+.account-panel-stage { min-height: 480px; }
+
+.eco-admin-page { background: #e8dfd4 !important; }
+.eco-admin-login { border-radius: 0; clip-path: polygon(0 0, calc(100% - 36px) 0, 100% 36px, 100% 100%, 0 100%); }
+.eco-admin-login__copy { background: var(--oxblood); }
+.eco-admin-step { border-radius: 50%; background: var(--oxblood); }
+.eco-admin-account { border-radius: 0; }
+
+.instagram-strip { gap: 8px; transform: rotate(-1deg) scale(1.02); }
+.instagram-strip a { border-radius: 0; }
+.instagram-strip a:nth-child(even) { transform: translateY(18px); }
+.instagram-strip img { filter: saturate(.72) contrast(1.06); transition: filter 400ms ease, transform 700ms var(--ease-atelier); }
+.instagram-strip a:hover img { filter: saturate(1); transform: scale(1.04); }
+
+.site-footer {
+  position: relative;
+  margin-inline: calc(-1 * var(--page-pad));
+  padding: clamp(62px, 8vw, 110px) var(--page-pad) 42px;
+  border: 0;
+  background: var(--ink);
+  color: var(--white);
+}
+.site-footer::before {
+  content: 'ESSENSHEA';
+  position: absolute;
+  right: var(--page-pad);
+  bottom: 8px;
+  color: rgba(255,255,255,.035);
+  font-family: var(--font-display);
+  font-size: clamp(5rem, 13vw, 13rem);
+  line-height: .75;
+  pointer-events: none;
+}
+.site-footer__brand strong { color: var(--blush); font-size: 2rem; font-style: italic; }
+.site-footer__brand p,
+.footer-legal { color: rgba(255,255,255,.58); }
+.footer-nav a { color: rgba(255,255,255,.82); border-bottom: 1px solid rgba(255,255,255,.12); }
+.footer-nav a:hover { color: var(--blush); border-color: var(--blush); }
+.footer-social a { border-color: rgba(255,255,255,.22); color: var(--white); }
+
+.agent-launcher { border-radius: 0; background: var(--oxblood); }
+.agent-launcher-mark { border-radius: 50%; background: var(--rouge); }
+.agent-panel { border: 1px solid rgba(74,31,39,.2); border-radius: 0; background: var(--paper); box-shadow: var(--shadow-lg); }
+.agent-header { background: var(--oxblood); color: var(--white); }
+.agent-header h2 { color: var(--white); font-family: var(--font-display); font-size: 1.45rem; font-weight: 500; }
+.agent-header .agent-panel-close { border-color: rgba(255,255,255,.25); color: var(--white); }
+.agent-chat-message { border-radius: 0; }
+.agent-chat-message--user { background: var(--oxblood); color: var(--white); }
+.agent-quick-actions button { border-radius: 0; }
+
+.atelier-reveal {
+  opacity: 0 !important;
+  transform: translateY(28px) !important;
+  transition: opacity 750ms var(--ease-atelier), transform 850ms var(--ease-atelier) !important;
+  transition-delay: calc(var(--reveal-order, 0) * 55ms) !important;
+}
+.atelier-reveal.atelier-visible { opacity: 1 !important; transform: translateY(0) !important; }
+
+@media (max-width: 1024px) {
+  .display-xl { font-size: clamp(4rem, 9vw, 6.3rem); }
+  .collection-tile { grid-column: span 6; }
+  .collection-tile:nth-child(n) { grid-column: span 6; aspect-ratio: 4 / 4.6; margin-top: 0; }
+  .collection-tile:nth-child(even) { margin-top: 54px; }
+  .hero__badge { left: -18px; }
+}
+
+@media (max-width: 820px) {
+  .atelier-progress { display: none; }
+  .topbar { position: sticky; min-height: 76px; padding-inline: 0; }
+  .topbar.is-scrolled { min-height: 68px; }
+  .nav-toggle { border-radius: 50%; background: transparent; }
+  .topnav {
+    top: 100%;
+    gap: 0;
+    padding: 18px;
+    border-radius: 0;
+    background: rgba(251, 248, 242, .98);
+  }
+  .topnav a { min-height: 58px; border-width: 0 0 1px; border-radius: 0; background: transparent; }
+  .topnav a:last-child { grid-column: auto; }
+  .topnav a::before { display: none; }
+  .hero { min-height: 0; }
+  .hero::before { display: none; }
+  .hero__visual { margin-top: 8px; aspect-ratio: 4 / 4.9; }
+  .hero__badge { right: 12px; bottom: 12px; left: 12px; width: auto; }
+  .asymmetric__copy::after { margin-top: 36px; }
+  .product-trio__card:nth-child(2),
+  .product-card:nth-child(3n + 2),
+  .category-product-card:nth-child(3n + 2),
+  .review-card:nth-child(3n + 2) { transform: none; margin-top: 0; }
+  .shop-hero::after,
+  .catalog-hero::after,
+  .reviews-hero::after { display: none; }
+  .modal-card { max-height: 92svh; clip-path: none; }
+  .site-footer { margin-inline: -16px; padding-inline: 16px; }
+}
+
+@media (max-width: 560px) {
+  .page-shell { width: min(calc(100% - 24px), var(--max-w)); }
+  .brand-text strong { font-size: 1.3rem; }
+  .display-xl { font-size: clamp(3.4rem, 17vw, 4.75rem); line-height: .86; }
+  .display-lg { font-size: clamp(3rem, 15vw, 4.15rem); line-height: .9; }
+  .display-md { font-size: clamp(2.35rem, 12vw, 3.25rem); }
+  .hero { padding-top: 42px !important; }
+  .hero__copy { margin-block: 24px 28px; }
+  .hero__badge { padding: 17px; }
+  .collection-grid { display: grid; grid-template-columns: 1fr; }
+  .collection-tile:nth-child(n) { grid-column: 1; margin-top: 0; aspect-ratio: 4 / 4.6; }
+  .collection-tile:nth-child(even) { margin-left: 28px; }
+  .collection-tile:nth-child(odd) { margin-right: 28px; }
+  .section { padding-block: 72px; }
+  .form-wrap { padding: 42px 20px 24px; }
+  .modal-overlay { align-items: end; padding: 0; }
+  .modal-card { width: 100%; max-width: 100%; max-height: 94svh; border-width: 1px 0 0; }
+  .modal-header { padding: 40px 18px 15px; }
+  .modal-body { padding: 20px 18px; }
+  .contact-card { margin-inline: 0; padding: 64px 18px 24px; clip-path: none; }
+  .contact-card::before { right: 18px; left: 18px; top: 22px; }
+  .account-benefits { grid-template-columns: 1fr; }
+  .account-eco-cycle { grid-template-columns: 1fr; }
+  .agent-launcher { border-radius: 50%; }
+  .agent-panel { left: 8px; right: 8px; border-radius: 0; }
+  .site-footer { margin-inline: -12px; padding-inline: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atelier-reveal,
+  .atelier-reveal.atelier-visible { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .atelier-progress span { transition: none; }
+}
