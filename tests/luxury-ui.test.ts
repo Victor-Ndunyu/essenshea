@@ -18,11 +18,11 @@ const pages = [
 test('every storefront surface loads the final calm-luxury design layer', async () => {
   for (const page of pages) {
     const html = await readFile(new URL(`../website/${page}`, import.meta.url), 'utf8');
-    assert.match(html, /luxury-refinement\.css\?v=11/, `${page} is missing the current design layer`);
-    assert.match(html, /design-system\.js\?v=1/, `${page} is missing the atelier interaction layer`);
+    assert.match(html, /luxury-refinement\.css\?v=12/, `${page} is missing the current design layer`);
+    assert.match(html, /design-system\.js\?v=2/, `${page} is missing the atelier interaction layer`);
     assert.match(html, /name="color-scheme" content="light only"/, `${page} can be auto-darkened`);
     if (page !== 'eco-rewards-admin.html') {
-      assert.match(html, /agent\.js\?v=4/, `${page} is missing the current assistant bundle`);
+      assert.match(html, /agent\.js\?v=5/, `${page} is missing the current assistant bundle`);
     }
   }
 });
@@ -46,6 +46,28 @@ test('fashion atelier system reaches forms, overlays, scrollbar and reduced moti
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.atelier-reveal/);
   assert.match(script, /IntersectionObserver/);
   assert.match(script, /MutationObserver/);
+  assert.match(script, /input\[type="password"\]/);
+  assert.match(script, /aria-label', 'Show password'/);
+  assert.match(script, /is-compact/);
+});
+
+test('customer copy avoids em dashes and the journal uses a stable grid', async () => {
+  const [index, shop, rewards, accountScript, agentScript, shopScript, css] = await Promise.all([
+    readFile(new URL('../website/index.html', import.meta.url), 'utf8'),
+    readFile(new URL('../website/shop.html', import.meta.url), 'utf8'),
+    readFile(new URL('../website/eco-rewards.html', import.meta.url), 'utf8'),
+    readFile(new URL('../website/assets/js/account.js', import.meta.url), 'utf8'),
+    readFile(new URL('../website/assets/js/agent.js', import.meta.url), 'utf8'),
+    readFile(new URL('../website/assets/js/shop.js', import.meta.url), 'utf8'),
+    readFile(new URL('../website/assets/css/luxury-refinement.css', import.meta.url), 'utf8'),
+  ]);
+
+  for (const source of [index, shop, rewards, accountScript, agentScript, shopScript]) {
+    assert.doesNotMatch(source, /—/);
+  }
+  assert.match(index, />Shop all products</);
+  assert.match(css, /\.instagram-strip\s*\{[\s\S]*grid-template-columns:\s*repeat\(3/);
+  assert.match(css, /\.instagram-strip a:nth-child\(even\)[\s\S]*transform:\s*none/);
 });
 
 test('the final design layer keeps content visible and styles interactive controls', async () => {

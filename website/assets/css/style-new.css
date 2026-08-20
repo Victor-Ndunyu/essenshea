@@ -2416,7 +2416,7 @@ body.modal-open { overflow: hidden; }
   }
 }
 
-/* 2026 visual refresh — youthful, editorial and intentionally minimal */
+/* 2026 visual refresh - youthful, editorial and intentionally minimal */
 :root {
   --ivory: #fbfaf7;
   --ink: #171914;
@@ -3347,7 +3347,7 @@ body {
 }
 
 
-/* Phase 5 reviews — grid, parallax scroll, fade edges, mouse motion */
+/* Phase 5 reviews - grid, parallax scroll, fade edges, mouse motion */
 #home-reviews {
   position: relative;
 }
@@ -3425,7 +3425,7 @@ body {
   background: rgba(255,255,255,0.95);
 }
 
-/* Review card — premium distinct card style */
+/* Review card - premium distinct card style */
 .review-card {
   background:
     linear-gradient(145deg, rgba(255,255,255,.82), rgba(247,241,229,.94)),
@@ -3604,7 +3604,7 @@ body:has(.site-footer) { overflow-x: hidden; }
 
 
 
-/* Animation system — easings, reveals, motion */
+/* Animation system - easings, reveals, motion */
 :root {
   --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
   --ease-out-quart: cubic-bezier(0.23, 1, 0.32, 1);
@@ -3681,7 +3681,7 @@ body:has(.site-footer) { overflow-x: hidden; }
   animation-range: entry 0% cover 18%;
 }
 
-/* Popup entrance/exit — modal */
+/* Popup entrance/exit - modal */
 .modal-overlay {
   transition: opacity 280ms var(--ease-out-expo), visibility 0ms 0ms;
 }
@@ -3700,7 +3700,7 @@ body:has(.site-footer) { overflow-x: hidden; }
   opacity: 0;
 }
 
-/* Popup entrance/exit — cart popup */
+/* Popup entrance/exit - cart popup */
 .cart-popup {
   transition: transform 300ms var(--ease-out-expo), opacity 300ms var(--ease-out-expo), visibility 0ms 0ms;
 }
@@ -3713,7 +3713,7 @@ body:has(.site-footer) { overflow-x: hidden; }
   transition: transform 220ms var(--ease-out-expo), opacity 220ms var(--ease-out-expo), visibility 0ms 220ms;
 }
 
-/* Popup entrance/exit — agent panel */
+/* Popup entrance/exit - agent panel */
 .agent-panel {
   transition: transform 300ms var(--ease-out-expo), opacity 300ms var(--ease-out-expo), visibility 0ms 0ms;
 }

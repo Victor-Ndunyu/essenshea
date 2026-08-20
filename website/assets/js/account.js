@@ -187,7 +187,7 @@ function renderOrders(orders, highlightReference) {
     const items = document.createElement('ul');
     (order.order_items || []).forEach(function(item) {
       const line = document.createElement('li');
-      line.textContent = item.quantity + ' × ' + item.title + ' — ' + item.price_text;
+      line.textContent = item.quantity + ' × ' + item.title + ' · ' + item.price_text;
       items.append(line);
     });
     const detail = document.createElement('p');
