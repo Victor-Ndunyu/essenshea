@@ -2920,7 +2920,7 @@ body::before { opacity: .1; }
 }
 
 /* Lightweight, persistent navigation. */
-html { background: #294f46; }
+html { background: #294f46 !important; }
 .topbar,
 .eco-admin-topbar {
   transform: translateZ(0);
@@ -2996,7 +2996,10 @@ html { background: #294f46; }
 }
 
 /* Finish the full-bleed footer cleanly at the viewport edge. */
-.site-footer { margin-bottom: -2px; }
+.site-footer {
+  margin-bottom: -2px;
+  box-shadow: 0 40px 0 #294f46;
+}
 
 /* Shorter section reveals reduce paint work while preserving reading rhythm. */
 .atelier-reveal {
