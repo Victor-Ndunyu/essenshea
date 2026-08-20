@@ -36,14 +36,15 @@
   window.addEventListener('resize', updateScrollState, { passive: true });
   updateScrollState();
 
-  const revealTargets = document.querySelectorAll([
+  const revealSelector = [
     'main > section',
     '.product-trio__card',
     '.catalog-collection-card',
     '.category-product-card',
     '.product-card',
     '.principles-list__item'
-  ].join(','));
+  ].join(',');
+  const revealTargets = document.querySelectorAll(revealSelector);
 
   if (!reduceMotion && 'IntersectionObserver' in window) {
     const observer = new IntersectionObserver((entries) => {
@@ -54,11 +55,27 @@
       });
     }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
 
-    revealTargets.forEach((target, index) => {
+    let revealOrder = 0;
+    const observeRevealTarget = (target) => {
+      if (target.classList.contains('atelier-reveal') || target.classList.contains('atelier-visible')) return;
       target.classList.add('atelier-reveal');
-      target.style.setProperty('--reveal-order', String(index % 4));
+      target.style.setProperty('--reveal-order', String(revealOrder % 4));
+      revealOrder += 1;
       observer.observe(target);
+    };
+
+    revealTargets.forEach(observeRevealTarget);
+
+    const revealMutationObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (!(node instanceof Element)) return;
+          if (node.matches(revealSelector)) observeRevealTarget(node);
+          node.querySelectorAll(revealSelector).forEach(observeRevealTarget);
+        });
+      });
     });
+    revealMutationObserver.observe(document.querySelector('main') || body, { childList: true, subtree: true });
   } else {
     revealTargets.forEach((target) => target.classList.add('atelier-visible'));
   }
