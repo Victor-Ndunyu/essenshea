@@ -1723,7 +1723,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Essenshea Atelier — fashion-led art direction
+   Essenshea Atelier - fashion-led art direction
    The final cascade deliberately turns the catalogue into an editorial shop.
    -------------------------------------------------------------------------- */
 
@@ -2098,7 +2098,7 @@ body::before {
 .shop-hero::after,
 .catalog-hero::after,
 .reviews-hero::after {
-  content: 'ESSENSHEA — PRIVATE BEAUTY EDIT';
+  content: 'ESSENSHEA - PRIVATE BEAUTY EDIT';
   position: absolute;
   right: 0;
   bottom: 42px;
@@ -2441,7 +2441,7 @@ body::before {
 }
 
 /* --------------------------------------------------------------------------
-   Essenshea Botanical Atelier — logo-led public release direction
+   Essenshea Botanical Atelier - logo-led public release direction
    Warm gold, sea-glass teal and botanical green replace the geometric edit.
    -------------------------------------------------------------------------- */
 
@@ -2919,6 +2919,95 @@ body::before { opacity: .1; }
   border-radius: 24px !important;
 }
 
+/* Lightweight, persistent navigation. */
+html { background: #294f46 !important; }
+.topbar,
+.eco-admin-topbar {
+  transform: translateZ(0);
+  transition: min-height 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+.topbar.is-scrolled,
+.eco-admin-topbar.is-scrolled {
+  min-height: 80px;
+  background: rgba(255, 254, 251, .97);
+  backdrop-filter: blur(10px) saturate(110%);
+}
+.topbar.is-scrolled.is-compact,
+.eco-admin-topbar.is-scrolled.is-compact {
+  min-height: 66px;
+  box-shadow: 0 8px 28px rgba(55, 91, 77, .08);
+}
+.topbar.is-compact .brand-logo,
+.eco-admin-topbar.is-compact .brand-logo {
+  width: 40px;
+  height: 40px;
+}
+.topbar.is-compact .topnav a { padding-block: 8px; }
+.brand-logo { transition: width 180ms ease, height 180ms ease, transform 360ms var(--ease-atelier); }
+
+/* Password visibility controls on every password or private-code field. */
+.password-input-shell {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+.password-input-shell .form-input {
+  width: 100%;
+  padding-right: 52px;
+}
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--botanical-deep);
+  cursor: pointer;
+}
+.password-toggle:hover { background: rgba(114, 164, 145, .12); }
+.password-toggle:focus-visible {
+  outline: 2px solid var(--marigold);
+  outline-offset: 1px;
+}
+.password-toggle svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+/* The journal is a deliberate grid, without accidental overlap. */
+.instagram-strip {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  transform: none;
+}
+.instagram-strip a,
+.instagram-strip a:nth-child(even) {
+  transform: none;
+  border-radius: 18px;
+}
+
+/* Finish the full-bleed footer cleanly at the viewport edge. */
+.site-footer {
+  margin-bottom: -2px;
+  box-shadow: 0 40px 0 #294f46;
+}
+
+/* Shorter section reveals reduce paint work while preserving reading rhythm. */
+.atelier-reveal {
+  transform: translateY(16px) !important;
+  transition: opacity 380ms ease, transform 420ms var(--ease-atelier) !important;
+  transition-delay: 0ms !important;
+}
+
 @media (max-width: 1024px) {
   .hero__badge { left: -22px; }
   .collection-tile:nth-child(even) { margin-top: 34px; }
@@ -2944,4 +3033,6 @@ body::before { opacity: .1; }
   .collection-tile:nth-child(odd) { margin-right: 18px; }
   .contact-card { border-radius: 30px; }
   .agent-panel { border-radius: 24px 24px 0 0; }
+  .instagram-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .instagram-strip a:last-child { grid-column: 1 / -1; aspect-ratio: 2 / 1; }
 }

@@ -5,20 +5,24 @@
   const body = document.body;
   const header = document.querySelector('.topbar, .eco-admin-topbar');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let previousScrollTop = window.scrollY || root.scrollTop;
 
   root.classList.add('atelier-ready');
 
-  const progress = document.createElement('div');
-  progress.className = 'atelier-progress';
-  progress.setAttribute('aria-hidden', 'true');
-  progress.innerHTML = '<span></span>';
-  body.appendChild(progress);
-
   const updateScrollState = () => {
     const scrollTop = window.scrollY || root.scrollTop;
-    const range = Math.max(root.scrollHeight - window.innerHeight, 1);
-    root.style.setProperty('--page-progress', Math.min(scrollTop / range, 1).toFixed(4));
-    if (header) header.classList.toggle('is-scrolled', scrollTop > 24);
+    if (header) {
+      const moved = scrollTop - previousScrollTop;
+      const isPastTop = scrollTop > 24;
+      header.classList.toggle('is-scrolled', isPastTop);
+
+      if (!isPastTop || moved < -6) {
+        header.classList.remove('is-compact');
+      } else if (scrollTop > 120 && moved > 6) {
+        header.classList.add('is-compact');
+      }
+    }
+    previousScrollTop = scrollTop;
   };
 
   let scrollFrame = 0;
@@ -34,13 +38,6 @@
 
   const revealTargets = document.querySelectorAll([
     'main > section',
-    '.product-trio__card',
-    '.collection-tile',
-    '.catalog-collection-card',
-    '.category-product-card',
-    '.product-card',
-    '.review-card',
-    '.fragrance-note-card',
     '.principles-list__item'
   ].join(','));
 
@@ -72,6 +69,30 @@
     modalObserver.observe(modal, { attributes: true, attributeFilter: ['class', 'aria-hidden'] });
   });
   syncModalState();
+
+  document.querySelectorAll('input[type="password"]').forEach((input) => {
+    if (input.closest('.password-input-shell')) return;
+
+    const shell = document.createElement('span');
+    shell.className = 'password-input-shell';
+    input.parentNode.insertBefore(shell, input);
+    shell.appendChild(input);
+
+    const toggle = document.createElement('button');
+    toggle.className = 'password-toggle';
+    toggle.type = 'button';
+    toggle.setAttribute('aria-label', 'Show password');
+    toggle.setAttribute('aria-pressed', 'false');
+    toggle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.75"/></svg>';
+    shell.appendChild(toggle);
+
+    toggle.addEventListener('click', () => {
+      const showing = input.type === 'text';
+      input.type = showing ? 'password' : 'text';
+      toggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+      toggle.setAttribute('aria-pressed', String(!showing));
+    });
+  });
 
   document.querySelectorAll('.topnav a').forEach((link) => {
     link.addEventListener('click', () => {

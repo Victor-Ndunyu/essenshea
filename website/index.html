@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="icon" href="assets/images/star-mark.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="assets/css/style-new.css" />
-  <link rel="stylesheet" href="assets/css/luxury-refinement.css?v=11" />
+  <link rel="stylesheet" href="assets/css/luxury-refinement.css?v=12" />
 </head>
 <body>
   <div class="page-shell">
@@ -40,9 +40,9 @@
         <div class="hero__content">
           <span class="label">The beauty atelier &middot; Nairobi</span>
           <h1 class="display-xl">Beauty, worn <em>your way.</em></h1>
-          <p class="hero__copy">Your skin, scent and hair are part of how you arrive. Essenshea pairs African shea, rich botanicals and expressive fragrance to create care that feels styled to you—not borrowed from everyone else.</p>
+          <p class="hero__copy">Your skin, scent and hair are part of how you arrive. Essenshea pairs African shea, rich botanicals and expressive fragrance to create care that feels styled to you, not borrowed from everyone else.</p>
           <div class="hero__actions">
-            <a class="btn btn--primary" href="#collections">Shop the beauty edit</a>
+            <a class="btn btn--primary" href="#collections">Shop all products</a>
             <a class="btn btn--ghost" href="/shop?focus=custom#custom-care">Create your signature</a>
           </div>
         </div>
@@ -51,7 +51,7 @@
           <div class="hero__badge">
             <span class="hero__badge-label">Private beauty commission</span>
             <h2 class="hero__badge-title">Your formula. Your finish.</h2>
-            <span class="hero__badge-desc">Texture, fragrance and ingredients—composed around you.</span>
+            <span class="hero__badge-desc">Texture, fragrance and ingredients, composed around you.</span>
           </div>
         </div>
       </section>
@@ -117,7 +117,7 @@
       <section class="section section--divider" id="collections">
         <div class="home-section-heading">
           <span class="label">Style your care</span>
-          <h2 class="display-lg">Build the look—from polished skin to an unforgettable scent trail.</h2>
+          <h2 class="display-lg">Build the look, from polished skin to an unforgettable scent trail.</h2>
         </div>
         <div class="collection-grid">
           <a href="/category/body-butters-and-balms" class="collection-tile">
@@ -338,9 +338,9 @@
     </footer>
   </div>
 
-  <script src="assets/js/design-system.js?v=1"></script>
+  <script src="assets/js/design-system.js?v=2"></script>
   <script src="assets/js/agent-config.js"></script>
-  <script src="assets/js/agent.js?v=4"></script>
+  <script src="assets/js/agent.js?v=5"></script>
   <script src="assets/js/featured-care.js?v=1"></script>
   <script>
     const form = document.getElementById('main-inquiry-form');
@@ -448,20 +448,10 @@
     var homeSection = document.getElementById('home-reviews');
 
     function updateParallax() {
-      if (!viewport || !parallaxInner) return;
-      var rect = viewport.getBoundingClientRect();
-      var wh = window.innerHeight;
-      if (rect.bottom < 0 || rect.top > wh) return;
-      var progress = (wh - rect.top) / (wh + rect.height);
-      progress = Math.max(0, Math.min(1, progress));
-      var maxScroll = parallaxInner.scrollHeight - viewport.clientHeight;
-      if (maxScroll <= 0) { parallaxInner.style.transform = ''; return; }
-      var offset = progress * maxScroll * 0.5;
-      parallaxInner.style.transform = 'translateY(' + (-offset) + 'px)';
+      if (parallaxInner) parallaxInner.style.transform = '';
     }
 
     populateReviews();
-    window.addEventListener('scroll', updateParallax);
     window.addEventListener('resize', updateParallax);
 
     if (glow && viewport) {

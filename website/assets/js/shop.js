@@ -80,17 +80,17 @@ function trapModalFocus(event) {
 function markImageUnavailable(image) {
   image.classList.add('image-unavailable');
   image.removeAttribute('src');
-  image.alt = image.alt ? image.alt + ' — image unavailable' : 'Product image unavailable';
+  image.alt = image.alt ? image.alt + ', image unavailable' : 'Product image unavailable';
 }
 
 function extractVariants(product) {
   if (Array.isArray(product.variants)) {
     return product.variants.map(function(variant) {
-      return typeof variant === 'string' ? variant : [variant.size || variant.name, variant.price || variant.priceText].filter(Boolean).join(' — ');
+      return typeof variant === 'string' ? variant : [variant.size || variant.name, variant.price || variant.priceText].filter(Boolean).join(', ');
     }).filter(Boolean);
   }
   const text = String(product.description || '');
-  const matches = text.match(/\b\d+(?:\.\d+)?\s*(?:ml|g|kg|l)\s*(?:(?:-|–|—|:)\s*)?(?:ksh|kes)\s*[\d,]+/gi) || [];
+  const matches = text.match(/\b\d+(?:\.\d+)?\s*(?:ml|g|kg|l)\s*(?:(?:-|–|:)\s*)?(?:ksh|kes)\s*[\d,]+/gi) || [];
   return matches.slice(0, 6).map(function(value) { return value.replace(/\s+/g, ' ').trim(); });
 }
 

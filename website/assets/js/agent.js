@@ -349,7 +349,7 @@ async function initializeAgent() {
     const siteProducts = getSiteProducts(catalogData);
     AGENT_DATA.products = siteProducts.products;
     AGENT_DATA.categories = siteProducts.categories;
-    addAgentMessage('assistant', 'Hi — tell me what you are shopping for, your skin or hair goal, preferred scent, or budget. I can help narrow it down and explain the options.');
+    addAgentMessage('assistant', 'Hi. Tell me what you are shopping for, your skin or hair goal, preferred scent, or budget. I can help narrow it down and explain the options.');
   } catch (error) {
     addAgentMessage('assistant', `Failed to load catalog data: ${error.message}`);
   }
