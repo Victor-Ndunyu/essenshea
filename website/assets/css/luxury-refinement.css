@@ -1989,7 +1989,7 @@ body::before {
   z-index: 2;
   right: auto;
   bottom: 24px;
-  left: -38px;
+  left: 18px;
   width: min(88%, 360px);
   padding: 22px 24px;
   border: 0;
@@ -2369,7 +2369,7 @@ body::before {
   .collection-tile { grid-column: span 6; }
   .collection-tile:nth-child(n) { grid-column: span 6; aspect-ratio: 4 / 4.6; margin-top: 0; }
   .collection-tile:nth-child(even) { margin-top: 54px; }
-  .hero__badge { left: -18px; }
+  .hero__badge { left: 12px; }
 }
 
 @media (max-width: 820px) {
