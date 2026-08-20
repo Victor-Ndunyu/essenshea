@@ -18,8 +18,8 @@ const pages = [
 test('every storefront surface loads the final calm-luxury design layer', async () => {
   for (const page of pages) {
     const html = await readFile(new URL(`../website/${page}`, import.meta.url), 'utf8');
-    assert.match(html, /luxury-refinement\.css\?v=12/, `${page} is missing the current design layer`);
-    assert.match(html, /design-system\.js\?v=2/, `${page} is missing the atelier interaction layer`);
+    assert.match(html, /luxury-refinement\.css\?v=13/, `${page} is missing the current design layer`);
+    assert.match(html, /design-system\.js\?v=3/, `${page} is missing the atelier interaction layer`);
     assert.match(html, /name="color-scheme" content="light only"/, `${page} can be auto-darkened`);
     if (page !== 'eco-rewards-admin.html') {
       assert.match(html, /agent\.js\?v=5/, `${page} is missing the current assistant bundle`);
@@ -49,6 +49,8 @@ test('fashion atelier system reaches forms, overlays, scrollbar and reduced moti
   assert.match(script, /input\[type="password"\]/);
   assert.match(script, /aria-label', 'Show password'/);
   assert.match(script, /is-compact/);
+  assert.match(script, /'\.product-card'/);
+  assert.match(css, /\.topbar\.is-scrolled\.is-compact[\s\S]*rgba\(255, 254, 251, \.86\)/);
 });
 
 test('customer copy avoids em dashes and the journal uses a stable grid', async () => {
@@ -68,6 +70,9 @@ test('customer copy avoids em dashes and the journal uses a stable grid', async 
   assert.match(index, />Shop all products</);
   assert.match(css, /\.instagram-strip\s*\{[\s\S]*grid-template-columns:\s*repeat\(3/);
   assert.match(css, /\.instagram-strip a:nth-child\(even\)[\s\S]*transform:\s*none/);
+  assert.match(index, /requestAnimationFrame\(updateParallax\)/);
+  assert.match(index, /addEventListener\('scroll', requestParallaxUpdate/);
+  assert.match(css, /--reviews-parallax-y/);
 });
 
 test('the final design layer keeps content visible and styles interactive controls', async () => {

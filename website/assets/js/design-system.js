@@ -38,6 +38,10 @@
 
   const revealTargets = document.querySelectorAll([
     'main > section',
+    '.product-trio__card',
+    '.catalog-collection-card',
+    '.category-product-card',
+    '.product-card',
     '.principles-list__item'
   ].join(','));
 
