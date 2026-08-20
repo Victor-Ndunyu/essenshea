@@ -2855,6 +2855,61 @@ body::before { opacity: .1; }
 .agent-chat-message { border-radius: 18px; }
 .agent-chat-message--user { background: var(--botanical-deep); }
 
+/* Final spatial pass: breathing room should frame content, not delay it. */
+.section { padding-block: clamp(68px, 7vw, 104px); }
+
+.shop-hero,
+.catalog-hero {
+  padding: clamp(44px, 5.5vw, 72px) 0 clamp(38px, 4.5vw, 62px);
+}
+
+.about-hero,
+.fragrance-hero,
+.eco-hero,
+.category-hero {
+  padding-top: clamp(42px, 5vw, 64px) !important;
+  padding-bottom: clamp(50px, 6vw, 76px) !important;
+}
+
+.reviews-page { padding-top: clamp(42px, 5vw, 64px); }
+
+.account-hero {
+  align-items: center;
+  padding-block: clamp(40px, 5vw, 62px);
+}
+.account-slideshow { min-height: 210px; }
+.account-benefits span { min-height: 76px; }
+.account-auth { padding-block: clamp(48px, 6vw, 78px); }
+
+/* Clean image frames: no novelty arches on catalogue photography. */
+.product-trio__card img,
+.catalog-collection-card img,
+.product-card img,
+.category-product-card img,
+.modal-image {
+  border-radius: 18px;
+  box-shadow: 0 14px 38px rgba(48, 86, 72, .07);
+}
+
+.collection-tile,
+.collection-tile:nth-child(1),
+.collection-tile:nth-child(5),
+.collection-tile:nth-child(9),
+.instagram-strip a {
+  border-radius: 22px;
+}
+
+.hero__visual,
+.asymmetric__visual,
+.about-hero__visual,
+.fragrance-hero__mark,
+.category-hero > div:last-child,
+.eco-card-photo,
+.account-slideshow,
+.account-section-visual {
+  border-radius: 24px !important;
+}
+
 @media (max-width: 1024px) {
   .hero__badge { left: -22px; }
   .collection-tile:nth-child(even) { margin-top: 34px; }
@@ -2864,7 +2919,7 @@ body::before { opacity: .1; }
   .topnav { border-radius: 24px; background: rgba(255, 254, 251, .98); }
   .topnav a { border-radius: 14px; }
   .hero::after { right: -30%; width: 78vw; }
-  .hero__visual { border-radius: 48% 48% 24px 24px / 20% 20% 24px 24px !important; }
+  .hero__visual { border-radius: 20px !important; }
   .hero__badge { right: 14px; bottom: 14px; left: 14px; }
   .modal-card { border-radius: 28px 28px 0 0; }
   .account-panel-stage { min-height: 0; }
