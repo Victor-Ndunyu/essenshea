@@ -3314,11 +3314,11 @@ body:has(.site-footer) {
 .shop-lookbook__card--3 { --card-x: 108px; --card-y: 38px; --card-r: 3.1deg; z-index: 2; filter: brightness(.91); }
 .shop-lookbook__card--4 { --card-x: 151px; --card-y: 52px; --card-r: 5deg; z-index: 1; filter: brightness(.86); }
 .shop-lookbook:hover .shop-lookbook__card--2,
-.shop-lookbook:focus-visible .shop-lookbook__card--2 { --card-x: 84px; --card-r: 2.2deg; }
+.shop-lookbook:focus-visible .shop-lookbook__card--2 { --card-x: 78px; --card-r: 2.2deg; }
 .shop-lookbook:hover .shop-lookbook__card--3,
-.shop-lookbook:focus-visible .shop-lookbook__card--3 { --card-x: 158px; --card-r: 4.5deg; }
+.shop-lookbook:focus-visible .shop-lookbook__card--3 { --card-x: 140px; --card-r: 4.5deg; }
 .shop-lookbook:hover .shop-lookbook__card--4,
-.shop-lookbook:focus-visible .shop-lookbook__card--4 { --card-x: 222px; --card-r: 7deg; }
+.shop-lookbook:focus-visible .shop-lookbook__card--4 { --card-x: 190px; --card-r: 7deg; }
 .shop-lookbook:hover .shop-lookbook__card--1 img,
 .shop-lookbook:focus-visible .shop-lookbook__card--1 img { transform: scale(1.025); filter: saturate(.94) contrast(1.03); }
 .shop-lookbook__card figcaption {
