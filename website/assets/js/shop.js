@@ -28,6 +28,7 @@ const shopPriceSelect = document.getElementById('shop-price');
 const shopSortSelect = document.getElementById('shop-sort');
 const shopClearFilters = document.getElementById('shop-clear-filters');
 const shopRoutinesRoot = document.getElementById('shop-routines');
+const shopLookbook = document.querySelector('.shop-lookbook');
 
 const shopCollections = [];
 const shopProducts = [];
@@ -37,6 +38,35 @@ let categoryOptions = [];
 let modalReturnFocus = null;
 let searchRenderTimer = null;
 let lastNoResultSearch = '';
+
+function enhanceShopLookbook() {
+  if (!shopLookbook || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  const cards = Array.from(shopLookbook.querySelectorAll('.shop-lookbook__card'));
+  let frame = 0;
+  function updatePointer(event) {
+    const bounds = shopLookbook.getBoundingClientRect();
+    const x = Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / bounds.width - .5) * 2));
+    const y = Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / bounds.height - .5) * 2));
+    window.cancelAnimationFrame(frame);
+    frame = window.requestAnimationFrame(function() {
+      cards.forEach(function(card, index) {
+        const depth = cards.length - index;
+        card.style.setProperty('--pointer-x', `${(x * depth * 1.8).toFixed(2)}px`);
+        card.style.setProperty('--pointer-y', `${(y * depth * 1.2).toFixed(2)}px`);
+      });
+    });
+  }
+  function resetPointer() {
+    cards.forEach(function(card) {
+      card.style.setProperty('--pointer-x', '0px');
+      card.style.setProperty('--pointer-y', '0px');
+    });
+  }
+  shopLookbook.addEventListener('pointermove', updatePointer, { passive: true });
+  shopLookbook.addEventListener('pointerleave', resetPointer, { passive: true });
+}
+
+enhanceShopLookbook();
 
 function trackShopEvent(eventType, details) {
   if (typeof window.essensheaTrack === 'function') window.essensheaTrack(eventType, details || {});
