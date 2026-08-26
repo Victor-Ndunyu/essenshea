@@ -18,7 +18,7 @@ const pages = [
 test('every storefront surface loads the final calm-luxury design layer', async () => {
   for (const page of pages) {
     const html = await readFile(new URL(`../website/${page}`, import.meta.url), 'utf8');
-    assert.match(html, /luxury-refinement\.css\?v=21/, `${page} is missing the current design layer`);
+    assert.match(html, /luxury-refinement\.css\?v=22/, `${page} is missing the current design layer`);
     assert.match(html, /design-system\.js\?v=6/, `${page} is missing the atelier interaction layer`);
     assert.match(html, /name="color-scheme" content="light only"/, `${page} can be auto-darkened`);
     if (page !== 'eco-rewards-admin.html') {
@@ -94,7 +94,7 @@ test('the final design layer keeps content visible and styles interactive contro
   assert.match(css, /\.filter-pill\s*\{/);
   assert.match(css, /\.contact-card\s*\{[\s\S]*grid-template-columns/);
   assert.match(css, /@media \(max-width: 560px\)/);
-  assert.match(css, /min-height:\s*calc\(100svh - 92px\)/);
+  assert.match(css, /min-height:\s*max\(760px, calc\(100svh - 72px\)\)/);
   assert.match(css, /aspect-ratio:\s*3 \/ 4\.1/);
   assert.match(css, /@media \(min-width: 821px\) and \(max-height: 780px\)/);
   assert.match(css, /#collections \.collection-grid\s*\{[\s\S]*grid-template-columns:\s*repeat\(3/);
@@ -111,10 +111,13 @@ test('shop hero presents a layered product lookbook with restrained pointer moti
   ]);
   assert.equal((html.match(/class="shop-lookbook__card/g) || []).length, 4);
   assert.match(html, /Gift_Sets\/images\/gift_set_1\.jpg/);
-  assert.match(html, /shop\.js\?v=4/);
+  assert.match(html, /shop\.js\?v=5/);
   assert.match(css, /grid-template-columns:\s*minmax\(0, \.9fr\) minmax\(520px, 1\.1fr\)/);
   assert.match(script, /enhanceShopLookbook/);
   assert.match(script, /requestAnimationFrame/);
+  assert.match(script, /shop-lookbook__card--1/);
+  assert.match(css, /clip-path:\s*inset\(0 round 26px\)/);
+  assert.match(css, /\.product-card\.atelier-reveal\s*\{[\s\S]*opacity:\s*1 !important/);
   assert.match(html, /id="shop-page-loader"/);
   assert.match(script, /fetchLiveCatalogWithRetry/);
   assert.match(script, /\/data\/catalog\.json/);

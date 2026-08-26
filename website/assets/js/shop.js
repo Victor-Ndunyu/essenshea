@@ -59,6 +59,7 @@ function enhanceShopLookbook() {
     window.cancelAnimationFrame(frame);
     frame = window.requestAnimationFrame(function() {
       cards.forEach(function(card, index) {
+        if (card.classList.contains('shop-lookbook__card--1')) return;
         const depth = cards.length - index;
         card.style.setProperty('--pointer-x', `${(x * depth * 1.8).toFixed(2)}px`);
         card.style.setProperty('--pointer-y', `${(y * depth * 1.2).toFixed(2)}px`);
@@ -67,6 +68,7 @@ function enhanceShopLookbook() {
   }
   function resetPointer() {
     cards.forEach(function(card) {
+      if (card.classList.contains('shop-lookbook__card--1')) return;
       card.style.setProperty('--pointer-x', '0px');
       card.style.setProperty('--pointer-y', '0px');
     });
