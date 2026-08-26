@@ -95,6 +95,7 @@ test('the final design layer keeps content visible and styles interactive contro
   assert.match(css, /\.contact-card\s*\{[\s\S]*grid-template-columns/);
   assert.match(css, /@media \(max-width: 560px\)/);
   assert.match(css, /min-height:\s*min\(820px, calc\(100svh - 92px\)\)/);
+  assert.match(css, /aspect-ratio:\s*3 \/ 4\.1/);
   assert.match(css, /@media \(min-width: 821px\) and \(max-height: 780px\)/);
   assert.match(css, /#collections \.collection-grid\s*\{[\s\S]*grid-template-columns:\s*repeat\(3/);
   assert.match(css, /#collections \.collection-tile:nth-child\(n\)[\s\S]*margin:\s*0/);
