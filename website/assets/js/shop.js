@@ -29,6 +29,7 @@ const shopSortSelect = document.getElementById('shop-sort');
 const shopClearFilters = document.getElementById('shop-clear-filters');
 const shopRoutinesRoot = document.getElementById('shop-routines');
 const shopLookbook = document.querySelector('.shop-lookbook');
+const shopPageLoader = document.getElementById('shop-page-loader');
 
 const shopCollections = [];
 const shopProducts = [];
@@ -38,6 +39,14 @@ let categoryOptions = [];
 let modalReturnFocus = null;
 let searchRenderTimer = null;
 let lastNoResultSearch = '';
+let shopLoaderHidden = false;
+
+function hideShopPageLoader() {
+  if (!shopPageLoader || shopLoaderHidden) return;
+  shopLoaderHidden = true;
+  shopPageLoader.classList.add('is-ready');
+  window.setTimeout(function() { shopPageLoader.remove(); }, 520);
+}
 
 function enhanceShopLookbook() {
   if (!shopLookbook || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
@@ -287,11 +296,10 @@ function renderShopRoutines() {
     + '</div>';
 }
 
-async function loadShopData() {
-  try {
-    const response = await fetch('/api/catalog');
-    const data = await response.json();
+function applyShopData(data) {
     const categories = data.categories || [];
+    shopCollections.length = 0;
+    shopProducts.length = 0;
 
     categoryOptions = [{ id: 'all', label: 'All categories' }].concat(categories.map(function(category) {
       return { id: category.slug, label: category.title };
@@ -350,13 +358,64 @@ async function loadShopData() {
     restoreCart();
     renderCart();
     applyShopDeepLinks();
-  } catch (error) {
-    if (shopProductsRoot) {
-      shopProductsRoot.innerHTML = '<p class="cart-empty">The product list is being prepared. Please refresh shortly.</p>';
-    }
-    console.error('Unable to load shop product data', error);
+    if (shopProductsRoot) shopProductsRoot.setAttribute('aria-busy', 'false');
+    hideShopPageLoader();
+}
+
+async function fetchCatalog(url, options, timeoutMs) {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(function() { controller.abort(); }, timeoutMs);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    if (!response.ok) throw new Error('Catalogue request returned ' + response.status);
+    return await response.json();
+  } finally {
+    window.clearTimeout(timeout);
   }
-  if (shopProductsRoot) shopProductsRoot.setAttribute('aria-busy', 'false');
+}
+
+async function fetchLiveCatalogWithRetry() {
+  let lastError;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      return await fetchCatalog('/api/catalog', { cache: 'no-store' }, 6500);
+    } catch (error) {
+      lastError = error;
+      if (attempt === 0) await new Promise(function(resolve) { window.setTimeout(resolve, 450); });
+    }
+  }
+  throw lastError;
+}
+
+async function loadShopData() {
+  let rendered = false;
+  const liveRequest = fetchLiveCatalogWithRetry();
+  try {
+    const staticData = await fetchCatalog('/data/catalog.json', { cache: 'force-cache' }, 3000);
+    applyShopData(staticData);
+    rendered = true;
+  } catch (error) {
+    console.warn('Static catalogue fallback unavailable', error);
+  }
+
+  try {
+    const liveData = await liveRequest;
+    applyShopData(liveData);
+    rendered = true;
+  } catch (error) {
+    console.error('Unable to refresh live shop product data', error);
+  }
+
+  if (!rendered && shopProductsRoot) {
+    shopProductsRoot.innerHTML = '<div class="shop-load-recovery"><p>The catalogue took longer than expected.</p><button class="btn btn--secondary" type="button" id="shop-retry-load">Try loading again</button></div>';
+    shopProductsRoot.setAttribute('aria-busy', 'false');
+    const retry = document.getElementById('shop-retry-load');
+    if (retry) retry.addEventListener('click', function() {
+      shopProductsRoot.setAttribute('aria-busy', 'true');
+      loadShopData();
+    }, { once: true });
+    hideShopPageLoader();
+  }
 }
 
 async function loadFragranceOptions() {
@@ -770,6 +829,7 @@ async function handleCustomRequestSubmit(event) {
 renderCart();
 loadShopData();
 loadFragranceOptions();
+window.setTimeout(hideShopPageLoader, 4500);
 
 document.addEventListener('click', function(event) {
   if (event.target === productModal) {
