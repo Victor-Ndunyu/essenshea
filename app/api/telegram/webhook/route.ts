@@ -57,7 +57,8 @@ async function handleMessage(
   try {
     await sendTypingIndicator(chatId);
     const canUseOwnerDesk = chatType === 'private' && senderId === chatId;
-    if (canUseOwnerDesk && userMessage.toLowerCase() === '/id') {
+    const normalizedMessage = userMessage.toLowerCase();
+    if (canUseOwnerDesk && (normalizedMessage === '/id' || normalizedMessage === '/whoami')) {
       await sendTelegramMessage(chatId, `Your Telegram ID is ${chatId}. Add it to the server-only OWNER_TELEGRAM_CHAT_IDS allowlist to authorize this private owner desk.`);
       return;
     }
@@ -74,7 +75,7 @@ async function handleMessage(
       safeMessage: 'An unauthorized or non-private Telegram chat attempted to use the owner desk',
       metadata: { chatType: chatType || 'unknown', directPrivateChat: canUseOwnerDesk },
     });
-    await sendTelegramMessage(chatId, 'This is Essenshea’s private owner desk. This Telegram account is not authorized. Customer assistance is available on the Essenshea website.');
+    await sendTelegramMessage(chatId, 'This is Essenshea’s private owner desk. This Telegram account is not authorized yet. Send /id in this private chat, then add the returned numeric ID to OWNER_TELEGRAM_CHAT_IDS. Customer assistance remains on the Essenshea website.');
   } catch (error) {
     console.error('Telegram message processing failed:', error);
     await sendTelegramMessage(

@@ -3111,9 +3111,9 @@ body:has(.site-footer) {
 
 /* Viewport-fit opening: the campaign message and both decisions arrive together. */
 .hero {
-  min-height: min(760px, calc(100svh - 92px));
+  min-height: min(820px, calc(100svh - 92px));
   align-items: start;
-  padding-block: clamp(24px, 4vh, 42px) clamp(36px, 5vh, 58px);
+  padding-block: clamp(30px, 4.8vh, 50px) clamp(42px, 5.8vh, 66px);
 }
 .hero__content {
   align-self: start;
@@ -3122,7 +3122,8 @@ body:has(.site-footer) {
 .hero__visual {
   align-self: start;
   width: 100%;
-  max-height: min(640px, calc(100svh - 148px));
+  max-height: min(700px, calc(100svh - 132px));
+  aspect-ratio: 3 / 4.1;
 }
 .hero__visual > img {
   width: 100%;
