@@ -18,7 +18,7 @@ const pages = [
 test('every storefront surface loads the final calm-luxury design layer', async () => {
   for (const page of pages) {
     const html = await readFile(new URL(`../website/${page}`, import.meta.url), 'utf8');
-    assert.match(html, /luxury-refinement\.css\?v=18/, `${page} is missing the current design layer`);
+    assert.match(html, /luxury-refinement\.css\?v=19/, `${page} is missing the current design layer`);
     assert.match(html, /design-system\.js\?v=6/, `${page} is missing the atelier interaction layer`);
     assert.match(html, /name="color-scheme" content="light only"/, `${page} can be auto-darkened`);
     if (page !== 'eco-rewards-admin.html') {
@@ -99,6 +99,22 @@ test('the final design layer keeps content visible and styles interactive contro
   assert.match(css, /@media \(min-width: 821px\) and \(max-height: 780px\)/);
   assert.match(css, /#collections \.collection-grid\s*\{[\s\S]*grid-template-columns:\s*repeat\(3/);
   assert.match(css, /#collections \.collection-tile:nth-child\(n\)[\s\S]*margin:\s*0/);
+  assert.match(css, /\.shop-lookbook__card--4/);
+  assert.match(css, /\.shop-lookbook:hover \.shop-lookbook__card--3/);
+});
+
+test('shop hero presents a layered product lookbook with restrained pointer motion', async () => {
+  const [html, css, script] = await Promise.all([
+    readFile(new URL('../website/shop.html', import.meta.url), 'utf8'),
+    readFile(new URL('../website/assets/css/luxury-refinement.css', import.meta.url), 'utf8'),
+    readFile(new URL('../website/assets/js/shop.js', import.meta.url), 'utf8'),
+  ]);
+  assert.equal((html.match(/class="shop-lookbook__card/g) || []).length, 4);
+  assert.match(html, /Gift_Sets\/images\/gift_set_1\.jpg/);
+  assert.match(html, /shop\.js\?v=3/);
+  assert.match(css, /grid-template-columns:\s*minmax\(0, \.9fr\) minmax\(520px, 1\.1fr\)/);
+  assert.match(script, /enhanceShopLookbook/);
+  assert.match(script, /requestAnimationFrame/);
 });
 
 test('navigation keeps the original understated link treatment', async () => {
