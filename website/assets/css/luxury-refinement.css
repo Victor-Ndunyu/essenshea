@@ -3432,18 +3432,27 @@ body:has(.site-footer) {
   .shop-lookbook__card { transition: none; }
 }
 
-/* Product movement is progressive enhancement. Merchandise is never hidden by it. */
-.product-card.atelier-reveal {
+/* Product motion has its own observer and never controls product visibility. */
+.product-card,
+.product-card.product-card--motion {
   opacity: 1 !important;
+  visibility: visible !important;
+}
+.product-card.product-card--motion {
   transform: translateY(16px) !important;
   filter: saturate(.9);
   transition: transform 420ms var(--ease-atelier), filter 420ms ease !important;
 }
-.product-card.atelier-reveal.atelier-visible {
+.product-card.product-card--motion.product-card--motion-visible {
   opacity: 1 !important;
   transform: translateY(0) !important;
   filter: saturate(1);
 }
+
+/* Every commerce control sits above the fixed navigation glass. */
+.cart-widget { z-index: 1250 !important; }
+.cart-popup { z-index: 1300 !important; }
+.modal-overlay { z-index: 1400; }
 
 /* Full-page shop preparation state. It exits as soon as the static catalogue renders. */
 .shop-page-loader {
