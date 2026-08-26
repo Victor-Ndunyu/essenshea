@@ -3109,6 +3109,90 @@ body:has(.site-footer) {
   }
 }
 
+/* Viewport-fit opening: the campaign message and both decisions arrive together. */
+.hero {
+  min-height: min(760px, calc(100svh - 92px));
+  align-items: start;
+  padding-block: clamp(24px, 4vh, 42px) clamp(36px, 5vh, 58px);
+}
+.hero__content {
+  align-self: start;
+  padding-top: clamp(4px, 1.2vh, 14px);
+}
+.hero__visual {
+  align-self: start;
+  width: 100%;
+  max-height: min(640px, calc(100svh - 148px));
+}
+.hero__visual > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Style Your Care reads as one considered collection, not competing card shapes. */
+#collections .collection-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 2vw, 28px);
+  align-items: stretch;
+}
+#collections .collection-tile,
+#collections .collection-tile:nth-child(n) {
+  grid-column: auto;
+  width: 100%;
+  margin: 0;
+  aspect-ratio: 4 / 5;
+  border-radius: 22px;
+}
+
+@media (min-width: 821px) and (max-height: 780px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr) minmax(340px, .68fr);
+    gap: clamp(30px, 5vw, 72px);
+    padding-block: 18px 30px;
+  }
+  .hero .display-xl { font-size: clamp(3.8rem, 8.2vh, 5.25rem); }
+  .hero__copy {
+    margin-top: 16px;
+    margin-bottom: 20px;
+    font-size: clamp(.98rem, 1.8vh, 1.1rem);
+    line-height: 1.55;
+  }
+  .hero__visual { max-height: calc(100svh - 136px); }
+}
+
+@media (max-width: 1024px) {
+  #collections .collection-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #collections .collection-tile:nth-child(n) { margin: 0; }
+}
+
+@media (max-width: 820px) {
+  .hero {
+    min-height: 0;
+    padding-block: clamp(22px, 4vh, 34px) clamp(44px, 7vh, 68px);
+  }
+  .hero__content { padding-top: 0; }
+  .hero__visual { max-height: none; }
+}
+
+@media (max-width: 560px) {
+  .hero { padding-top: 22px !important; }
+  .hero__copy {
+    margin: 20px 0 26px;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  #collections .collection-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  #collections .collection-tile:nth-child(n) {
+    margin: 0;
+    aspect-ratio: 4 / 4.7;
+  }
+}
+
 @media (max-width: 560px) {
   .page-shell { padding-top: 76px; }
   .topbar { width: calc(100% - 24px); }
@@ -3138,4 +3222,10 @@ body:has(.site-footer) {
     transform: none !important;
     will-change: auto;
   }
+}
+
+/* Keep the viewport-fit mobile spacing last in the cascade. */
+@media (max-width: 560px) {
+  .hero { padding-top: 22px !important; }
+  #collections .collection-tile:nth-child(n) { margin: 0; }
 }

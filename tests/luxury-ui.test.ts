@@ -18,7 +18,7 @@ const pages = [
 test('every storefront surface loads the final calm-luxury design layer', async () => {
   for (const page of pages) {
     const html = await readFile(new URL(`../website/${page}`, import.meta.url), 'utf8');
-    assert.match(html, /luxury-refinement\.css\?v=15/, `${page} is missing the current design layer`);
+    assert.match(html, /luxury-refinement\.css\?v=16/, `${page} is missing the current design layer`);
     assert.match(html, /design-system\.js\?v=6/, `${page} is missing the atelier interaction layer`);
     assert.match(html, /name="color-scheme" content="light only"/, `${page} can be auto-darkened`);
     if (page !== 'eco-rewards-admin.html') {
@@ -94,6 +94,10 @@ test('the final design layer keeps content visible and styles interactive contro
   assert.match(css, /\.filter-pill\s*\{/);
   assert.match(css, /\.contact-card\s*\{[\s\S]*grid-template-columns/);
   assert.match(css, /@media \(max-width: 560px\)/);
+  assert.match(css, /min-height:\s*min\(760px, calc\(100svh - 92px\)\)/);
+  assert.match(css, /@media \(min-width: 821px\) and \(max-height: 780px\)/);
+  assert.match(css, /#collections \.collection-grid\s*\{[\s\S]*grid-template-columns:\s*repeat\(3/);
+  assert.match(css, /#collections \.collection-tile:nth-child\(n\)[\s\S]*margin:\s*0/);
 });
 
 test('navigation keeps the original understated link treatment', async () => {
