@@ -9,6 +9,7 @@ Set these server-only variables in the deployment environment:
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_WEBHOOK_SECRET`
 - `TELEGRAM_SETUP_SECRET`
+- `TELEGRAM_WEBHOOK_URL` — production value: `https://essenshea.vercel.app/api/telegram/webhook`
 - `OWNER_TELEGRAM_CHAT_IDS` — comma-separated positive Telegram IDs
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
@@ -24,7 +25,9 @@ An owner session is authorized only when all three conditions are true:
 
 ## Finding the current owner's Telegram ID
 
-Send `/id` to the bot in a private chat. The bot returns the sender's own numeric Telegram ID without granting access to any owner data. Never guess the ID. Store only the numeric ID in the environment variable, without `@` or a username.
+Send `/id` or `/whoami` to the bot in a private chat. The bot returns the sender's own numeric Telegram ID without granting access to any owner data. Never guess the ID. Store only the numeric ID in the environment variable, without `@` or a username.
+
+During initial setup, keep the temporary operator and final owner as separate allowlist entries. Verify the incoming owner before removing the temporary operator. Never replace the only working owner ID before the incoming owner has passed the command checks below.
 
 ## Safe website changes
 

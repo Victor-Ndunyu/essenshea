@@ -7,7 +7,8 @@ test('Telegram is owner-only and never falls through to the customer agent', asy
   assert.match(route, /chatType === 'private'/);
   assert.match(route, /senderId === chatId/);
   assert.match(route, /private owner desk/);
-  assert.match(route, /userMessage\.toLowerCase\(\) === '\/id'/);
+  assert.match(route, /normalizedMessage === '\/id'/);
+  assert.match(route, /normalizedMessage === '\/whoami'/);
   assert.doesNotMatch(route, /callBusinessAgent/);
   assert.doesNotMatch(route, /getOrCreateSession/);
 });
@@ -16,6 +17,7 @@ test('owner configuration documents an allowlist and transfer-safe threshold', a
   const env = await readFile(new URL('../.env.example', import.meta.url), 'utf8');
   assert.match(env, /^OWNER_TELEGRAM_CHAT_IDS=$/m);
   assert.match(env, /^OWNER_LOW_STOCK_THRESHOLD=3$/m);
+  assert.match(env, /^TELEGRAM_WEBHOOK_URL=https:\/\/essenshea\.vercel\.app\/api\/telegram\/webhook$/m);
 });
 
 test('owner context covers live and static business data without customer contact fields', async () => {
