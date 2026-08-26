@@ -3454,6 +3454,16 @@ body:has(.site-footer) {
 .cart-popup { z-index: 1300 !important; }
 .modal-overlay { z-index: 1400; }
 
+/* The catalogue container is permanent content, never an entrance-animation target. */
+#shop-products,
+#shop-products.atelier-reveal,
+#shop-products.atelier-reveal.atelier-visible {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+  transition: none !important;
+}
+
 /* Full-page shop preparation state. It exits as soon as the static catalogue renders. */
 .shop-page-loader {
   position: fixed;

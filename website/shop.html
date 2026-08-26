@@ -11,8 +11,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="icon" href="assets/images/star-mark.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="assets/css/style-new.css" />
-  <link rel="stylesheet" href="assets/css/luxury-refinement.css?v=23" />
-  <style>#shop-products-grid .product-card{opacity:1!important;visibility:visible!important}</style>
+  <link rel="stylesheet" href="assets/css/luxury-refinement.css?v=24" />
+  <style>#shop-products,#shop-products-grid,#shop-products-grid .product-card{opacity:1!important;visibility:visible!important}#shop-products{transform:none!important}</style>
 </head>
 <body>
   <div id="shop-page-loader" class="shop-page-loader" role="status" aria-live="polite" aria-label="Preparing the Essenshea shop">
@@ -74,7 +74,7 @@
       </section>
 
       <!-- -- Product Grid -- -->
-      <section class="shop-section" id="shop-products">
+      <section class="shop-section" id="shop-products" data-no-reveal>
         <span class="label">Shop the edit</span>
         <h2 class="display-md">Choose the pieces that complete your beauty language.</h2>
         <p class="body" style="margin-bottom:20px;max-width:640px">Open a product to view details, then add it to your request list. Some items are available now; others are made to order.</p>
@@ -231,7 +231,7 @@
     </footer>
   </div>
 
-  <script src="assets/js/design-system.js?v=7"></script>
+  <script src="assets/js/design-system.js?v=8"></script>
   <script src="assets/js/agent-config.js"></script>
   <script src="assets/js/agent.js?v=5"></script>
   <script src="assets/js/shop.js?v=6"></script>

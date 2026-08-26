@@ -18,8 +18,8 @@ const pages = [
 test('every storefront surface loads the final calm-luxury design layer', async () => {
   for (const page of pages) {
     const html = await readFile(new URL(`../website/${page}`, import.meta.url), 'utf8');
-    assert.match(html, /luxury-refinement\.css\?v=23/, `${page} is missing the current design layer`);
-    assert.match(html, /design-system\.js\?v=7/, `${page} is missing the atelier interaction layer`);
+    assert.match(html, /luxury-refinement\.css\?v=24/, `${page} is missing the current design layer`);
+    assert.match(html, /design-system\.js\?v=8/, `${page} is missing the atelier interaction layer`);
     assert.match(html, /name="color-scheme" content="light only"/, `${page} can be auto-darkened`);
     if (page !== 'eco-rewards-admin.html') {
       assert.match(html, /agent\.js\?v=5/, `${page} is missing the current assistant bundle`);
@@ -120,10 +120,14 @@ test('shop hero presents a layered product lookbook with restrained pointer moti
   assert.match(css, /clip-path:\s*inset\(0 round 26px\)/);
   assert.doesNotMatch(designScript.match(/const revealSelector =[\s\S]*?\.join\(','\);/)?.[0] || '', /'\.product-card'/);
   assert.match(html, /#shop-products-grid \.product-card\{opacity:1!important/);
+  assert.match(html, /id="shop-products" data-no-reveal/);
+  assert.match(html, /#shop-products,#shop-products-grid,#shop-products-grid \.product-card\{opacity:1!important/);
+  assert.match(designScript, /main > section:not\(\[data-no-reveal\]\)/);
   assert.match(script, /prepareProductCardMotion/);
   assert.match(css, /\.product-card\.product-card--motion[\s\S]*opacity:\s*1 !important/);
   assert.match(css, /\.cart-widget \{ z-index: 1250 !important; \}/);
   assert.match(css, /\.cart-popup \{ z-index: 1300 !important; \}/);
+  assert.match(css, /#shop-products\.atelier-reveal\.atelier-visible[\s\S]*opacity:\s*1 !important/);
   assert.match(html, /id="shop-page-loader"/);
   assert.match(script, /fetchLiveCatalogWithRetry/);
   assert.match(script, /\/data\/catalog\.json/);
