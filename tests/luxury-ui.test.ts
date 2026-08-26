@@ -18,8 +18,8 @@ const pages = [
 test('every storefront surface loads the final calm-luxury design layer', async () => {
   for (const page of pages) {
     const html = await readFile(new URL(`../website/${page}`, import.meta.url), 'utf8');
-    assert.match(html, /luxury-refinement\.css\?v=22/, `${page} is missing the current design layer`);
-    assert.match(html, /design-system\.js\?v=6/, `${page} is missing the atelier interaction layer`);
+    assert.match(html, /luxury-refinement\.css\?v=23/, `${page} is missing the current design layer`);
+    assert.match(html, /design-system\.js\?v=7/, `${page} is missing the atelier interaction layer`);
     assert.match(html, /name="color-scheme" content="light only"/, `${page} can be auto-darkened`);
     if (page !== 'eco-rewards-admin.html') {
       assert.match(html, /agent\.js\?v=5/, `${page} is missing the current assistant bundle`);
@@ -50,7 +50,7 @@ test('fashion atelier system reaches forms, overlays, scrollbar and reduced moti
   assert.match(script, /aria-label', 'Show password'/);
   assert.match(script, /is-compact/);
   assert.match(script, /is-hidden/);
-  assert.match(script, /'\.product-card'/);
+  assert.doesNotMatch(script.match(/const revealSelector =[\s\S]*?\.join\(','\);/)?.[0] || '', /'\.product-card'/);
   assert.match(script, /revealMutationObserver\.observe/);
   assert.match(script, /careObserver/);
   assert.match(css, /#collections \.collection-tile\.care-tile-reveal/);
@@ -104,20 +104,26 @@ test('the final design layer keeps content visible and styles interactive contro
 });
 
 test('shop hero presents a layered product lookbook with restrained pointer motion', async () => {
-  const [html, css, script] = await Promise.all([
+  const [html, css, script, designScript] = await Promise.all([
     readFile(new URL('../website/shop.html', import.meta.url), 'utf8'),
     readFile(new URL('../website/assets/css/luxury-refinement.css', import.meta.url), 'utf8'),
     readFile(new URL('../website/assets/js/shop.js', import.meta.url), 'utf8'),
+    readFile(new URL('../website/assets/js/design-system.js', import.meta.url), 'utf8'),
   ]);
   assert.equal((html.match(/class="shop-lookbook__card/g) || []).length, 4);
   assert.match(html, /Gift_Sets\/images\/gift_set_1\.jpg/);
-  assert.match(html, /shop\.js\?v=5/);
+  assert.match(html, /shop\.js\?v=6/);
   assert.match(css, /grid-template-columns:\s*minmax\(0, \.9fr\) minmax\(520px, 1\.1fr\)/);
   assert.match(script, /enhanceShopLookbook/);
   assert.match(script, /requestAnimationFrame/);
   assert.match(script, /shop-lookbook__card--1/);
   assert.match(css, /clip-path:\s*inset\(0 round 26px\)/);
-  assert.match(css, /\.product-card\.atelier-reveal\s*\{[\s\S]*opacity:\s*1 !important/);
+  assert.doesNotMatch(designScript.match(/const revealSelector =[\s\S]*?\.join\(','\);/)?.[0] || '', /'\.product-card'/);
+  assert.match(html, /#shop-products-grid \.product-card\{opacity:1!important/);
+  assert.match(script, /prepareProductCardMotion/);
+  assert.match(css, /\.product-card\.product-card--motion[\s\S]*opacity:\s*1 !important/);
+  assert.match(css, /\.cart-widget \{ z-index: 1250 !important; \}/);
+  assert.match(css, /\.cart-popup \{ z-index: 1300 !important; \}/);
   assert.match(html, /id="shop-page-loader"/);
   assert.match(script, /fetchLiveCatalogWithRetry/);
   assert.match(script, /\/data\/catalog\.json/);
