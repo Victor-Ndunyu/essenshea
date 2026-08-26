@@ -3118,8 +3118,8 @@ body:has(.site-footer) {
   padding-block: clamp(24px, 3.8vh, 40px);
 }
 .hero__content {
-  align-self: center;
-  padding-top: 0;
+  align-self: start;
+  padding-top: clamp(20px, 6vh, 58px);
 }
 .hero__visual {
   align-self: center;
