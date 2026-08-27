@@ -26,6 +26,9 @@ function cleanCartItems(value: unknown) {
       title,
       quantity,
       priceText: cleanCustomerText(item.priceText, 80) || 'Price on request',
+      unitPrice: item.unitPrice !== null && item.unitPrice !== undefined && item.unitPrice !== '' && Number.isFinite(Number(item.unitPrice)) && Number(item.unitPrice) >= 0
+        ? Number(item.unitPrice)
+        : null,
       available: item.available === true,
     };
   });
@@ -69,4 +72,3 @@ export async function PUT(req: NextRequest) {
   if (error) return NextResponse.json({ error: 'We could not sync your cart' }, { status: 503 });
   return attachRefreshedCustomerSession(NextResponse.json({ success: true }), auth);
 }
-

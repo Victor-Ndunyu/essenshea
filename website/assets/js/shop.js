@@ -571,7 +571,10 @@ function renderProductCard(product) {
     + '<div class="product-card__meta">'
     + '<span class="product-card__price">' + escapeHtml(product.priceText) + '</span>'
     + '<span class="product-card__flag">' + escapeHtml(productStatusLabel(product)) + '</span>'
+    + '<div class="product-card__actions">'
+    + '<button class="btn btn--sm btn--primary product-quick-add" type="button" data-id="' + escapeHtml(product.id) + '" aria-label="Add ' + escapeHtml(product.title) + ' to request">Add</button>'
     + '<button class="btn btn--sm btn--secondary product-open" type="button" data-id="' + escapeHtml(product.id) + '" aria-label="View details for ' + escapeHtml(product.title) + '">View details</button>'
+    + '</div>'
     + '</div>'
     + '</article>';
 }
@@ -625,6 +628,8 @@ function renderCart() {
     cartItemsRoot.innerHTML = '<p class="cart-empty">Your request list is empty. Open a product to add it.</p>';
     cartCount.textContent = '0 items';
     if (cartNote) cartNote.textContent = 'Ready to request when you are.';
+    var emptyTotal = document.getElementById('cart-total');
+    if (emptyTotal) emptyTotal.textContent = 'KSh 0';
     checkoutButton.disabled = true;
     return;
   }
@@ -650,7 +655,12 @@ function renderCart() {
   cartCount.textContent = totalCount + ' item' + (totalCount === 1 ? '' : 's');
 
   if (cartNote) {
-    cartNote.textContent = 'Ready to submit. We will confirm pricing and availability within 24 hours.';
+    const pricedTotal = cart.reduce(function(sum, item) {
+      return sum + (typeof item.priceValue === 'number' ? item.priceValue * item.quantity : 0);
+    }, 0);
+    const requestPriceCount = cart.filter(function(item) { return typeof item.priceValue !== 'number'; }).length;
+    cartNote.textContent = 'Estimated total: KSh ' + pricedTotal.toLocaleString('en-KE')
+      + (requestPriceCount ? ' + ' + requestPriceCount + ' item' + (requestPriceCount === 1 ? '' : 's') + ' priced after review' : '');
   }
   checkoutButton.disabled = false;
 }
@@ -708,6 +718,7 @@ function syncCartToWidget() {
       quantity: item.quantity,
       available: item.available,
       priceText: item.priceText,
+      unitPrice: typeof item.priceValue === 'number' ? item.priceValue : null,
     };
   });
   try { localStorage.setItem('essenshea_cart', JSON.stringify(cartData)); } catch (e) {}
@@ -872,6 +883,12 @@ document.addEventListener('click', function(event) {
 
   if (button.classList.contains('product-open')) {
     openProductModal(button.dataset.id);
+  }
+
+  if (button.classList.contains('product-quick-add')) {
+    addToCart(button.dataset.id);
+    button.textContent = 'Added';
+    window.setTimeout(function() { button.textContent = 'Add'; }, 900);
   }
 
   if (button.id === 'modal-close') {

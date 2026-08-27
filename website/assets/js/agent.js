@@ -403,6 +403,9 @@ function normalizeSyncedCart(cart) {
       title: String(item.title).slice(0, 180),
       quantity: Math.max(1, Math.min(20, Number(item.quantity) || 1)),
       priceText: String(item.priceText || 'Price on request').slice(0, 80),
+      unitPrice: item.unitPrice !== null && item.unitPrice !== undefined && item.unitPrice !== '' && Number.isFinite(Number(item.unitPrice))
+        ? Number(item.unitPrice)
+        : null,
       available: item.available === true,
     };
   });
@@ -498,6 +501,7 @@ function createCartWidgetMarkup() {
     + '<div class="cart-popup-footer">'
     + '<div class="cart-summary">'
     + '<span id="cart-popup-count">0 items</span>'
+    + '<strong id="cart-popup-total" class="cart-popup-total">KSh 0</strong>'
     + '<span id="cart-popup-note">Ready to request when you are.</span>'
     + '</div>'
     + '<form id="cart-popup-form" class="cart-popup-form">'
@@ -563,12 +567,14 @@ function renderCartPopup() {
   var count = document.getElementById('cart-popup-count');
   var note = document.getElementById('cart-popup-note');
   var checkout = document.getElementById('cart-popup-checkout');
+  var totalLabel = document.getElementById('cart-popup-total');
   if (!body) return;
 
   if (!cart.length) {
     body.innerHTML = '<p class="cart-empty">Your request list is empty.</p>';
     if (count) count.textContent = '0 items';
     if (note) note.textContent = 'Ready to request when you are.';
+    if (totalLabel) totalLabel.textContent = 'KSh 0';
     if (checkout) checkout.disabled = true;
     return;
   }
@@ -590,7 +596,14 @@ function renderCartPopup() {
 
   var total = cart.reduce(function(s, i) { return s + i.quantity; }, 0);
   if (count) count.textContent = total + ' item' + (total === 1 ? '' : 's');
-  if (note) note.textContent = 'Ready to submit. We will contact you to confirm pricing and availability.';
+  var pricedTotal = cart.reduce(function(sum, item) {
+    return sum + (typeof item.unitPrice === 'number' ? item.unitPrice * item.quantity : 0);
+  }, 0);
+  var requestPriceCount = cart.filter(function(item) { return typeof item.unitPrice !== 'number'; }).length;
+  if (totalLabel) totalLabel.textContent = 'Estimated total: KSh ' + pricedTotal.toLocaleString('en-KE');
+  if (note) note.textContent = requestPriceCount
+    ? requestPriceCount + ' item' + (requestPriceCount === 1 ? '' : 's') + ' will be priced after review.'
+    : 'Taxes or delivery, if applicable, are confirmed before payment.';
   if (checkout) checkout.disabled = false;
 }
 
@@ -636,6 +649,7 @@ function submitCartPopup(event) {
           title: i.title,
           quantity: i.quantity,
           priceText: i.priceText,
+          unitPrice: i.unitPrice,
         };
       }),
       customer: {
