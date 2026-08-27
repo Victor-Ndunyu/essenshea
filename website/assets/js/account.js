@@ -146,6 +146,17 @@ function renderCart(items) {
     root.append(empty);
     return;
   }
+  const summary = document.createElement('div');
+  summary.className = 'account-cart-summary';
+  const itemCount = items.reduce(function(total, item) { return total + Number(item.quantity || 0); }, 0);
+  const pricedTotal = items.reduce(function(total, item) {
+    return total + (typeof item.unitPrice === 'number' ? item.unitPrice * item.quantity : 0);
+  }, 0);
+  const requestPriceCount = items.filter(function(item) { return typeof item.unitPrice !== 'number'; }).length;
+  summary.innerHTML = '<span>' + itemCount + ' item' + (itemCount === 1 ? '' : 's') + '</span>'
+    + '<strong>Estimated total: KSh ' + pricedTotal.toLocaleString('en-KE') + '</strong>'
+    + (requestPriceCount ? '<small>' + requestPriceCount + ' item' + (requestPriceCount === 1 ? '' : 's') + ' priced after review</small>' : '');
+  root.append(summary);
   items.forEach(function(item) {
     const row = document.createElement('div');
     row.className = 'account-list-row';
@@ -153,9 +164,47 @@ function renderCart(items) {
     title.textContent = item.title;
     const detail = document.createElement('span');
     detail.textContent = item.quantity + ' × ' + (item.priceText || 'Price on request');
-    row.append(title, detail);
+    const actions = document.createElement('div');
+    actions.className = 'account-cart-actions';
+    const decrease = document.createElement('button');
+    decrease.type = 'button';
+    decrease.dataset.accountCartAction = 'decrease';
+    decrease.dataset.id = item.id;
+    decrease.setAttribute('aria-label', 'Remove one ' + item.title);
+    decrease.textContent = '−';
+    const quantity = document.createElement('span');
+    quantity.setAttribute('aria-live', 'polite');
+    quantity.textContent = String(item.quantity);
+    const increase = document.createElement('button');
+    increase.type = 'button';
+    increase.dataset.accountCartAction = 'increase';
+    increase.dataset.id = item.id;
+    increase.setAttribute('aria-label', 'Add one more ' + item.title);
+    increase.textContent = '+';
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'account-cart-remove';
+    remove.dataset.accountCartAction = 'remove';
+    remove.dataset.id = item.id;
+    remove.textContent = 'Remove';
+    actions.append(decrease, quantity, increase, remove);
+    row.append(title, detail, actions);
     root.append(row);
   });
+}
+
+function updateSavedCartItem(productId, action) {
+  let items = [];
+  try { items = JSON.parse(localStorage.getItem(CART_KEY) || '[]'); } catch (error) {}
+  if (!Array.isArray(items)) items = [];
+  const item = items.find(function(entry) { return entry.id === productId; });
+  if (!item) return;
+  if (action === 'remove') item.quantity = 0;
+  else item.quantity = Math.max(0, Math.min(20, Number(item.quantity || 1) + (action === 'increase' ? 1 : -1)));
+  items = items.filter(function(entry) { return entry.quantity > 0; });
+  localStorage.setItem(CART_KEY, JSON.stringify(items));
+  window.dispatchEvent(new CustomEvent('essenshea-cart-update'));
+  renderCart(items);
 }
 
 function renderOrders(orders, highlightReference) {
@@ -507,6 +556,12 @@ window.addEventListener('storage', function(event) {
 });
 
 window.addEventListener('essenshea-cart-update', refreshSavedCart);
+
+document.getElementById('account-cart').addEventListener('click', function(event) {
+  const button = event.target.closest('[data-account-cart-action]');
+  if (!button) return;
+  updateSavedCartItem(button.dataset.id, button.dataset.accountCartAction);
+});
 
 window.addEventListener('focus', function() { refreshOrderHistory({ scroll: false }); });
 document.addEventListener('visibilitychange', function() {

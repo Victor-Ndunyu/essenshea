@@ -18,11 +18,11 @@ const pages = [
 test('every storefront surface loads the final calm-luxury design layer', async () => {
   for (const page of pages) {
     const html = await readFile(new URL(`../website/${page}`, import.meta.url), 'utf8');
-    assert.match(html, /luxury-refinement\.css\?v=24/, `${page} is missing the current design layer`);
+    assert.match(html, /luxury-refinement\.css\?v=25/, `${page} is missing the current design layer`);
     assert.match(html, /design-system\.js\?v=8/, `${page} is missing the atelier interaction layer`);
     assert.match(html, /name="color-scheme" content="light only"/, `${page} can be auto-darkened`);
     if (page !== 'eco-rewards-admin.html') {
-      assert.match(html, /agent\.js\?v=5/, `${page} is missing the current assistant bundle`);
+      assert.match(html, /agent\.js\?v=6/, `${page} is missing the current assistant bundle`);
     }
   }
 });
@@ -112,7 +112,7 @@ test('shop hero presents a layered product lookbook with restrained pointer moti
   ]);
   assert.equal((html.match(/class="shop-lookbook__card/g) || []).length, 4);
   assert.match(html, /Gift_Sets\/images\/gift_set_1\.jpg/);
-  assert.match(html, /shop\.js\?v=6/);
+  assert.match(html, /shop\.js\?v=7/);
   assert.match(css, /grid-template-columns:\s*minmax\(0, \.9fr\) minmax\(520px, 1\.1fr\)/);
   assert.match(script, /enhanceShopLookbook/);
   assert.match(script, /requestAnimationFrame/);

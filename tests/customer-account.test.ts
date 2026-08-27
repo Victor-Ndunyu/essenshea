@@ -83,6 +83,21 @@ test('account page exposes saved cart, live orders, rewards, preferences and sec
   assert.match(accountScript, /\/api\/catalog/);
 });
 
+test('cart totals and quantities stay editable in the popup and saved account cart', async () => {
+  const [shop, agent, account] = await Promise.all([
+    readFile(new URL('../website/assets/js/shop.js', import.meta.url), 'utf8'),
+    readFile(new URL('../website/assets/js/agent.js', import.meta.url), 'utf8'),
+    readFile(new URL('../website/assets/js/account.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(shop, /product-quick-add/);
+  assert.match(shop, /unitPrice/);
+  assert.match(agent, /cart-popup-total/);
+  assert.match(agent, /Estimated total: KSh/);
+  assert.match(account, /data-account-cart-action/);
+  assert.match(account, /updateSavedCartItem/);
+  assert.match(account, /Estimated total: KSh/);
+});
+
 test('homepage daily edit covers every catalogue and opens shared shop details', async () => {
   const [html, script] = await Promise.all([
     readFile(path.join(root, 'website/index.html'), 'utf8'),
