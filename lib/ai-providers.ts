@@ -8,7 +8,7 @@ export type ModelAttempt = {
 };
 
 export type ChatMessage = {
-  role: 'system' | 'user';
+  role: 'system' | 'user' | 'assistant';
   content: string;
 };
 
@@ -147,7 +147,7 @@ export async function callChatModel(
 ): Promise<ModelCallResult> {
   let response: Response;
   try {
-    response = await fetcher(`${attempt.baseUrl}/chat/completions`, {
+    response = await fetcher(`${attempt.baseUrl.replace(/\/+$/, '')}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
