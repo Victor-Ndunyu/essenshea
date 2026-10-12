@@ -60,7 +60,7 @@ export function getServiceReply(message: string, facts: SiteFacts): GuideReply |
 }
 
 export function getCatalogReply(message: string, catalog: CatalogData, liveVerified: boolean): GuideReply {
-  const stop = new Set(['please','what','which','have','does','your','with','there','that','this','some','want','need','looking','show','tell','about','price','prices','cost','much','available','stock','recommend','suggest','help','find','give','sell','products','product','would','like','could','order','buy','how','for','and','the','you','are','can','any','get','me','my','is','a','do','in','of','to']);
+  const stop = new Set(['please','what','which','have','does','your','with','there','that','this','some','want','need','looking','show','tell','about','price','prices','cost','much','available','stock','recommend','suggest','help','find','give','sell','products','product','would','like','could','order','buy','scent','scented','how','for','and','the','you','are','can','any','get','me','my','is','a','do','in','of','to']);
   const terms = clean(message).split(' ').filter(word => word.length > 2 && !stop.has(word));
   const matches = catalog.categories.flatMap(category => category.products.filter(product => !product.hidden).map(product => ({ category, product })))
     .map(item => ({ ...item, words: clean(`${item.product.name} ${item.category.title}`).split(' ') }))
@@ -85,9 +85,40 @@ export function formatCustomerCatalog(catalog: CatalogData, message: string, liv
     for (const product of category.products.filter(product => !product.hidden)) {
       lines.push(`- ${product.name}${liveVerified ? ` | ${product.price || 'Price on request'}` : ''}`);
       if (words.some(word => clean(product.name).split(' ').includes(word))) {
-        lines.push(JSON.stringify({ description: product.description?.slice(0, 600), ingredients: product.ingredients, bestFor: product.bestFor, size: product.size }));
+        lines.push(JSON.stringify({ description: cosmeticDescription(product.description), ingredients: product.ingredients, size: product.size }));
       }
     }
   }
   return lines.join('\n');
+}
+
+
+const TREATMENT_CLAIM = /\b(?:treats?|cures?|heals?|fades?|eliminates?|prevents?)\s+(?:\w+\s+){0,3}(?:eczema|acne|wounds?|inflammation|stretch marks|disease)|\b(?:promotes?|stimulates?|restores?)\s+(?:\w+\s+){0,3}hair growth\b/gi;
+
+export function hasUnsupportedTreatmentClaim(reply: string): boolean {
+  const matches = reply.matchAll(TREATMENT_CLAIM);
+  for (const match of matches) {
+    const before = reply.slice(Math.max(0, (match.index || 0) - 45), match.index);
+    // Allow explicit disclaimers, but never affirmative treatment promises.
+    if (!/\b(?:not|cannot|can't|doesn't|don't|won't|never)\s+(?:\w+\s+){0,2}$/i.test(before)) return true;
+  }
+  return false;
+}
+
+function cosmeticDescription(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  return value.split(/(?<=[.!?])\s+/).filter(sentence =>
+    !hasUnsupportedTreatmentClaim(sentence) && !/\b(?:eczema|acne|wounds?|inflammation|stretch marks|hair growth)\b/i.test(sentence)
+  ).join(' ').slice(0, 600) || undefined;
+}
+
+export function getCustomerReplyActions(reply: string, catalog: CatalogData): GuideAction[] {
+  const text = clean(reply);
+  const matches = catalog.categories.flatMap(category => category.products)
+    .filter(product => !product.hidden)
+    .filter(product => {
+      const name = clean(product.name.replace(/\b\d+(?:\.\d+)?\s*(?:ml|g|kg|l)\b/gi, ''));
+      return name.length > 5 && text.includes(name);
+    }).slice(0, 3);
+  return matches.map(product => ({label: product.name, href: `/shop?product=${encodeURIComponent(product.slug)}`}));
 }

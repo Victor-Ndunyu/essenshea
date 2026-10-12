@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { getWelcomeReply, getServiceReply, getCatalogReply, formatCustomerCatalog } from '../lib/customer-guide.ts';
+import { getWelcomeReply, getServiceReply, getCatalogReply, formatCustomerCatalog, hasUnsupportedTreatmentClaim, getCustomerReplyActions } from '../lib/customer-guide.ts';
 import { ESSENSHEA_SITE_FACTS } from '../lib/site-facts.ts';
 
 const catalog = { categories: [{ slug: 'carrier-oils', title: 'Carrier Oils', products: [
@@ -45,4 +45,22 @@ test('unmatched or medical requests are not turned into random product recommend
     assert.match(reply.response, /can’t give a personalised answer/);
     assert.equal(reply.actions[1].href, 'https://wa.me/254727349749');
   }
+});
+
+
+test('rejects treatment promises while allowing an explicit disclaimer', () => {
+  assert.equal(hasUnsupportedTreatmentClaim('It treats eczema and acne and heals wounds.'), true);
+  assert.equal(hasUnsupportedTreatmentClaim('It promotes healthy hair growth.'), true);
+  assert.equal(hasUnsupportedTreatmentClaim('This product does not treat eczema.'), false);
+  assert.equal(hasUnsupportedTreatmentClaim('This product moisturizes skin.'), false);
+});
+
+test('excludes medical marketing claims from model context', () => {
+  const data = {categories:[{slug:'butters',title:'Body Butters',products:[{slug:'lavender',name:'Lavender Whipped Shea Butter 250ml',description:'A lavender scent. Treats eczema and acne. Heals wounds. Promotes healthy hair growth.'}]}]};
+  const context = formatCustomerCatalog(data, 'lavender', true);
+  assert.match(context, /lavender scent/);
+  assert.doesNotMatch(context, /Treats|Heals|Promotes/);
+  assert.deepEqual(getCustomerReplyActions('We have Lavender Whipped Shea Butter in a 250ml jar.', data), [{label:'Lavender Whipped Shea Butter 250ml',href:'/shop?product=lavender'}]);
+  assert.equal(getCustomerReplyActions('Welcome to Essenshea!', data).length, 0);
+  assert.match(getCatalogReply('I want a body butter with a lavender scent. What do you have?',data,true).response,/Lavender Whipped/);
 });
