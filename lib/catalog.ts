@@ -1,6 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { getSupabaseAdmin } from './supabase-admin';
+import { mergeCatalogData } from './catalog-merge';
 
 export type CatalogProduct = {
   slug: string;
@@ -30,7 +31,7 @@ export type CatalogData = {
   categories: CatalogCategory[];
 };
 
-type CatalogOverrideRow = {
+export type CatalogOverrideRow = {
   product_slug: string;
   category_slug: string;
   product_name: string | null;
@@ -66,7 +67,7 @@ function categoryFallbackImage(category: CatalogCategory): string {
   return category.image || category.products?.[0]?.image || '/assets/images/essenshea-logo.jpg';
 }
 
-async function loadCatalogOverrides(): Promise<CatalogOverrideRow[]> {
+async function loadCatalogOverrides(): Promise<{ rows: CatalogOverrideRow[]; available: boolean }> {
   try {
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
@@ -74,74 +75,23 @@ async function loadCatalogOverrides(): Promise<CatalogOverrideRow[]> {
       .select('product_slug, category_slug, product_name, description, price_text, price_value, image_url, stock, available_by_order, hidden, is_new, sort_order')
       .order('sort_order', { ascending: true, nullsFirst: false });
     if (error) throw error;
-    return data || [];
+    return { rows: data || [], available: true };
   } catch (error) {
     console.error('Catalog overrides unavailable:', error);
-    return [];
+    return { rows: [], available: false };
   }
 }
 
-function applyOverride(product: CatalogProduct, override: CatalogOverrideRow): CatalogProduct {
-  return {
-    ...product,
-    name: override.product_name || product.name,
-    description: override.description ?? product.description,
-    price: override.price_text ?? product.price,
-    priceValue: override.price_value ?? product.priceValue ?? null,
-    image: override.image_url || product.image,
-    stock: override.stock,
-    availableByOrder: override.available_by_order ?? product.availableByOrder ?? false,
-    hidden: override.hidden ?? false,
-  };
+export async function getCatalogSnapshot(options: { includeHidden?: boolean } = {}) {
+  const source = await loadStaticCatalog();
+  const overrides = await loadCatalogOverrides();
+  const snapshot = mergeCatalogData(source, overrides.rows, Boolean(options.includeHidden));
+  if (!overrides.available) snapshot.issues.unshift({ code: 'unverified_live_data', message: 'Live saved edits could not be loaded. This is the original catalogue only; category and stock checks are incomplete.' });
+  return snapshot;
 }
 
 export async function getMergedCatalog(options: { includeHidden?: boolean } = {}): Promise<CatalogData> {
-  const catalog = await loadStaticCatalog();
-  const overrides = await loadCatalogOverrides();
-  const categories = catalog.categories || [];
-  const categoryBySlug = new Map(categories.map((category) => [category.slug, category]));
-
-  for (const override of overrides) {
-    let category = categoryBySlug.get(override.category_slug);
-    if (!category) {
-      category = {
-        slug: override.category_slug,
-        title: override.category_slug.replace(/-/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()),
-        description: 'Owner-managed Essenshea products.',
-        image: '/assets/images/essenshea-logo.jpg',
-        tag: 'Owner update',
-        products: [],
-      };
-      categories.push(category);
-      categoryBySlug.set(category.slug, category);
-    }
-
-    const index = (category.products || []).findIndex((product) => product.slug === override.product_slug);
-    if (index >= 0) {
-      category.products[index] = applyOverride(category.products[index], override);
-    } else if (override.is_new) {
-      category.products = category.products || [];
-      category.products.push(applyOverride({
-        slug: override.product_slug,
-        name: override.product_name || override.product_slug.replace(/-/g, ' '),
-        description: override.description || 'Owner-added Essenshea product. Details will be confirmed before fulfilment.',
-        price: override.price_text || 'Price on request',
-        priceValue: override.price_value,
-        image: override.image_url || categoryFallbackImage(category),
-      }, override));
-    }
-  }
-
-  for (const category of categories) {
-    category.products = (category.products || [])
-      .filter((product) => options.includeHidden || !product.hidden)
-      .sort((a, b) => String(a.name).localeCompare(String(b.name), undefined, { sensitivity: 'base' }));
-    category.items = category.products.length;
-    category.image = categoryFallbackImage(category);
-  }
-
-  catalog.categories = categories.filter((category) => (category.products || []).length > 0);
-  return catalog;
+  return (await getCatalogSnapshot(options)).catalog;
 }
 
 export async function getCatalogSummary(): Promise<string> {
