@@ -33,5 +33,5 @@ Header signature sits beneath logo and wordmark and remains visible on mobile.
 Asset versions are bumped so prior cached styles/scripts refresh.
 
 ## Verification
-Six product-edit regression tests pass. Database transaction tested under service_role with product fields, atomic audit, and stale rejection; rolled back and verified no persistent test products. Preview build and public-route verification performed before merge.
+Seven tests pass, including a mocked owner request/preview/confirm/replay/cancel/stale/unauthorised flow. Database transaction tested under service_role with product fields, atomic audit, and stale rejection; rolled back and verified no persistent test products. Preview build and public-route verification performed before merge.
 Owner-account Telegram interaction requires the owner to send an actual request; no Telegram messages were sent on the owner's behalf.
