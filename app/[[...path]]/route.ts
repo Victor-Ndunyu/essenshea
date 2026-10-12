@@ -1,7 +1,8 @@
-﻿import { promises as fs } from 'fs';
+import { promises as fs } from 'fs';
 import path from 'path';
 import { NextRequest, NextResponse } from 'next/server';
-import { getMergedCatalog } from '../../lib/catalog';
+import { getCatalogSnapshot } from '../../lib/catalog';
+import { enhanceHtml, catalogueLinks, renderProductPage, renderSitemap, renderLlms, categoryPath, SITE_URL } from '../../lib/discovery';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,6 +51,29 @@ export async function GET(req: NextRequest) {
   const pathname = url.pathname;
   const cleanPath = pathname.replace(/^\//, '');
 
+  if (cleanPath === 'robots.txt') {
+    return new NextResponse(`User-agent: *
+Allow: /
+Disallow: /account
+Disallow: /eco-rewards-admin
+Disallow: /api/
+
+Sitemap: ${SITE_URL}/sitemap.xml
+`, { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+  }
+  if (['sitemap.xml', 'llms.txt', 'llms-full.txt'].includes(cleanPath) || cleanPath.startsWith('product/')) {
+    const snapshot = await getCatalogSnapshot();
+    if (snapshot.issues.some(issue => issue.code === 'unverified_live_data')) return new NextResponse('Live catalogue temporarily unavailable. Please retry.', { status: 503, headers: { 'Retry-After': '60' } });
+    const catalog = snapshot.catalog;
+    if (cleanPath === 'sitemap.xml') return new NextResponse(renderSitemap(catalog), { headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'no-cache' } });
+    if (cleanPath.startsWith('llms')) return new NextResponse(renderLlms(catalog, cleanPath === 'llms-full.txt'), { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' } });
+    const slug = cleanPath.slice(8);
+    const category = catalog.categories.find(category => category.products.some(product => product.slug === slug));
+    const product = category?.products.find(product => product.slug === slug);
+    if (!category || !product) return new NextResponse('Product not found', { status: 404 });
+    const template = await fs.readFile(path.join(WEBSITE_DIR, 'category.html'), 'utf-8');
+    return new NextResponse(renderProductPage(template, category, product), { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
+  }
   if (cleanPath === 'catalog' || cleanPath === 'catalog.html') {
     const destination = new URL('/shop', req.url);
     url.searchParams.forEach((value, key) => destination.searchParams.set(key, value));
@@ -66,12 +90,15 @@ export async function GET(req: NextRequest) {
     try {
       const [tmpl, catalog] = await Promise.all([
         fs.readFile(catPath, 'utf-8'),
-        getMergedCatalog(),
+        getCatalogSnapshot(),
       ]);
+      if (catalog.issues.some(issue => issue.code === 'unverified_live_data')) return new NextResponse('Live collection temporarily unavailable.', { status: 503, headers: { 'Retry-After': '60' } });
+      const categoryCatalog = catalog.catalog;
       let cat = null;
-      for (let i = 0; i < (catalog.categories || []).length; i++) {
-        if (catalog.categories[i].slug === slug) { cat = catalog.categories[i]; break; }
+      for (let i = 0; i < (categoryCatalog.categories || []).length; i++) {
+        if (categoryCatalog.categories[i].slug === slug) { cat = categoryCatalog.categories[i]; break; }
       }
+      if (!cat && slug) return new NextResponse('Collection not found', { status: 404 });
       if (!cat) {
         return new NextResponse(tmpl, {
           headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
@@ -88,7 +115,7 @@ export async function GET(req: NextRequest) {
         productsHtml += '<article class="category-product-card">'
           + '<img src="' + esc(p.image) + '" alt="' + esc(p.name) + '" loading="lazy" />'
           + '<div class="category-product-card__body">'
-          + '<h3>' + esc(p.name) + '</h3>'
+          + '<h3><a href="/product/' + encodeURIComponent(p.slug) + '">' + esc(p.name) + '</a></h3>'
           + '<p>' + esc(shortDesc) + '</p>'
           + '<div class="category-product-card__meta">'
           + '<span>' + priceText + '</span>'
@@ -123,11 +150,11 @@ export async function GET(req: NextRequest) {
 
       const renderedWithTag = rendered.replace('id="category-tag" class="label label--gold"></span>', 'id="category-tag" class="label label--gold">' + esc(cat.tag || 'Curated collection') + '</span>');
 
-      return new NextResponse(renderedWithTag, {
+      return new NextResponse(enhanceHtml(renderedWithTag, categoryPath(cat), cat.title + ' | Essenshea Nairobi', (cat.description || 'Explore ' + cat.title + ' from Essenshea in Nairobi, Kenya.').slice(0, 155)), {
         headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
       });
     } catch (e) {
-      return serveFile('category.html', WEBSITE_DIR);
+      return new NextResponse('Collection temporarily unavailable.', { status: 503, headers: { 'Retry-After': '60' } });
     }
   }
 
@@ -159,8 +186,20 @@ async function serveFile(relativePath: string, baseDir: string): Promise<NextRes
     return new NextResponse('Not found', { status: 404 });
   }
   try {
-    const data = await fs.readFile(fullPath);
+    let data = await fs.readFile(fullPath);
     const ext = path.extname(fullPath).toLowerCase();
+    if (ext === '.html') {
+      const canonicalPath = '/' + relativePath.replace(/\.html$/, '').replace(/^index$/, '');
+      let html = data.toString('utf-8');
+      if (['index.html','shop.html'].includes(relativePath)) {
+        const snapshot = await getCatalogSnapshot();
+        if (!snapshot.issues.some(issue => issue.code === 'unverified_live_data')) html = html.replace('</main>', catalogueLinks(snapshot.catalog) + '</main>');
+      }
+      html = enhanceHtml(html, canonicalPath,
+        relativePath === 'index.html' ? 'Essenshea Nairobi | Shea Butter, Oils, Skin & Hair Care' : undefined,
+        relativePath === 'index.html' ? 'Shop Essenshea natural body care, shea butter, carrier oils, haircare and fragrances in Nairobi. Pickup at Kimathi House. Request pricing and delivery.' : undefined);
+      data = Buffer.from(html);
+    }
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
     const cacheControl = getCacheControl(ext, relativePath);
     return new NextResponse(data, {
@@ -169,11 +208,8 @@ async function serveFile(relativePath: string, baseDir: string): Promise<NextRes
   } catch {
     if (!path.extname(fullPath)) {
       try {
-        const htmlPath = fullPath + '.html';
-        const data = await fs.readFile(htmlPath);
-        return new NextResponse(data, {
-          headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' },
-        });
+        await fs.access(fullPath + '.html');
+        return serveFile(relativePath + '.html', baseDir);
       } catch { }
     }
     return new NextResponse('Not found', { status: 404 });

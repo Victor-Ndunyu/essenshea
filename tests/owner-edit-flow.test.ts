@@ -14,6 +14,7 @@ test('owner edit flow previews, confirms once, rejects outsiders and stale edits
  const snapshot = () => mergeCatalogData(base, saved ? [saved] : [], true);
  const resolve = async (query: string) => {
   const category = snapshot().catalog.categories[0];
+  if(query === 'oil') return {status:'ambiguous',matches:[{category,product:category.products[0]},{category,product:{...category.products[0],slug:'almond-oil',name:'Almond Oil'}}]};
   const product = category.products.find(item => item.slug === query || item.name.toLowerCase() === query.toLowerCase());
   return product ? {status:'matched',match:{category,product}} : {status:'not_found',matches:[]};
  };
@@ -54,6 +55,17 @@ test('owner edit flow previews, confirms once, rejects outsiders and stale edits
   const owner=8772114050;
   const denied=await mod.handleOwnerTelegramCommand({chatId:8262729456,text:'/setprice Amla Oil | 850'});
   assert.equal(denied.handled,false);assert.equal(events.length,0);
+  const ambiguous=await mod.handleOwnerTelegramCommand({chatId:owner,text:'/setprice oil | 850'});
+  assert.equal(saved,null);assert.match(ambiguous.response,/Choose the exact product/);
+  const selectionToken=ambiguous.response.match(/\/choose ([A-F0-9]{8}) 1/)[1];
+  const outsider=await mod.handleOwnerTelegramCommand({chatId:8262729456,text:'/choose '+selectionToken+' 1'});assert.equal(outsider.handled,false);
+  const selection=await mod.handleOwnerTelegramCommand({chatId:owner,text:'/choose '+selectionToken+' 1'});
+  assert.match(selection.response,/Approve within/);assert.equal(saved,null);
+  const selectionReplay=await mod.handleOwnerTelegramCommand({chatId:owner,text:'/choose '+selectionToken+' 1'});assert.match(selectionReplay.response,/already been used/);
+  const expired=await mod.handleOwnerTelegramCommand({chatId:owner,text:'/setprice Amla Oil | 820'});
+  const expiredToken=expired.response.match(/\/confirm ([A-F0-9]{8})/)[1];
+  events.find(row=>row.payload?.token===expiredToken).payload.expiresAt=new Date(0).toISOString();
+  const expiredResult=await mod.handleOwnerTelegramCommand({chatId:owner,text:'/confirm '+expiredToken});assert.match(expiredResult.response,/expired/);assert.equal(saved,null);
   const preview=await mod.handleOwnerTelegramCommand({chatId:owner,text:'/edit Amla Oil | price=850 | stock=12 | labels=Hair growth'});
   assert.equal(saved,null);assert.match(preview.response,/price value: 500 → 850/);
   const token=preview.response.match(/\/confirm ([A-F0-9]{8})/)[1];

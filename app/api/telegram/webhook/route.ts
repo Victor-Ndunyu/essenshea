@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   sendTelegramMessage,
   sendTypingIndicator,
+  answerTelegramCallback,
+  ensureTelegramCallbackUpdates,
 } from '../../../../lib/telegram';
-import { handleOwnerTelegramCommand } from '../../../../lib/owner-agent';
+import { callbackCommand, ownerReplyMarkup } from '../../../../lib/telegram-ui';
+import { handleOwnerTelegramCommand, isOwnerTelegramChat } from '../../../../lib/owner-agent';
 import { recordOperationalEvent } from '../../../../lib/operational-events';
 import { secretsMatch } from '../../../../lib/security';
 
@@ -27,6 +30,21 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
+    const callback = body?.callback_query;
+    if (callback) {
+      const chatId = callback.message?.chat?.id;
+      const authorized = typeof chatId === 'number' && callback.message?.chat?.type === 'private'
+        && callback.from?.id === chatId && isOwnerTelegramChat(chatId);
+      const command = callbackCommand(callback.data);
+      if (!authorized || !command || typeof callback.id !== 'string') {
+        if (typeof callback.id === 'string') await answerTelegramCallback(callback.id, 'This button is unavailable for this account.');
+        return NextResponse.json({ ok: true });
+      }
+      await answerTelegramCallback(callback.id, 'Processing your selection');
+      const result = await handleOwnerTelegramCommand({ chatId, text: command });
+      if (result.handled) await sendTelegramMessage(chatId, result.response, result.replyMarkup || ownerReplyMarkup(result.response));
+      return NextResponse.json({ ok: true });
+    }
     const message = body?.message;
     if (typeof message?.chat?.id !== 'number') {
       return NextResponse.json({ ok: true });
@@ -62,11 +80,12 @@ async function handleMessage(
       await sendTelegramMessage(chatId, `Your Telegram ID is ${chatId}. Add it to the server-only OWNER_TELEGRAM_CHAT_IDS allowlist to authorize this private owner desk.`);
       return;
     }
+    if (canUseOwnerDesk && isOwnerTelegramChat(chatId)) await ensureTelegramCallbackUpdates();
     const ownerResult = canUseOwnerDesk
       ? await handleOwnerTelegramCommand({ chatId, text: userMessage, photos })
       : { handled: false, response: '' };
     if (ownerResult.handled) {
-      await sendTelegramMessage(chatId, ownerResult.response);
+      await sendTelegramMessage(chatId, ownerResult.response, ownerResult.replyMarkup || ownerReplyMarkup(ownerResult.response));
       return;
     }
     await recordOperationalEvent({

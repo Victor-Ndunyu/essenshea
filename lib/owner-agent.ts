@@ -1,4 +1,5 @@
-﻿import { randomBytes } from 'node:crypto';
+import type { InlineKeyboard } from './telegram-ui';
+import { randomBytes } from 'node:crypto';
 import { getSupabaseAdmin } from './supabase-admin';
 import { resolveCatalogProduct, slugifyCatalogValue, getMergedCatalog, getCatalogSnapshot } from './catalog';
 import { formatConversationMemory, loadRecentOwnerConversation, retrieveOwnerMemory, saveOwnerMemory } from './agent-memory';
@@ -21,6 +22,7 @@ type OwnerCommandResult = {
   handled: boolean;
   response: string;
   failed?: boolean;
+  replyMarkup?: InlineKeyboard;
 };
 
 const MUTATING_COMMANDS = ['/edit ', '/stock ', '/available ', '/availablenow ', '/order ', '/setdesc ', '/addproduct ', '/hide ', '/show ', '/setimage ', '/addreview ', '/removereview ', '/delreview ', '/forget '];
@@ -45,12 +47,13 @@ function helpText(): string {
     '/lowstock - show products at or below the configured threshold',
     '/cataloghealth - show missing stock, descriptions, images and prices',
     '/orders - show recent order requests without customer contact details',
-    'Live-site changes show old and proposed values, then require a one-time /confirm TOKEN within 10 minutes.',
+    'Live-site changes show old and proposed values. Tap Approve change or Cancel within 10 minutes; /confirm TOKEN and /cancel TOKEN also work.',
     '/stock product name | 5 - preview a stock update',
     '/available product name | 5 - set stock and mark available now',
     '/order product name - mark available by order',
     '/describe product name - show exact site description',
     '/find product name - search catalogue names',
+    '/products - browse products with selection buttons',
     '/remember note - store an owner note permanently',
     '/memory topic - retrieve owner memory',
     '/forget topic - preview removal of matching owner notes',
@@ -260,6 +263,23 @@ async function createPendingAction(chatId: number, command: string, photos?: Tel
     };
     command = '/edit ' + query + ' | ' + changes[key];
   }
+  const productCommand = command.match(/^\/(edit|setimage)\s+([^|]+)([\s\S]*)$/i);
+  if (productCommand) {
+    const resolution = await resolveCatalogProduct(productCommand[2].trim());
+    if (resolution.status === 'ambiguous') {
+      const choices = resolution.matches.map(match => ({ slug: match.product.slug, name: match.product.name, category: match.category.title }));
+      const token = randomBytes(4).toString('hex').toUpperCase();
+      const { error } = await getSupabaseAdmin().from('owner_agent_events').insert([{
+        telegram_chat_id: chatId, event_type: 'owner_selection_pending', product_slug: null,
+        payload: { token, choices, prefix: '/' + productCommand[1] + ' ', suffix: productCommand[3], photoFileId: latestPhotoFileId(photos), expiresAt: new Date(Date.now() + ACTION_TTL_MINUTES * 60_000).toISOString() },
+      }]);
+      if (error) throw new Error('Could not save product choices. Nothing changed.');
+      return ['Choose the exact product. Nothing has changed yet; selection opens a fresh approval preview.',
+        ...choices.map((choice,index) => `${index+1}. ${choice.name} (${choice.category})\n/choose ${token} ${index+1}`),
+        'Choices expire in 10 minutes.'].join('\n');
+    }
+    if (resolution.status === 'matched') command = '/' + productCommand[1] + ' ' + resolution.match.product.slug + productCommand[3];
+  }
   const edit = /^\/edit\s/i.test(command) ? await prepareProductEdit(command) : undefined;
   const summary = edit?.summary || await actionSummary(command, photos);
   const token = randomBytes(4).toString('hex').toUpperCase();
@@ -289,6 +309,40 @@ async function createPendingAction(chatId: number, command: string, photos?: Tel
   ].join('\n');
 }
 
+async function selectPendingProduct(chatId: number, token: string, index: number): Promise<string> {
+  const { data, error } = await getSupabaseAdmin().from('owner_agent_events').select('id, payload')
+    .eq('telegram_chat_id', chatId).eq('event_type', 'owner_selection_pending').order('created_at', { ascending: false }).limit(30);
+  if (error) throw new Error('Product choices could not be loaded. Nothing changed.');
+  const row = (data || []).find(item => item.payload?.token === token);
+  if (!row) return 'That product selection is invalid or has already been used. Send the request again.';
+  if (!Number.isFinite(Date.parse(row.payload.expiresAt)) || Date.parse(row.payload.expiresAt) <= Date.now()) return 'That product selection expired. Send the request again.';
+  const choice = row.payload.choices?.[index - 1];
+  if (!choice) return 'Choose one of the listed products.';
+  const { data: claimed, error: claimError } = await getSupabaseAdmin().from('owner_agent_events').update({ event_type: 'owner_selection_used' })
+    .eq('id', row.id).eq('event_type', 'owner_selection_pending').select('id').maybeSingle();
+  if (claimError) throw new Error('Product selection could not be saved. Nothing changed.');
+  if (!claimed) return 'That product selection has already been used.';
+  return createPendingAction(chatId, row.payload.prefix + choice.slug + row.payload.suffix,
+    row.payload.photoFileId ? [{file_id: row.payload.photoFileId}] : undefined);
+}
+
+async function browseOwnerProducts(page: number): Promise<OwnerCommandResult> {
+  const catalog = await getMergedCatalog({ includeHidden: true });
+  const products = catalog.categories.flatMap(category => category.products.map(product => ({ product, category })));
+  const pages = Math.max(1, Math.ceil(products.length / 8));
+  page = Math.max(0, Math.min(page, pages - 1));
+  const slice = products.slice(page * 8, page * 8 + 8);
+  const buttons = slice.filter(({product}) => Buffer.byteLength('product:' + product.slug, 'utf8') <= 64)
+    .map(({product}) => [{text: product.name.slice(0,64), callback_data:'product:' + product.slug}]);
+  const navigation = [];
+  if (page > 0) navigation.push({text:'Previous', callback_data:'browse:'+(page-1)});
+  if (page < pages - 1) navigation.push({text:'Next', callback_data:'browse:'+(page+1)});
+  if (navigation.length) buttons.push(navigation);
+  return { handled: true, response: ['Select a product to view its current details. Page '+(page+1)+' of '+pages+'.',
+    ...slice.map(({product,category}) => product.name+' ('+category.title+(product.hidden?', hidden':'')+')'),
+    'To edit: /edit Exact Product Name | price=850 | stock=12. Changes always require approval.'].join('\n'), replyMarkup:{inline_keyboard:buttons} };
+}
+
 async function findPendingAction(chatId: number, token: string): Promise<PendingOwnerAction | null> {
   const { data, error } = await getSupabaseAdmin()
     .from('owner_agent_events')
@@ -314,10 +368,12 @@ async function findPendingAction(chatId: number, token: string): Promise<Pending
 async function cancelPendingAction(chatId: number, token: string): Promise<string> {
   const pending = await findPendingAction(chatId, token);
   if (!pending) return 'That action token is invalid or has already been used.';
-  await getSupabaseAdmin().from('owner_agent_events').update({
+  const { data: cancelled, error } = await getSupabaseAdmin().from('owner_agent_events').update({
     event_type: 'owner_action_cancelled',
     payload: { token, command: pending.command, summary: pending.summary, cancelledAt: new Date().toISOString() },
-  }).eq('id', pending.id).eq('event_type', 'owner_action_pending');
+  }).eq('id', pending.id).eq('event_type', 'owner_action_pending').select('id').maybeSingle();
+  if (error) throw new Error('Cancellation could not be saved. Check /activity before retrying.');
+  if (!cancelled) return 'That action was already confirmed, cancelled, or expired.';
   return 'Cancelled. No website or business data was changed.';
 }
 
@@ -564,6 +620,10 @@ export async function handleOwnerTelegramCommand(params: {
 
   try {
     if (!params.approvedCommand) {
+      const choice = text.match(/^\/choose ([A-F0-9]{8}) ([1-5])$/i);
+      if (choice) return {handled:true, response:await selectPendingProduct(chatId, choice[1].toUpperCase(), Number(choice[2]))};
+      const browse = text.match(/^\/products(?: (\d{1,4}))?$/);
+      if (browse) return browseOwnerProducts(Number(browse[1] || 0));
       const approval = parseOwnerActionApproval(text);
       if (approval?.action === 'cancel') {
         return { handled: true, response: await cancelPendingAction(chatId, approval.token) };
@@ -571,7 +631,7 @@ export async function handleOwnerTelegramCommand(params: {
       if (approval?.action === 'confirm') {
         const pending = await findPendingAction(chatId, approval.token);
         if (!pending) return { handled: true, response: 'That action token is invalid or has already been used.' };
-        if (!pending.expiresAt || Date.parse(pending.expiresAt) <= Date.now()) {
+        if (!Number.isFinite(Date.parse(pending.expiresAt)) || Date.parse(pending.expiresAt) <= Date.now()) {
           await getSupabaseAdmin().from('owner_agent_events').update({
             event_type: 'owner_action_expired',
             payload: { token: pending.token, command: pending.command, summary: pending.summary, expiredAt: new Date().toISOString() },
