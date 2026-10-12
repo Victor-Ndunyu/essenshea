@@ -1,6 +1,6 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { getMergedCatalog, type CatalogData, type CatalogProduct } from './catalog';
+import { getCatalogSnapshot, type CatalogData, type CatalogProduct } from './catalog';
 import { getSupabaseAdmin } from './supabase-admin';
 import { formatSiteFacts } from './site-facts';
 import { ownerLowStockThreshold } from './owner-command';
@@ -20,6 +20,7 @@ type SiteReview = { author: string; role: string | null; text: string; is_visibl
 
 export type OwnerBusinessData = {
   catalog: CatalogData;
+  catalogIssues?: Array<{ code: string; productSlug?: string; message: string }>;
   reviews: SiteReview[];
   recentOrders: RecentOrder[];
   ecoRewards: { activeAccounts: number | null; availableRewards: number | null };
@@ -84,15 +85,15 @@ async function loadPublicPageText(): Promise<string> {
 }
 
 export async function loadOwnerBusinessData(): Promise<OwnerBusinessData> {
-  const [catalog, reviews, recentOrders, activeAccounts, availableRewards, publicPageText] = await Promise.all([
-    getMergedCatalog({ includeHidden: true }),
+  const [snapshot, reviews, recentOrders, activeAccounts, availableRewards, publicPageText] = await Promise.all([
+    getCatalogSnapshot({ includeHidden: true }),
     safeLoad('reviews', loadReviews, []),
     safeLoad('orders', loadRecentOrders, []),
     safeLoad('eco accounts', () => countRows('eco_reward_accounts', [['active', true]]), null),
     safeLoad('eco rewards', () => countRows('eco_reward_benefits', [['status', 'available']]), null),
     safeLoad('public pages', loadPublicPageText, 'Public page text unavailable.'),
   ]);
-  return { catalog, reviews, recentOrders, ecoRewards: { activeAccounts, availableRewards }, publicPageText };
+  return { catalog: snapshot.catalog, catalogIssues: snapshot.issues, reviews, recentOrders, ecoRewards: { activeAccounts, availableRewards }, publicPageText };
 }
 
 function productStatus(product: CatalogProduct): string {
@@ -123,6 +124,9 @@ export function formatOwnerBusinessContext(data: OwnerBusinessData): string {
     '',
     'CURRENT PUBLIC PAGE TEXT (authoritative checked-in website copy)',
     data.publicPageText,
+    '',
+    'CATALOGUE LISTING DIAGNOSTICS',
+    ...(data.catalogIssues || []).filter(issue => ['unverified_live_data', 'missing_category', 'orphan_override', 'duplicate_product', 'owner_category'].includes(issue.code)).map(issue => '- ' + issue.message),
     '',
     'LIVE CATALOGUE (includes hidden owner-managed items)',
     ...catalogue,
@@ -176,6 +180,12 @@ export function formatCatalogHealth(data: OwnerBusinessData): string {
   for (const [label, products] of Object.entries(issues)) {
     if (products.length) lines.push(`${label} issues: ${products.slice(0, 12).join(', ')}${products.length > 12 ? '…' : ''}`);
   }
+  const diagnostics = data.catalogIssues || [];
+  const listingIssues = diagnostics.filter(issue => ['unverified_live_data', 'missing_category', 'orphan_override', 'duplicate_product', 'owner_category'].includes(issue.code));
+  lines.push('Listing and category checks: ' + listingIssues.length);
+  lines.push(...listingIssues.slice(0, 8).map(issue => '- ' + issue.message));
+  lines.push('Products without numeric prices: ' + diagnostics.filter(issue => issue.code === 'unstructured_price').length + ' (includes price-on-request and prices embedded in descriptions).');
+  lines.push('Category assignment checks cannot prove a product belongs in another category without owner guidance.');
   return lines.join('\n');
 }
 
