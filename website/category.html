@@ -134,6 +134,16 @@ function textExcerpt(text, length) {
   return clean.length <= length ? clean : clean.slice(0, length).trim() + '…';
 }
 
+function categoryEscape(value) {
+  return String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+function categoryAvailability(product) {
+  if (product.availableByOrder) return 'Made to order';
+  if (typeof product.stock === 'number' && product.stock <= 0) return 'Out of stock';
+  return typeof product.priceValue === 'number' ? 'Available' : 'Price on request';
+}
+
 function renderCategoryPage(category) {
   currentCategory = category;
   document.title = category.title + ' - Essenshea';
@@ -147,18 +157,18 @@ function renderCategoryPage(category) {
   }
   if (categoryProductGrid) {
     categoryProductGrid.innerHTML = (category.products || []).map(function(product) {
-      var available = typeof product.priceValue === 'number';
+      var available = !product.availableByOrder && typeof product.priceValue === 'number' && !(typeof product.stock === 'number' && product.stock <= 0);
       return '<article class="category-product-card">'
-        + '<img src="' + product.image + '" alt="' + product.name + '" loading="lazy" />'
+        + '<img src="' + categoryEscape(product.image) + '" alt="' + categoryEscape(product.name) + '" loading="lazy" />'
         + '<div class="category-product-card__body">'
-        + '<h3>' + product.name + '</h3>'
-        + '<p>' + textExcerpt(product.description, 120) + '</p>'
+        + '<h3>' + categoryEscape(product.name) + '</h3>'
+        + '<p>' + categoryEscape(textExcerpt(product.description, 120)) + '</p>'
         + '<div class="category-product-card__meta">'
-        + '<span>' + (product.price || 'Price on request') + '</span>'
-        + '<span class="avail-flag">' + (available ? 'Available' : 'Request') + '</span>'
+        + '<span>' + categoryEscape(product.price || 'Price on request') + '</span>'
+        + '<span class="avail-flag">' + categoryAvailability(product) + '</span>'
         + '</div>'
         + '<div class="category-product-card__actions">'
-        + '<button class="btn btn--sm btn--secondary category-product-open" data-product="' + product.slug + '" type="button">View details</button>'
+        + '<button class="btn btn--sm btn--secondary category-product-open" data-product="' + categoryEscape(product.slug) + '" type="button">View details</button>'
         + '<a class="btn btn--sm btn--primary" href="/shop?product=' + encodeURIComponent(product.slug) + '">Order this</a>'
         + '</div>'
         + '</div>'
@@ -174,7 +184,8 @@ async function loadCategoryPage() {
     return;
   }
   try {
-    var response = await fetch('/api/catalog');
+    var response = await fetch('/api/catalog', { cache: 'no-store' });
+    if (!response.ok) throw new Error('Catalogue unavailable');
     var data = await response.json();
     var category = (data.categories || []).find(function(item) { return item.slug === slug; });
     if (!category) {
@@ -205,9 +216,9 @@ function openCategoryProductModal(productSlug) {
   categoryModalImage.src = product.image;
   categoryModalImage.alt = product.name;
   categoryModalDescription.textContent = product.description;
-  var available = typeof product.priceValue === 'number';
+  var available = !product.availableByOrder && typeof product.priceValue === 'number' && !(typeof product.stock === 'number' && product.stock <= 0);
   var stockText = typeof product.stock === 'number' ? 'In stock: ' + product.stock : 'Stock pending';
-  categoryModalDetails.textContent = (product.price || 'Price on request') + ' \u00B7 ' + (available ? 'Available now' : 'Request only') + ' \u00B7 ' + stockText + ' \u00B7 ' + (available ? 'Seller will ship or confirm pickup options.' : 'Seller will review and confirm pricing and availability.');
+  categoryModalDetails.textContent = (product.price || 'Price on request') + ' \u00B7 ' + categoryAvailability(product) + ' \u00B7 ' + stockText + ' \u00B7 ' + (available ? 'Seller will ship or confirm pickup options.' : 'Seller will review and confirm pricing and availability.');
   if (categoryModalOrder) categoryModalOrder.href = '/shop?product=' + encodeURIComponent(product.slug);
   categoryModal.classList.remove('hidden');
   categoryModal.setAttribute('aria-hidden', 'false');
