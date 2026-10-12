@@ -1,11 +1,12 @@
 ﻿import { randomBytes } from 'node:crypto';
 import { getSupabaseAdmin } from './supabase-admin';
-import { resolveCatalogProduct, slugifyCatalogValue, getMergedCatalog } from './catalog';
+import { resolveCatalogProduct, slugifyCatalogValue, getMergedCatalog, getCatalogSnapshot } from './catalog';
 import { formatConversationMemory, loadRecentOwnerConversation, retrieveOwnerMemory, saveOwnerMemory } from './agent-memory';
 import { callChatModel, getModelAttempts } from './ai-providers';
 import { parseTelegramOwnerIds } from './security';
 import { parseNaturalOwnerMutation, parseOwnerActionApproval } from './owner-command';
 import { percentageChange } from './analytics';
+import { parseProductEdit, productRecord, productEditPreview, ownerMoney, ownerStock, type ProductPatch } from './product-edit';
 import {
   formatCatalogHealth,
   formatLowStock,
@@ -19,9 +20,10 @@ type TelegramPhoto = { file_id: string; file_size?: number; width?: number; heig
 type OwnerCommandResult = {
   handled: boolean;
   response: string;
+  failed?: boolean;
 };
 
-const MUTATING_COMMANDS = ['/stock ', '/available ', '/availablenow ', '/order ', '/setdesc ', '/addproduct ', '/hide ', '/show ', '/setimage ', '/addreview ', '/removereview ', '/delreview ', '/forget '];
+const MUTATING_COMMANDS = ['/edit ', '/stock ', '/available ', '/availablenow ', '/order ', '/setdesc ', '/addproduct ', '/hide ', '/show ', '/setimage ', '/addreview ', '/removereview ', '/delreview ', '/forget '];
 const ACTION_TTL_MINUTES = 10;
 
 function ownerChatIds(): Set<number> {
@@ -54,6 +56,18 @@ function helpText(): string {
     '/forget topic - preview removal of matching owner notes',
     '/activity - show the latest owner-agent changes',
     '/insights - show the latest 7-day storefront and order signals',
+    '/edit product name | price=850 | stock=12 - preview several changes together',
+    '/setprice product name | 850 - change the price',
+    '/setname product name | new name - rename without changing its identity',
+    '/setcategory product name | Haircare - move to an existing category',
+    '/setlabels product name | Hair growth; Scalp comfort - edit card labels',
+    '/setbenefits product name | First benefit; Second benefit - edit product notes',
+    '/setingredients product name | shea butter, olive oil - edit ingredients',
+    '/setsize product name | 250ml - edit the displayed size',
+    '/setvariants product name | 100ml:550;250ml:800 - edit size prices',
+    '/categories - show category names and product counts',
+    'More /edit fields: concerns, availability=now/by order, visibility=visible/hidden. Lists use semicolons; clear removes optional lists.',
+    'Examples: Change the price of Amla Oil to KSh 850. Move Amla Oil to Haircare.',
     '/setdesc product name | new description - preview a description update',
     '/addproduct category | name | price | description - add product as by order',
     '/hide product name - remove from public catalogue',
@@ -76,7 +90,8 @@ function latestPhotoFileId(photos?: TelegramPhoto[]): string | null {
 
 async function logOwnerEvent(chatId: number, eventType: string, productSlug: string | null, payload: Record<string, unknown>) {
   try {
-    await getSupabaseAdmin().from('owner_agent_events').insert([{ telegram_chat_id: chatId, event_type: eventType, product_slug: productSlug, payload }]);
+    const { error } = await getSupabaseAdmin().from('owner_agent_events').insert([{ telegram_chat_id: chatId, event_type: eventType, product_slug: productSlug, payload }]);
+    if (error) throw error;
   } catch (error) {
     console.error('Owner event log failed:', error);
   }
@@ -92,45 +107,46 @@ async function resolveProductOrThrow(productName: string) {
   return resolution.match;
 }
 
-async function upsertOverride(productName: string, patch: Record<string, unknown>, chatId: number): Promise<{ name: string; slug: string; categorySlug: string }> {
+async function upsertOverride(productName: string, patch: ProductPatch, chatId: number, expected?: Record<string, unknown> | null): Promise<{ name: string; slug: string; categorySlug: string }> {
   const match = await resolveProductOrThrow(productName);
-  const before = {
-    stock: match.product.stock ?? null,
-    availableByOrder: Boolean(match.product.availableByOrder),
-    hidden: Boolean(match.product.hidden),
-    description: match.product.description || null,
-    image: match.product.image || null,
-  };
-  const row = {
-    product_slug: match.product.slug,
-    category_slug: match.category.slug,
-    product_name: match.product.name,
-    updated_by: String(chatId),
-    updated_at: new Date().toISOString(),
-    ...patch,
-  };
-  const { error } = await getSupabaseAdmin().from('catalog_overrides').upsert(row, { onConflict: 'product_slug' });
+  const before = productRecord(match.product, match.category.slug);
+  const { data: saved, error: readError } = await getSupabaseAdmin().from('catalog_overrides').select('*').eq('product_slug', match.product.slug).maybeSingle();
+  if (readError) throw new Error('Saved product data could not be checked. Nothing was changed.');
+  const row = { ...before, ...patch };
+  const { error } = await getSupabaseAdmin().rpc('owner_apply_catalog_patch', {
+    p_slug: match.product.slug, p_row: row,
+    p_expected: expected === undefined ? saved : expected,
+    p_actor: chatId, p_snapshot: before,
+  });
   if (error) throw new Error(error.message);
   const readBack = await resolveProductOrThrow(match.product.slug);
-  await logOwnerEvent(chatId, 'catalog_update', match.product.slug, {
-    before,
-    requested: patch,
-    after: {
-      stock: readBack.product.stock ?? null,
-      availableByOrder: Boolean(readBack.product.availableByOrder),
-      hidden: Boolean(readBack.product.hidden),
-      description: readBack.product.description || null,
-      image: readBack.product.image || null,
-    },
-  });
-  return { name: match.product.name, slug: match.product.slug, categorySlug: match.category.slug };
+  const after = productRecord(readBack.product, readBack.category.slug);
+  for (const [key, value] of Object.entries(row)) {
+    if (JSON.stringify(after[key]) !== JSON.stringify(value)) throw new Error('The edit was saved but website verification failed for ' + key + '. Check /activity before retrying.');
+  }
+  return { name: readBack.product.name, slug: match.product.slug, categorySlug: readBack.category.slug };
+}
+
+type PreparedEdit = { slug: string; patch: ProductPatch; before: ProductPatch; expected: Record<string, unknown> | null; summary: string };
+async function prepareProductEdit(command: string): Promise<PreparedEdit> {
+  const snapshot = await getCatalogSnapshot({ includeHidden: true });
+  if (snapshot.issues.some(issue => issue.code === 'unverified_live_data')) throw new Error('Live catalogue edits could not be loaded. Please retry before making changes.');
+  const parsed = parseProductEdit(command, snapshot.catalog.categories);
+  const match = await resolveProductOrThrow(parsed.query);
+  if (parsed.patch.product_name && snapshot.catalog.categories.flatMap(category => category.products).some(product => product.slug !== match.product.slug && product.name.toLowerCase() === String(parsed.patch.product_name).toLowerCase())) {
+    throw new Error('Another product already uses that name. Choose a distinct name.');
+  }
+  const { data, error } = await getSupabaseAdmin().from('catalog_overrides').select('*').eq('product_slug', match.product.slug).maybeSingle();
+  if (error) throw new Error('Could not read saved product information. No edit was prepared.');
+  const before = productRecord(match.product, match.category.slug);
+  return { slug: match.product.slug, patch: parsed.patch, before, expected: data, summary: match.product.name + '\n' + productEditPreview(before, parsed.patch) };
 }
 
 async function handleStockCommand(chatId: number, text: string, availableByOrder: boolean): Promise<string> {
   const args = splitPipeArgs(text);
   if (args.length < 2) return 'Use: /stock product name | 5';
-  const stock = Number.parseInt(args[1], 10);
-  if (!Number.isFinite(stock) || stock < 0) return 'Stock must be a whole number of 0 or more.';
+  const stock = ownerStock(args[1]);
+  if (stock === null) return 'Stock must be a whole number of 0 or more.';
   const updated = await upsertOverride(args[0], { stock, available_by_order: availableByOrder, hidden: false }, chatId);
   return `${updated.name} is updated. Stock: ${stock}. Status: ${availableByOrder ? 'available by order' : 'available now'}.`;
 }
@@ -140,12 +156,14 @@ async function handleAddProduct(chatId: number, text: string): Promise<string> {
   if (args.length < 4) return 'Use: /addproduct category | name | price | description';
   const [category, name, price, description] = args;
   const productSlug = slugifyCatalogValue(name);
-  const categorySlug = slugifyCatalogValue(category);
-  const { error } = await getSupabaseAdmin().from('catalog_overrides').upsert({
+  const catalog = await getMergedCatalog({ includeHidden: true });
+  const categorySlug = String(parseProductEdit('/edit New product | category=' + category, catalog.categories).patch.category_slug);
+  const { error } = await getSupabaseAdmin().from('catalog_overrides').insert({
     product_slug: productSlug,
     category_slug: categorySlug,
     product_name: name,
     price_text: price,
+    price_value: ownerMoney(price),
     description,
     image_url: '/assets/images/essenshea-logo.jpg',
     is_new: true,
@@ -153,7 +171,7 @@ async function handleAddProduct(chatId: number, text: string): Promise<string> {
     available_by_order: true,
     updated_by: String(chatId),
     updated_at: new Date().toISOString(),
-  }, { onConflict: 'product_slug' });
+  });
   if (error) throw new Error(error.message);
   await logOwnerEvent(chatId, 'catalog_add_product', productSlug, { category, name, price });
   return `${name} has been added under ${category}. It is public as available by order. Send a product photo with caption: /setimage ${name}`;
@@ -166,6 +184,7 @@ type PendingOwnerAction = {
   summary: string;
   expiresAt: string;
   photoFileId?: string;
+  edit?: PreparedEdit;
 };
 
 async function actionSummary(command: string, photos?: TelegramPhoto[]): Promise<string> {
@@ -173,6 +192,12 @@ async function actionSummary(command: string, photos?: TelegramPhoto[]): Promise
   if (lower.startsWith('/addproduct ')) {
     const args = splitPipeArgs(command.slice(12));
     if (args.length < 4) throw new Error('Use: /addproduct category | name | price | description');
+    ownerMoney(args[2]);
+    const snapshot = await getCatalogSnapshot({ includeHidden: true });
+    if (snapshot.issues.some(issue => issue.code === 'unverified_live_data')) throw new Error('Live catalogue is unavailable. Retry before adding products.');
+    parseProductEdit('/edit New product | category=' + args[0], snapshot.catalog.categories);
+    const slug = slugifyCatalogValue(args[1]);
+    if (snapshot.catalog.categories.flatMap(category => category.products).some(product => product.slug === slug)) throw new Error('That product already exists. Use /edit to change it.');
     return `Add a public by-order product\nCategory: ${args[0]}\nName: ${args[1]}\nPrice: ${args[2]}\nDescription: ${args.slice(3).join(' | ')}`;
   }
   if (lower.startsWith('/addreview ')) return `Add this review to the public site:\n${command.slice(11)}`;
@@ -202,7 +227,7 @@ async function actionSummary(command: string, photos?: TelegramPhoto[]): Promise
   if (prefix === '/stock ' || prefix === '/available ') {
     const args = splitPipeArgs(raw);
     const stock = Number.parseInt(args[1], 10);
-    if (args.length < 2 || !Number.isSafeInteger(stock) || stock < 0) throw new Error('Stock must be a whole number of 0 or more.');
+    if (args.length < 2 || stock === null) throw new Error('Stock must be a whole number of 0 or more.');
     proposed = `Proposed: stock ${stock}; available now; public`;
   } else if (prefix === '/availablenow ') proposed = 'Proposed: available now; preserve stock; public';
   else if (prefix === '/order ') proposed = 'Proposed: available by order; stock not set; public';
@@ -220,7 +245,23 @@ async function actionSummary(command: string, photos?: TelegramPhoto[]): Promise
 }
 
 async function createPendingAction(chatId: number, command: string, photos?: TelegramPhoto[]): Promise<string> {
-  const summary = await actionSummary(command, photos);
+  const legacy = command.match(/^\/(stock|available|availablenow|order|setdesc|hide|show)\s+([\s\S]+)$/i);
+  if (legacy) {
+    const key = legacy[1].toLowerCase();
+    const parts = legacy[2].split('|').map(item => item.trim());
+    const query = parts[0];
+    const changes: Record<string, string> = {
+      stock: 'stock=' + (parts[1] || '') + ' | availability=now | visibility=visible',
+      available: 'stock=' + (parts[1] || '') + ' | availability=now | visibility=visible',
+      availablenow: 'availability=now | visibility=visible',
+      order: 'availability=by order | stock=unknown | visibility=visible',
+      setdesc: 'description=' + parts.slice(1).join(' | '),
+      hide: 'visibility=hidden', show: 'visibility=visible',
+    };
+    command = '/edit ' + query + ' | ' + changes[key];
+  }
+  const edit = /^\/edit\s/i.test(command) ? await prepareProductEdit(command) : undefined;
+  const summary = edit?.summary || await actionSummary(command, photos);
   const token = randomBytes(4).toString('hex').toUpperCase();
   const expiresAt = new Date(Date.now() + ACTION_TTL_MINUTES * 60 * 1000).toISOString();
   const payload = {
@@ -229,6 +270,7 @@ async function createPendingAction(chatId: number, command: string, photos?: Tel
     summary,
     expiresAt,
     photoFileId: latestPhotoFileId(photos) || undefined,
+    edit,
   };
   const { error } = await getSupabaseAdmin().from('owner_agent_events').insert([{
     telegram_chat_id: chatId,
@@ -265,6 +307,7 @@ async function findPendingAction(chatId: number, token: string): Promise<Pending
     summary: String(row.payload.summary || ''),
     expiresAt: String(row.payload.expiresAt || ''),
     photoFileId: row.payload.photoFileId ? String(row.payload.photoFileId) : undefined,
+    edit: row.payload.edit,
   };
 }
 
@@ -542,12 +585,16 @@ export async function handleOwnerTelegramCommand(params: {
         if (claimError) throw new Error(claimError.message);
         if (!claimed) return { handled: true, response: 'That action was already confirmed, cancelled, or expired.' };
         try {
-          const result = await handleOwnerTelegramCommand({
-            chatId,
-            text: pending.command,
-            approvedCommand: pending.command,
-            approvedPhotoFileId: pending.photoFileId,
-          });
+          let result: OwnerCommandResult;
+          if (pending.edit) {
+            const current = await resolveProductOrThrow(pending.edit.slug);
+            if (JSON.stringify(productRecord(current.product, current.category.slug)) !== JSON.stringify(pending.edit.before)) throw new Error('This product changed after the preview. Send the edit request again to review the latest values.');
+            const updated = await upsertOverride(pending.edit.slug, pending.edit.patch, chatId, pending.edit.expected);
+            result = { handled: true, response: updated.name + ' updated and verified on the website.\n' + productEditPreview(pending.edit.before, pending.edit.patch) };
+          } else {
+            result = await handleOwnerTelegramCommand({ chatId, text: pending.command, approvedCommand: pending.command, approvedPhotoFileId: pending.photoFileId });
+          }
+          if (result.failed) throw new Error(result.response);
           await getSupabaseAdmin().from('owner_agent_events').update({
             event_type: 'owner_action_applied',
             payload: { token: pending.token, command: pending.command, summary: pending.summary, result: result.response, completedAt: new Date().toISOString() },
@@ -565,6 +612,11 @@ export async function handleOwnerTelegramCommand(params: {
 
     if (lower === '/start' || lower === '/help' || lower === 'help') {
       return { handled: true, response: helpText() };
+    }
+
+    if (lower === '/categories') {
+      const catalog = await getMergedCatalog({ includeHidden: true });
+      return { handled: true, response: catalog.categories.map(category => category.title + ': ' + category.products.filter(product => !product.hidden).length + ' public products').join('\n') };
     }
 
     if (lower === '/dashboard' || lower === 'dashboard' || lower.includes('business snapshot')) {
@@ -596,6 +648,10 @@ export async function handleOwnerTelegramCommand(params: {
     }
 
     if (!params.approvedCommand) {
+      const shortcuts: Record<string, string> = { setprice: 'price', setname: 'name', setcategory: 'category', setlabels: 'labels', setbenefits: 'benefits', setingredients: 'ingredients', setsize: 'size', setvariants: 'variants' };
+      const shortcut = text.match(/^\/(setprice|setname|setcategory|setlabels|setbenefits|setingredients|setsize|setvariants)\s+([^|]+)\|\s*([\s\S]+)$/i);
+      if (shortcut) return { handled: true, response: await createPendingAction(chatId, '/edit ' + shortcut[2].trim() + ' | ' + shortcuts[shortcut[1].toLowerCase()] + '=' + shortcut[3].trim()) };
+      if (/^\/(setprice|setname|setcategory|setlabels|setbenefits|setingredients|setsize|setvariants)\b/i.test(text)) return { handled: true, response: 'Use ' + text.split(/\s/)[0] + ' Product Name | new value. Send /help for examples.' };
       const naturalCommand = parseNaturalOwnerMutation(text);
       const proposedCommand = MUTATING_COMMANDS.some((command) => lower.startsWith(command)) ? text : naturalCommand;
       if (proposedCommand) return { handled: true, response: await createPendingAction(chatId, proposedCommand, photos) };
@@ -733,6 +789,6 @@ export async function handleOwnerTelegramCommand(params: {
     return { handled: true, response: await answerOwnerConversationally(chatId, text) };
   } catch (error) {
     await saveOwnerMemory(chatId, 'owner_error', error instanceof Error ? error.message : 'Owner command failed', { text });
-    return { handled: true, response: error instanceof Error ? error.message : 'The owner command failed. Please try again.' };
+    return { handled: true, failed: true, response: error instanceof Error ? error.message : 'The owner command failed. Please try again.' };
   }
 }

@@ -13,6 +13,12 @@ export type CatalogProduct = {
   stock?: number | null;
   availableByOrder?: boolean;
   hidden?: boolean;
+  bestFor?: string[] | null;
+  concerns?: string[] | null;
+  benefits?: string[] | null;
+  ingredients?: string | null;
+  size?: string | null;
+  variants?: Array<{ size: string; priceValue: number; price: string }> | null;
   [key: string]: unknown;
 };
 
@@ -44,6 +50,12 @@ export type CatalogOverrideRow = {
   hidden: boolean | null;
   is_new: boolean | null;
   sort_order: number | null;
+  best_for?: string[] | null;
+  concerns?: string[] | null;
+  benefits?: string[] | null;
+  ingredients?: string | null;
+  size_text?: string | null;
+  variants?: Array<{ size: string; priceValue: number; price: string }> | null;
 };
 
 let staticCatalogCache: CatalogData | null = null;
@@ -72,7 +84,7 @@ async function loadCatalogOverrides(): Promise<{ rows: CatalogOverrideRow[]; ava
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
       .from('catalog_overrides')
-      .select('product_slug, category_slug, product_name, description, price_text, price_value, image_url, stock, available_by_order, hidden, is_new, sort_order')
+      .select('product_slug, category_slug, product_name, description, price_text, price_value, image_url, stock, available_by_order, hidden, is_new, sort_order, best_for, concerns, benefits, ingredients, size_text, variants')
       .order('sort_order', { ascending: true, nullsFirst: false });
     if (error) throw error;
     return { rows: data || [], available: true };
