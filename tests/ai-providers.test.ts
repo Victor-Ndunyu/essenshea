@@ -7,7 +7,7 @@ import {
 } from '../lib/ai-providers.ts';
 import { checkMemoryRateLimit } from '../lib/memory-rate-limit.ts';
 
-test('builds the tested NVIDIA primary and fallback attempts', () => {
+test('builds the current NVIDIA primary and fallback attempts', () => {
   const attempts = getModelAttempts({
     NVIDIA_AGENT_API_KEY: 'nvidia-secret',
   });
@@ -15,8 +15,8 @@ test('builds the tested NVIDIA primary and fallback attempts', () => {
   assert.deepEqual(
     attempts.map(({ provider, model }) => ({ provider, model })),
     [
-      { provider: 'nvidia', model: 'meta/llama-3.3-70b-instruct' },
-      { provider: 'nvidia', model: 'meta/llama-3.1-8b-instruct' },
+      { provider: 'nvidia', model: 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning' },
+      { provider: 'nvidia', model: 'nvidia/nemotron-3-super-120b-a12b' },
     ],
   );
 });
@@ -104,4 +104,17 @@ test('keeps a bounded in-memory rate limit when Supabase is unavailable', () => 
     checkMemoryRateLimit({ key, limit: 2, windowSeconds: 60 }),
     false,
   );
+});
+
+
+test('disables reasoning for short customer chat without changing other providers', async () => {
+  for (const provider of ['nvidia', 'huggingface'] as const) {
+    let body: Record<string, unknown> = {};
+    const fetcher = async (_url: unknown, init: RequestInit | undefined) => {
+      body = JSON.parse(String(init?.body));
+      return new Response(JSON.stringify({choices:[{message:{content:'Welcome'}}]}));
+    };
+    await callChatModel({ provider, model: 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning', baseUrl:'https://example.test/v1', apiKey:'test-only' }, [{role:'user', content:'Hello'}], fetcher as typeof fetch);
+    assert.deepEqual(body.chat_template_kwargs, provider === 'nvidia' ? {enable_thinking:false} : undefined);
+  }
 });
