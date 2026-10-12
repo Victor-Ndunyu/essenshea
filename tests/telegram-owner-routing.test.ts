@@ -25,7 +25,7 @@ test('owner context covers live and static business data without customer contac
   for (const table of ['site_reviews', 'orders', 'eco_reward_accounts', 'eco_reward_benefits']) {
     assert.match(source, new RegExp(`'${table}'`));
   }
-  assert.match(source, /getMergedCatalog\(\{ includeHidden: true \}\)/);
+  assert.match(source, /getCatalogSnapshot\(\{ includeHidden: true \}\)/);
   assert.match(source, /loadPublicPageText/);
   assert.doesNotMatch(source, /customer_phone|customer_email|customer_contact/);
 });

@@ -1,0 +1,6 @@
+/* Public catalogue directory: visible links for readers and crawlers. */
+.catalogue-directory details { border-bottom: 1px solid rgba(49,94,83,.18); padding: 16px 0; }
+.catalogue-directory summary { cursor: pointer; font-family: var(--font-display); font-size: clamp(1.15rem,2vw,1.5rem); }
+.catalogue-directory summary a { color: var(--botanical-deep); text-decoration: none; }
+.catalogue-directory ul { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(220px,100%),1fr)); gap: 12px 24px; padding: 20px 0 4px 20px; }
+.catalogue-directory a:hover, .catalogue-directory a:focus-visible { text-decoration: underline; }
