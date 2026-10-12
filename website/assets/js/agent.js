@@ -58,10 +58,10 @@ function createAgentMarkup() {
       </div>
       <div class="agent-status-bar">
         <span>Essenshea Care</span>
-        <span>Online</span>
+        <span id="agent-status" role="status" aria-live="polite">Ready to help</span>
       </div>
       <div class="agent-body">
-        <div class="agent-chat-window" id="agent-chat-window"></div>
+        <div class="agent-chat-window" id="agent-chat-window" role="log" aria-live="polite" aria-relevant="additions"></div>
         <div class="agent-quick-actions" aria-label="Assistant shortcuts">
           <button type="button" data-agent-prompt="Help me build a simple skincare routine">Build a routine</button>
           <button type="button" data-agent-prompt="Help me choose products for my hair goals">Hair guide</button>
@@ -69,7 +69,7 @@ function createAgentMarkup() {
           <button type="button" data-agent-prompt="Help me make a custom order">Custom order</button>
         </div>
         <form id="agent-send-form" class="agent-send-form">
-          <input id="agent-input" type="text" placeholder="Type your question..." aria-label="Agent message input" />
+          <input id="agent-input" type="text" placeholder="Type your question..." aria-label="Agent message input" maxlength="2000" />
           <button type="submit" class="btn btn--primary">Send</button>
         </form>
       </div>
@@ -150,9 +150,18 @@ function renderAgentMessages() {
       const actions = document.createElement('div');
       actions.className = 'agent-message-actions';
       message.actions.forEach((action) => {
-        const link = document.createElement('a');
+        const link = document.createElement(action.prompt ? 'button' : 'a');
         link.className = 'btn btn--sm btn--secondary';
-        link.href = action.href;
+        if (action.prompt) {
+          link.type = 'button';
+          link.dataset.agentPrompt = action.prompt;
+        } else {
+          // Only allow site navigation or the published WhatsApp handoff.
+          const target = new URL(action.href, window.location.origin);
+          if (target.origin !== window.location.origin && target.origin !== 'https://wa.me') return;
+          if (!['http:', 'https:'].includes(target.protocol)) return;
+          link.href = target.href;
+        }
         link.textContent = action.label;
         actions.appendChild(link);
       });
@@ -239,7 +248,7 @@ function getAgentActions(prompt) {
 
 async function callBrainProvider(prompt) {
   if (!AGENT_API_ENDPOINT) {
-    return { error: 'Missing agent API URL. Add AGENT_API_URL to the configuration.' };
+    return { error: 'Chat is unavailable right now. You can still browse products or ask Essenshea on WhatsApp.' };
   }
 
   try {
@@ -249,6 +258,7 @@ async function callBrainProvider(prompt) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ message: prompt, source: 'website', sessionId: getAgentSessionId() }),
+      signal: AbortSignal.timeout(45000),
     });
 
     if (!response.ok) {
@@ -261,9 +271,10 @@ async function callBrainProvider(prompt) {
     }
 
     const payload = await response.json();
-    return { result: payload.response || payload.answer || 'Agent response received.' };
+    if (!payload.response && !payload.answer) throw new Error('Empty response');
+    return { result: payload.response || payload.answer, actions: payload.actions, degraded: payload.degraded === true };
   } catch (error) {
-    return { error: error.message || 'Unable to reach the provider.' };
+    return { error: 'I couldn’t finish that request. Please try again, or ask Essenshea on WhatsApp for help.' };
   }
 }
 
@@ -284,11 +295,15 @@ async function handleAgentSend(event) {
     sendButton.textContent = 'Sending...';
   }
 
+  const status = document.getElementById('agent-status');
+  if (status) status.textContent = 'Helping you…';
   const result = await callBrainProvider(value);
   if (result.error) {
-    addAgentMessage('assistant', result.error);
+    addAgentMessage('assistant', result.error, [{ label: 'Try again', prompt: value }, { label: 'WhatsApp Essenshea', href: 'https://wa.me/254727349749' }]);
+    if (status) status.textContent = 'Please retry';
   } else {
-    addAgentMessage('assistant', result.result, getAgentActions(value));
+    addAgentMessage('assistant', result.result, Array.isArray(result.actions) ? result.actions : getAgentActions(value));
+    if (status) status.textContent = result.degraded ? 'Catalogue help' : 'Ready to help';
   }
   input.disabled = false;
   input.focus();
@@ -342,16 +357,19 @@ async function initializeAgent() {
     document.getElementById('agent-send-form')?.requestSubmit();
   });
 
+  addAgentMessage('assistant', 'Welcome to Essenshea! I can help you browse products, explore custom care, or find ordering details. What are you looking for today?');
   try {
     const response = await fetch('/api/catalog');
+    if (!response.ok) throw new Error('Catalogue unavailable');
     const catalogData = await response.json();
     AGENT_DATA.catalog = catalogData;
     const siteProducts = getSiteProducts(catalogData);
     AGENT_DATA.products = siteProducts.products;
     AGENT_DATA.categories = siteProducts.categories;
-    addAgentMessage('assistant', 'Hi. Tell me what you are shopping for, your skin or hair goal, preferred scent, or budget. I can help narrow it down and explain the options.');
+
   } catch (error) {
-    addAgentMessage('assistant', `Failed to load catalog data: ${error.message}`);
+    // The chat API can still help even if product shortcuts could not load.
+    console.warn('Assistant product shortcuts are unavailable.');
   }
 
   window.EssensheaAgent = {
