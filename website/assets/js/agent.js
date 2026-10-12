@@ -136,19 +136,28 @@ function setAgentPanelVisible(visible) {
 function renderAgentMessages() {
   const chatWindow = document.getElementById('agent-chat-window');
   if (!chatWindow) return;
+  chatWindow.style.overflowX = 'hidden';
   chatWindow.replaceChildren();
   AGENT_DATA.messages.forEach((message) => {
     const item = document.createElement('div');
     item.className = `agent-chat-message agent-chat-message--${message.role}`;
+    item.style.maxWidth = '100%';
+    item.style.boxSizing = 'border-box';
     const role = document.createElement('span');
     role.className = 'agent-chat-role';
     role.textContent = message.role === 'assistant' ? 'Assistant' : 'You';
     const text = document.createElement('p');
     text.textContent = message.text;
+    text.style.whiteSpace = 'pre-wrap';
+    text.style.overflowWrap = 'anywhere';
+    if (message.role === 'user') text.style.color = '#fff';
     item.append(role, text);
     if (message.actions && message.actions.length) {
       const actions = document.createElement('div');
       actions.className = 'agent-message-actions';
+      actions.style.display = 'flex';
+      actions.style.flexWrap = 'wrap';
+      actions.style.gap = '8px';
       message.actions.forEach((action) => {
         const link = document.createElement(action.prompt ? 'button' : 'a');
         link.className = 'btn btn--sm btn--secondary';
@@ -162,6 +171,9 @@ function renderAgentMessages() {
           if (!['http:', 'https:'].includes(target.protocol)) return;
           link.href = target.href;
         }
+        link.style.maxWidth = '100%';
+        link.style.whiteSpace = 'normal';
+        link.style.overflowWrap = 'anywhere';
         link.textContent = action.label;
         actions.appendChild(link);
       });

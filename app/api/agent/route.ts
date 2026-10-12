@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
       try {
         const result = await callChatModel(attempt, [
           { role: 'system', content: systemPrompt },
-          ...memoryMessages.map(item => ({ role: item.role, content: item.content })),
+          ...memoryMessages.filter(item => item.role !== 'assistant' || !hasUnsupportedTreatmentClaim(item.content)).map(item => ({ role: item.role, content: item.content })),
           { role: 'user', content: message },
         ]);
         if (hasUnsupportedTreatmentClaim(result.content)) {
