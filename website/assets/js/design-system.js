@@ -64,6 +64,36 @@
         fragment.appendChild(link);
       });
       catalogueNav.replaceChildren(fragment);
+      const grid = document.querySelector('#collections .collection-grid');
+      if (grid) {
+        const template = grid.querySelector('.collection-tile');
+        const publicSlugs = new Set((data.categories || []).map(category => category.slug));
+        Array.from(grid.querySelectorAll('.collection-tile')).forEach(tile => {
+          const href = tile.getAttribute('href') || '';
+          const slug = href === '/fragrances' ? 'fragrances' : href.split('/category/')[1];
+          if (slug && !publicSlugs.has(slug)) tile.remove();
+        });
+        (data.categories || []).forEach(category => {
+          let tile = Array.from(grid.querySelectorAll('.collection-tile')).find(item => {
+            const href = item.getAttribute('href');
+            return href === '/category/' + category.slug || (category.slug === 'fragrances' && href === '/fragrances') || href === '/shop?category=' + encodeURIComponent(category.slug) + '#shop-products';
+          });
+          if (!tile && template) {
+            tile = template.cloneNode(true);
+            tile.classList.remove('care-tile-reveal');
+            tile.classList.add('care-tile-visible');
+            grid.appendChild(tile);
+          }
+          if (!tile) return;
+          tile.href = '/shop?category=' + encodeURIComponent(category.slug) + '#shop-products';
+          const image = tile.querySelector('img');
+          if (image) { image.src = category.image || '/assets/images/essenshea-logo.jpg'; image.alt = category.title; }
+          const title = tile.querySelector('h3');
+          if (title) title.textContent = category.title;
+          const count = tile.querySelector('.collection-tile__overlay span');
+          if (count) count.textContent = category.products.length + ' product' + (category.products.length === 1 ? '' : 's');
+        });
+      }
     }).catch(error => console.warn(error.message));
   }
 
