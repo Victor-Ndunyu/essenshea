@@ -6,7 +6,13 @@ export function parseOwnerActionApproval(text: string): { action: 'confirm' | 'c
 
 export function parseNaturalOwnerMutation(text: string): string | null {
   const clean = text.trim().replace(/\s+/g, ' ');
-  let match = clean.match(/^(?:set|change|update)\s+(?:the\s+)?stock\s+(?:of|for)\s+(.+?)\s+(?:to|at)\s+(\d+)$/i)
+  let match = clean.match(/^(?:set|change|update)\s+(?:the\s+)?price\s+(?:of|for)\s+(.+?)\s+to\s+((?:(?:ksh|kes)\s*)?[\d,.]+|price on request)$/i);
+  if (match) return '/edit ' + match[1].trim() + ' | price=' + match[2];
+  match = clean.match(/^move\s+(.+?)\s+to\s+(?:the\s+)?(.+?)(?:\s+category)?$/i);
+  if (match) return '/edit ' + match[1].trim() + ' | category=' + match[2].trim();
+  match = clean.match(/^(?:rename|change the name of)\s+(.+?)\s+to\s+(.+)$/i);
+  if (match) return '/edit ' + match[1].trim() + ' | name=' + match[2].trim();
+  match = clean.match(/^(?:set|change|update)\s+(?:the\s+)?stock\s+(?:of|for)\s+(.+?)\s+(?:to|at)\s+(\d+)$/i)
     || clean.match(/^(?:set|change|update)\s+(.+?)['’]?s?\s+stock\s+(?:to|at)\s+(\d+)$/i);
   if (match) return `/stock ${match[1].trim()} | ${match[2]}`;
 

@@ -108,7 +108,7 @@ export function formatOwnerBusinessContext(data: OwnerBusinessData): string {
     category.products.map((product) => {
       const stock = typeof product.stock === 'number' ? String(product.stock) : 'not set';
       const description = String(product.description || 'description missing').replace(/\s+/g, ' ').slice(0, 320);
-      return `- ${product.name} [${product.slug}] | ${category.title} | ${product.price || 'Price on request'} | stock ${stock} | ${productStatus(product)} | ${description}`;
+      return `- ${product.name} [${product.slug}] | ${category.title} | ${product.price || 'Price on request'} | stock ${stock} | ${productStatus(product)} | size ${product.size || 'not set'} | labels ${JSON.stringify(product.bestFor ?? null)} | concerns ${JSON.stringify(product.concerns ?? null)} | ingredients ${product.ingredients || 'not set'} | size prices ${JSON.stringify(product.variants ?? null)} | notes ${JSON.stringify(product.benefits ?? null)} | ${description}`;
     }),
   );
   const orders = data.recentOrders.map((order) => {

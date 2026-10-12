@@ -43,6 +43,30 @@
   window.addEventListener('resize', updateScrollState, { passive: true });
   updateScrollState();
 
+  const catalogueNav = document.querySelector('.craft-catalogue__nav');
+  if (catalogueNav) {
+    fetch('/api/catalog', { cache: 'no-store' }).then(response => {
+      if (!response.ok) throw new Error('Catalogue navigation unavailable');
+      return response.json();
+    }).then(data => {
+      const fragment = document.createDocumentFragment();
+      (data.categories || []).forEach((category, index) => {
+        const link = document.createElement('a');
+        link.href = '/shop?category=' + encodeURIComponent(category.slug) + '#shop-products';
+        const number = document.createElement('span');
+        number.textContent = String(index + 1).padStart(2, '0');
+        const title = document.createElement('strong');
+        title.textContent = category.title;
+        const arrow = document.createElement('i');
+        arrow.setAttribute('aria-hidden', 'true');
+        arrow.textContent = '→';
+        link.append(number, title, arrow);
+        fragment.appendChild(link);
+      });
+      catalogueNav.replaceChildren(fragment);
+    }).catch(error => console.warn(error.message));
+  }
+
   const careTiles = document.querySelectorAll('#collections .collection-tile');
   if (!reduceMotion && 'IntersectionObserver' in window && careTiles.length) {
     const careObserver = new IntersectionObserver((entries) => {

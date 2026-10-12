@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="icon" href="/assets/images/star-mark.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/assets/css/style-new.css" />
-  <link rel="stylesheet" href="/assets/css/luxury-refinement.css?v=25" />
+  <link rel="stylesheet" href="/assets/css/luxury-refinement.css?v=26" />
 </head>
 <body>
   <div class="page-shell">
@@ -104,7 +104,7 @@
     </footer>
   </div>
 
-  <script src="/assets/js/design-system.js?v=8"></script>
+  <script src="/assets/js/design-system.js?v=9"></script>
   <script src="/assets/js/agent-config.js"></script>
   <script src="/assets/js/agent.js?v=6"></script>
   <script>
@@ -163,6 +163,7 @@ function renderCategoryPage(category) {
         + '<div class="category-product-card__body">'
         + '<h3>' + categoryEscape(product.name) + '</h3>'
         + '<p>' + categoryEscape(textExcerpt(product.description, 120)) + '</p>'
+        + (Array.isArray(product.bestFor) && product.bestFor.length ? '<div class="product-card__tags">' + product.bestFor.map(function(label) { return '<span>' + categoryEscape(label) + '</span>'; }).join('') + '</div>' : '')
         + '<div class="category-product-card__meta">'
         + '<span>' + categoryEscape(product.price || 'Price on request') + '</span>'
         + '<span class="avail-flag">' + categoryAvailability(product) + '</span>'
@@ -215,7 +216,7 @@ function openCategoryProductModal(productSlug) {
   categoryModalTitle.textContent = product.name;
   categoryModalImage.src = product.image;
   categoryModalImage.alt = product.name;
-  categoryModalDescription.textContent = product.description;
+  categoryModalDescription.textContent = [product.description, product.size ? 'Size: ' + product.size : '', Array.isArray(product.bestFor) && product.bestFor.length ? 'Best for: ' + product.bestFor.join(', ') : '', Array.isArray(product.benefits) && product.benefits.length ? 'Product notes: ' + product.benefits.join('; ') : '', product.ingredients ? 'Ingredients: ' + product.ingredients : '', Array.isArray(product.variants) && product.variants.length ? 'Size prices: ' + product.variants.map(function(item) { return item.size + ': ' + item.price; }).join('; ') : ''].filter(Boolean).join('\n\n');
   var available = !product.availableByOrder && typeof product.priceValue === 'number' && !(typeof product.stock === 'number' && product.stock <= 0);
   var stockText = typeof product.stock === 'number' ? 'In stock: ' + product.stock : 'Stock pending';
   categoryModalDetails.textContent = (product.price || 'Price on request') + ' \u00B7 ' + categoryAvailability(product) + ' \u00B7 ' + stockText + ' \u00B7 ' + (available ? 'Seller will ship or confirm pickup options.' : 'Seller will review and confirm pricing and availability.');

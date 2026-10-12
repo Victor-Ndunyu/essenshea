@@ -201,6 +201,7 @@ function normalizeSearchValue(value) {
 }
 
 function getProductConcernIds(product) {
+  if (Array.isArray(product.explicitConcerns)) return product.explicitConcerns;
   const haystack = normalizeSearchValue([product.title, product.category, product.description].join(' '));
   return concernOptions
     .filter(function(option) {
@@ -366,11 +367,15 @@ function applyShopData(data) {
           stock: product.stock ?? null,
           availableByOrder: Boolean(product.availableByOrder),
           variants: extractVariants(product),
+          explicitConcerns: product.concerns,
+          explicitBenefits: product.benefits,
+          explicitIngredients: product.ingredients,
+          size: product.size,
           stockText: typeof product.stock === 'number' ? 'In stock: ' + product.stock : '',
           note: '',
         };
         mappedProduct.concerns = getProductConcernIds(mappedProduct);
-        mappedProduct.bestFor = getProductConcernLabels(mappedProduct);
+        mappedProduct.bestFor = Array.isArray(product.bestFor) ? product.bestFor : getProductConcernLabels(mappedProduct);
         shopProducts.push(mappedProduct);
       });
     });
@@ -565,6 +570,7 @@ function renderProductCard(product) {
     + '<div class="product-card__content">'
     + '<h3>' + escapeHtml(product.title) + '</h3>'
     + '<p>' + escapeHtml(product.descriptionExcerpt) + '</p>'
+    + (product.size ? '<div><span>Size</span><strong>' + escapeHtml(product.size) + '</strong></div>' : '')
     + (product.variants.length ? '<span class="product-card__variants">Sizes: ' + product.variants.map(escapeHtml).join(' · ') + '</span>' : '')
     + (tags ? '<div class="product-card__tags" aria-label="Best for">' + tags + '</div>' : '')
     + '</div>'
@@ -674,17 +680,19 @@ function openProductModal(productId) {
   modalImage.src = product.image;
   modalImage.alt = product.title;
   const descriptionParts = splitProductDescription(product.description);
+  if (Array.isArray(product.explicitBenefits)) descriptionParts.benefits = product.explicitBenefits;
+  if (typeof product.explicitIngredients === 'string') descriptionParts.ingredients = product.explicitIngredients;
   const related = getRelatedProducts(product, 3);
   modalDescription.textContent = product.descriptionExcerpt;
-  modalDetails.innerHTML = '<div><span>Price</span><strong>' + product.priceText + '</strong></div>'
+  modalDetails.innerHTML = '<div><span>Price</span><strong>' + escapeHtml(product.priceText) + '</strong></div>'
     + '<div><span>Availability</span><strong>' + productStatusLabel(product) + '</strong></div>'
-    + (product.bestFor && product.bestFor.length ? '<div><span>Best for</span><strong>' + product.bestFor.join(', ') + '</strong></div>' : '')
-    + (product.variants.length ? '<div><span>Sizes</span><strong>' + product.variants.join(', ') + '</strong></div>' : '');
+    + (product.bestFor && product.bestFor.length ? '<div><span>Best for</span><strong>' + product.bestFor.map(escapeHtml).join(', ') + '</strong></div>' : '')
+    + (product.variants.length ? '<div><span>Sizes</span><strong>' + product.variants.map(escapeHtml).join(', ') + '</strong></div>' : '');
   modalBenefits.innerHTML = descriptionParts.benefits.length
-    ? '<h3>Benefits and product notes</h3><ul>' + descriptionParts.benefits.map(function(benefit) { return '<li>' + benefit + '</li>'; }).join('') + '</ul>'
+    ? '<h3>Benefits and product notes</h3><ul>' + descriptionParts.benefits.map(function(benefit) { return '<li>' + escapeHtml(benefit) + '</li>'; }).join('') + '</ul>'
     : '';
   modalIngredients.innerHTML = '<h3>Ingredients and fulfilment</h3>'
-    + (descriptionParts.ingredients ? '<p><strong>Ingredients:</strong> ' + descriptionParts.ingredients + '</p>' : '<p>Full ingredient details are not yet listed. Ask Essenshea before ordering if you have allergies or sensitivities.</p>')
+    + (descriptionParts.ingredients ? '<p><strong>Ingredients:</strong> ' + escapeHtml(descriptionParts.ingredients) + '</p>' : '<p>Full ingredient details are not yet listed. Ask Essenshea before ordering if you have allergies or sensitivities.</p>')
     + '<p>' + productFulfilmentText(product) + '</p>';
   modalRelated.innerHTML = related.length
     ? '<h3>You may also like</h3><div class="product-related-list">' + related.map(function(item) {
