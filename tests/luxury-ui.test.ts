@@ -22,7 +22,7 @@ test('every storefront surface loads the final calm-luxury design layer', async 
     assert.match(html, /design-system\.js\?v=10/, `${page} is missing the atelier interaction layer`);
     assert.match(html, /name="color-scheme" content="light only"/, `${page} can be auto-darkened`);
     if (page !== 'eco-rewards-admin.html') {
-      assert.match(html, /agent\.js\?v=7/, `${page} is missing the current assistant bundle`);
+      assert.match(html, /agent\.js\?v=8/, `${page} is missing the current assistant bundle`);
     }
   }
 });
