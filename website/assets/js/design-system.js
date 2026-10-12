@@ -78,7 +78,7 @@
         entry.target.classList.add('atelier-visible');
         observer.unobserve(entry.target);
       });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0 });
 
     let revealOrder = 0;
     const observeRevealTarget = (target) => {

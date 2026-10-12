@@ -3581,3 +3581,34 @@ body:has(.site-footer) {
   .shop-page-loader__copy span,
   .shop-page-loader__deck i { animation: none; }
 }
+
+/* Keep the signature beneath the full brand, including on small screens. */
+.topbar .brand {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+  column-gap: 12px;
+  row-gap: 3px;
+  align-items: center;
+}
+.topbar .brand-logo { grid-column: 1; grid-row: 1; }
+.topbar .brand-text { display: contents; }
+.topbar .brand-text strong { grid-column: 2; grid-row: 1; }
+.topbar .brand-text small {
+  display: block;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  color: var(--botanical-deep, #29342f);
+  font-family: var(--font-body);
+  font-size: .65rem;
+  font-weight: 400;
+  letter-spacing: .045em;
+  text-transform: none;
+  line-height: 1.35;
+  white-space: nowrap;
+  opacity: .78;
+}
+@media (max-width: 600px) {
+  .topbar .brand { column-gap: 9px; row-gap: 2px; }
+  .topbar .brand-text small { font-size: .62rem; }
+}
