@@ -1,6 +1,9 @@
 ﻿import { promises as fs } from 'fs';
 import path from 'path';
 import { NextRequest, NextResponse } from 'next/server';
+import { getMergedCatalog } from '../../lib/catalog';
+
+export const dynamic = 'force-dynamic';
 
 const WEBSITE_DIR = path.join(process.cwd(), 'website');
 const CATALOGUE_DIR = path.join(process.cwd(), 'Essenshea_Catalogue');
@@ -60,27 +63,25 @@ export async function GET(req: NextRequest) {
         ? decodeURIComponent(cleanPath.replace('category.html/', '').split('/')[0])
         : url.searchParams.get('slug') || '';
     const catPath = path.join(WEBSITE_DIR, 'category.html');
-    const dataPath = path.join(WEBSITE_DIR, 'data', 'catalog.json');
     try {
-      const [tmpl, raw] = await Promise.all([
+      const [tmpl, catalog] = await Promise.all([
         fs.readFile(catPath, 'utf-8'),
-        fs.readFile(dataPath, 'utf-8'),
+        getMergedCatalog(),
       ]);
-      const catalog = JSON.parse(raw);
       let cat = null;
       for (let i = 0; i < (catalog.categories || []).length; i++) {
         if (catalog.categories[i].slug === slug) { cat = catalog.categories[i]; break; }
       }
       if (!cat) {
         return new NextResponse(tmpl, {
-          headers: { 'Content-Type': 'text/html; charset=utf-8' },
+          headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
         });
       }
       let productsHtml = '';
       for (let i = 0; i < (cat.products || []).length; i++) {
         const p = cat.products[i];
         const priceText = esc(p.price || 'Price on request');
-        const avail = typeof p.priceValue === 'number';
+        const avail = !p.availableByOrder && typeof p.priceValue === 'number' && !(typeof p.stock === 'number' && p.stock <= 0);
         const stockTxt = typeof p.stock === 'number' ? '<span class="product-stock">In stock: ' + p.stock + '</span>' : '';
         const desc = (p.description || '').replace(/\s+/g, ' ').trim();
         const shortDesc = desc.length > 100 ? desc.slice(0, 100).trim() + '…' : desc;
@@ -91,7 +92,7 @@ export async function GET(req: NextRequest) {
           + '<p>' + esc(shortDesc) + '</p>'
           + '<div class="category-product-card__meta">'
           + '<span>' + priceText + '</span>'
-          + '<span class="avail-flag">' + (avail ? 'Available' : 'Made to order') + '</span>'
+          + '<span class="avail-flag">' + (p.availableByOrder ? 'Made to order' : typeof p.stock === 'number' && p.stock <= 0 ? 'Out of stock' : avail ? 'Available' : 'Price on request') + '</span>'
           + stockTxt
           + '</div>'
           + '<button type="button" class="btn btn--sm btn--secondary category-product-open" data-product="' + esc(p.slug) + '">View details</button>'
@@ -123,7 +124,7 @@ export async function GET(req: NextRequest) {
       const renderedWithTag = rendered.replace('id="category-tag" class="label label--gold"></span>', 'id="category-tag" class="label label--gold">' + esc(cat.tag || 'Curated collection') + '</span>');
 
       return new NextResponse(renderedWithTag, {
-        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+        headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
       });
     } catch (e) {
       return serveFile('category.html', WEBSITE_DIR);
