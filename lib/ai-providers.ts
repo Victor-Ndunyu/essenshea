@@ -78,7 +78,7 @@ export function getModelAttempts(env: Environment = process.env): ModelAttempt[]
             model:
               nonEmpty(env.NVIDIA_AGENT_MODEL) ||
               nonEmpty(env.AGENT_MODEL) ||
-              'meta/llama-3.3-70b-instruct',
+              'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning',
           },
           {
             provider: 'nvidia',
@@ -90,7 +90,7 @@ export function getModelAttempts(env: Environment = process.env): ModelAttempt[]
             model:
               nonEmpty(env.NVIDIA_AGENT_FALLBACK_MODEL) ||
               nonEmpty(env.AGENT_FALLBACK_MODEL) ||
-              'meta/llama-3.1-8b-instruct',
+              'nvidia/nemotron-3-super-120b-a12b',
           },
         ]
       : [],
@@ -158,6 +158,9 @@ export async function callChatModel(
         messages,
         max_tokens: 450,
         temperature: 0.3,
+        ...(attempt.provider === 'nvidia' && attempt.model.startsWith('nvidia/nemotron-3-')
+          ? { chat_template_kwargs: { enable_thinking: false } }
+          : {}),
       }),
       signal: AbortSignal.timeout(10_000),
     });
