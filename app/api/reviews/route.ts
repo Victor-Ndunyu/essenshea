@@ -1,3 +1,4 @@
+import { cleanReviewText } from '../../../lib/review-text';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../lib/supabase-admin';
 import { checkRateLimit, getClientAddress } from '../../../lib/rate-limit';
@@ -10,17 +11,7 @@ function cleanText(value: unknown, max: number): string {
   return String(value || '').trim().slice(0, max);
 }
 
-export function cleanReviewText(value: unknown): string {
-  return cleanText(value, 2000)
-    .normalize('NFKC')
-    .replace(/[\u0000-\u001F\u007F\uFFFD\u25A1]/g, ' ')
-    .replace(/!{3,}/g, '!!')
-    .replace(/\?{3,}/g, '??')
-    .replace(/\s+([,.!?;:])/g, '$1')
-    .replace(/([,.!?;:])(?!\s|$)/g, '$1 ')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
-}
+export { cleanReviewText } from '../../../lib/review-text';
 
 function authorized(req: NextRequest): boolean {
   const expected = process.env.ECO_REWARDS_ADMIN_KEY || '';

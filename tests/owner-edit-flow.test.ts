@@ -3,17 +3,18 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { stripTypeScriptTypes } from 'node:module';
 import { mergeCatalogData } from '../lib/catalog-merge.ts';
-import { parseNaturalOwnerMutation, parseOwnerActionApproval } from '../lib/owner-command.ts';
+import { parseNaturalOwnerMutation, parseOwnerActionApproval, parseNaturalOwnerApproval, looksLikeOwnerMutation, ownerErrorReply } from '../lib/owner-command.ts';
+import { cleanReviewText } from '../lib/review-text.ts';
 import { parseProductEdit, productRecord, productEditPreview, ownerMoney, ownerStock } from '../lib/product-edit.ts';
 
 test('owner edit flow previews, confirms once, rejects outsiders and stale edits, and cancels safely', async () => {
  const env = process.env.OWNER_TELEGRAM_CHAT_IDS;
  process.env.OWNER_TELEGRAM_CHAT_IDS = '8772114050';
- const base = { categories: [{ slug:'carrier-oils', title:'Carrier Oils', products:[{slug:'amla-oil',name:'Amla Oil',description:'Original',price:'KSh 500',priceValue:500,image:'/oil.jpg',stock:8}] }] };
- const events: any[] = []; let saved: any = null;
+ const base = { categories: [{ slug:'carrier-oils', title:'Carrier Oils', products:[{slug:'amla-oil',name:'Amla Oil',description:'Original',price:'KSh 500',priceValue:500,image:'/oil.jpg',stock:8}] }, {slug:'haircare',title:'Haircare',products:[{slug:'hair-balm',name:'Hair Balm',description:'Hair care',price:'KSh 200',priceValue:200,image:'/balm.jpg',stock:3}]}] };
+ const events: any[] = []; let saved: any = null; let rpcMode = ''; let rpcCalls = 0; let failCompletionAudit = false; let failReview = false; const reviews: any[] = [];
  const snapshot = () => mergeCatalogData(base, saved ? [saved] : [], true);
  const resolve = async (query: string) => {
-  const category = snapshot().catalog.categories[0];
+  const category = snapshot().catalog.categories.find(c=>c.products.length)!;
   if(query === 'oil') return {status:'ambiguous',matches:[{category,product:category.products[0]},{category,product:{...category.products[0],slug:'almond-oil',name:'Almond Oil'}}]};
   const product = category.products.find(item => item.slug === query || item.name.toLowerCase() === query.toLowerCase());
   return product ? {status:'matched',match:{category,product}} : {status:'not_found',matches:[]};
@@ -22,7 +23,12 @@ test('owner edit flow previews, confirms once, rejects outsiders and stale edits
   from(table: string) {
    const filters: Array<[string, any]> = []; let operation = 'select'; let value: any;
    const run = () => {
-    const matches = (table === 'catalog_overrides' ? (saved ? [saved] : []) : events).filter(row => filters.every(([key,val])=>row[key]===val));
+    if (failCompletionAudit && operation === 'update' && value?.event_type === 'owner_action_applied') throw new TypeError('fetch failed');
+    const matches = (table === 'site_reviews' ? reviews : table === 'catalog_overrides' ? (saved ? [saved] : []) : events).filter(row => filters.every(([key,val])=>row[key]===val));
+    if (table === 'site_reviews' && operation === 'insert') {
+      if (failReview) return {data:null,error:{message:'fetch failed'}};
+      const row = {id:'review-id-test',...value}; reviews.push(row); return {data:[row],error:null};
+    }
     if(operation === 'insert') for(const row of value) events.push({id:events.length+1,...row});
     if(operation === 'update') for(const row of matches) Object.assign(row,value);
     return {data:matches,error:null};
@@ -32,19 +38,23 @@ test('owner edit flow previews, confirms once, rejects outsiders and stale edits
     order(){return builder;},limit(){return builder;},
     insert(rows: any){operation='insert';value=rows;return builder;},
     update(row: any){operation='update';value=row;return builder;},
+    single: async()=>{const r=run();return {...r,data:r.data?.[0]||null};},
     maybeSingle: async()=>{const r=run();return {...r,data:r.data[0]||null};},
     then(resolve: any,reject: any){return Promise.resolve(run()).then(resolve,reject);}
    };return builder;
   },
   async rpc(_name: string, params: any) {
+   rpcCalls++;
+   if (rpcMode === 'before-write') return {error:{message:'TypeError: fetch failed'}};
    if(JSON.stringify(saved)!==JSON.stringify(params.p_expected)) return {error:{message:'Stale saved row'}};
    const old=saved;
    saved={product_slug:params.p_slug,is_new:false,sort_order:null,...params.p_row};
    events.push({id:events.length+1,event_type:'catalog_update',payload:{before:params.p_snapshot,beforeOverride:old,afterOverride:saved}});
+   if (rpcMode === 'lost-response') throw new TypeError('fetch failed');
    return {data:saved,error:null};
   }
  };
- const mocks: any = {getSupabaseAdmin:()=>admin,resolveCatalogProduct:resolve,slugifyCatalogValue:(s: string)=>s.toLowerCase().replace(/\s/g,'-'),getMergedCatalog:async()=>snapshot().catalog,getCatalogSnapshot:async()=>snapshot(),parseNaturalOwnerMutation,parseOwnerActionApproval,parseProductEdit,productRecord,productEditPreview,ownerMoney,ownerStock,parseTelegramOwnerIds:(s: string)=>s ? s.split(',').map(Number):[],saveOwnerMemory:async()=>{},loadRecentOwnerConversation:async()=>[],retrieveOwnerMemory:async()=>'',formatConversationMemory:()=>'',callChatModel:async()=>'',getRuntimeModelAttempts:async()=>[],isModelCoolingDown:()=>false,MODEL_CHAIN_BUDGET_MS:28000,percentageChange:()=>'',formatCatalogHealth:()=>'',formatLowStock:()=>'',formatOwnerBusinessContext:()=>'',formatRecentOrders:()=>'',loadOwnerBusinessData:async()=>({})};
+ const mocks: any = {cleanReviewText,getSupabaseAdmin:()=>admin,resolveCatalogProduct:resolve,slugifyCatalogValue:(s: string)=>s.toLowerCase().replace(/\s/g,'-'),getMergedCatalog:async()=>snapshot().catalog,getCatalogSnapshot:async()=>snapshot(),parseNaturalOwnerMutation,parseOwnerActionApproval,parseNaturalOwnerApproval,looksLikeOwnerMutation,ownerErrorReply,parseProductEdit,productRecord,productEditPreview,ownerMoney,ownerStock,parseTelegramOwnerIds:(s: string)=>s ? s.split(',').map(Number):[],saveOwnerMemory:async()=>{},loadRecentOwnerConversation:async()=>[],retrieveOwnerMemory:async()=>'',formatConversationMemory:()=>'',callChatModel:async()=>'',getRuntimeModelAttempts:async()=>[],isModelCoolingDown:()=>false,MODEL_CHAIN_BUDGET_MS:28000,percentageChange:()=>'',formatCatalogHealth:()=>'',formatLowStock:()=>'',formatOwnerBusinessContext:()=>'',formatRecentOrders:()=>'',loadOwnerBusinessData:async()=>({})};
  const key='__essensheaOwnerEditTest';
  (globalThis as any)[key]=mocks;
  try {
@@ -84,6 +94,55 @@ test('owner edit flow previews, confirms once, rejects outsiders and stale edits
   await mod.handleOwnerTelegramCommand({chatId:owner,text:'/cancel '+cancelToken});
   await mod.handleOwnerTelegramCommand({chatId:owner,text:'/confirm '+cancelToken});
   assert.equal(saved.price_value,850);
+
+  // Reproduce the owner's unsupported request and repeated Proceed messages.
+  saved = null; events.length = 0; rpcCalls = 0;
+  const noPreview = await mod.handleOwnerTelegramCommand({chatId:owner,text:'Proceed'});
+  assert.match(noPreview.response,/no active approval preview/);
+  const unsupported = await mod.handleOwnerTelegramCommand({chatId:owner,text:'I want to reorganise all the products'});
+  assert.equal(rpcCalls,0);
+  const natural = await mod.handleOwnerTelegramCommand({chatId:owner,text:'I want to change the Amla Oil from carrier oils to haircare'});
+  assert.match(natural.response,/Approve within/);
+  const go = await mod.handleOwnerTelegramCommand({chatId:owner,text:'I would like to proceed'});
+  assert.match(go.response,/updated and verified/); assert.equal(saved.category_slug,'haircare'); assert.equal(rpcCalls,1);
+  const repeat = await mod.handleOwnerTelegramCommand({chatId:owner,text:'Proceed'});
+  assert.match(repeat.response,/no active approval preview/); assert.equal(rpcCalls,1);
+  const unknownCategory = await mod.handleOwnerTelegramCommand({chatId:owner,text:'Move Amla Oil to Body Care'});
+  assert.match(unknownCategory.response,/Choose an existing category/); assert.equal(rpcCalls,1);
+  const unknownEdit = await mod.handleOwnerTelegramCommand({chatId:owner,text:'Please change the website colours'});
+  assert.match(unknownEdit.response,/not prepared an edit/); assert.equal(rpcCalls,1);
+  const p1 = await mod.handleOwnerTelegramCommand({chatId:owner,text:'Change the price of Amla Oil to 900'});
+  const p2 = await mod.handleOwnerTelegramCommand({chatId:owner,text:'Change the stock of Amla Oil to 12'});
+  const unclear = await mod.handleOwnerTelegramCommand({chatId:owner,text:'Go ahead'});
+  assert.match(unclear.response,/more than one active preview/); assert.equal(rpcCalls,1);
+  for (const p of [p1,p2]) await mod.handleOwnerTelegramCommand({chatId:owner,text:'/cancel '+p.response.match(/\/confirm ([A-F0-9]{8})/)[1]});
+  // A committed write with a lost response must be reconciled, never replayed.
+  const lost = await mod.handleOwnerTelegramCommand({chatId:owner,text:'Change the price of Amla Oil to 920'});
+  rpcMode = 'lost-response'; failCompletionAudit = true;
+  const recovered = await mod.handleOwnerTelegramCommand({chatId:owner,text:'Proceed'});
+  assert.match(recovered.response,/updated and verified/); assert.equal(saved.price_value,920); assert.equal(rpcCalls,2);
+  await mod.handleOwnerTelegramCommand({chatId:owner,text:'/confirm '+lost.response.match(/\/confirm ([A-F0-9]{8})/)[1]});
+  assert.equal(rpcCalls,2);
+  rpcMode = 'before-write'; failCompletionAudit = false;
+  const failedPreview = await mod.handleOwnerTelegramCommand({chatId:owner,text:'Change the price of Amla Oil to 930'});
+  const failed = await mod.handleOwnerTelegramCommand({chatId:owner,text:'/confirm '+failedPreview.response.match(/\/confirm ([A-F0-9]{8})/)[1]});
+  assert.equal(failed.failed,true); assert.doesNotMatch(failed.response,/fetch failed/); assert.match(failed.response,/could not verify/); assert.equal(saved.price_value,920);
+
+  rpcMode = ''; events.length = 0;
+  const reviewPreview = await mod.handleOwnerTelegramCommand({chatId:owner,text:'/addreview Reviewer | Customer | A lovely scrub.'});
+  failReview = true;
+  const reviewFail = await mod.handleOwnerTelegramCommand({chatId:owner,text:'Proceed'});
+  assert.equal(reviewFail.failed,true); assert.doesNotMatch(reviewFail.response,/fetch failed/); assert.equal(reviews.length,0);
+  assert.equal(events.filter(e=>e.event_type==='owner_action_applied').length,0);
+  assert.equal(events.filter(e=>e.event_type==='owner_action_failed').length,1);
+  failReview = false;
+  const reviewAgain = await mod.handleOwnerTelegramCommand({chatId:owner,text:'/addreview Reviewer | Customer | A lovely scrub.'});
+  const reviewSaved = await mod.handleOwnerTelegramCommand({chatId:owner,text:'Proceed'});
+  assert.match(reviewSaved.response,/Review added/); assert.equal(reviews.length,1);
+  const reviewList = await mod.handleOwnerTelegramCommand({chatId:owner,text:'/reviews'});
+  assert.match(reviewList.response,/review-id-test/);
+  await mod.handleOwnerTelegramCommand({chatId:owner,text:'/confirm '+reviewAgain.response.match(/\/confirm ([A-F0-9]{8})/)[1]});
+  assert.equal(reviews.length,1);
  } finally {
   delete (globalThis as any)[key];
   if(env===undefined)delete process.env.OWNER_TELEGRAM_CHAT_IDS;else process.env.OWNER_TELEGRAM_CHAT_IDS=env;

@@ -10,6 +10,7 @@ import { handleOwnerTelegramCommand, isOwnerTelegramChat } from '../../../../lib
 import { recordOperationalEvent } from '../../../../lib/operational-events';
 import { secretsMatch } from '../../../../lib/security';
 
+export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
 function validWebhookSecret(provided: string): boolean {
@@ -37,10 +38,10 @@ export async function POST(req: NextRequest) {
         && callback.from?.id === chatId && isOwnerTelegramChat(chatId);
       const command = callbackCommand(callback.data);
       if (!authorized || !command || typeof callback.id !== 'string') {
-        if (typeof callback.id === 'string') await answerTelegramCallback(callback.id, 'This button is unavailable for this account.');
+        if (typeof callback.id === 'string') await answerTelegramCallback(callback.id, 'This button is unavailable for this account.').catch(() => console.error('Telegram callback acknowledgement unavailable'));
         return NextResponse.json({ ok: true });
       }
-      await answerTelegramCallback(callback.id, 'Processing your selection');
+      await answerTelegramCallback(callback.id, 'Processing your selection').catch(() => console.error('Telegram callback acknowledgement unavailable'));
       const result = await handleOwnerTelegramCommand({ chatId, text: command });
       if (result.handled) await sendTelegramMessage(chatId, result.response, result.replyMarkup || ownerReplyMarkup(result.response));
       return NextResponse.json({ ok: true });
@@ -80,7 +81,7 @@ async function handleMessage(
       await sendTelegramMessage(chatId, `Your Telegram ID is ${chatId}. Add it to the server-only OWNER_TELEGRAM_CHAT_IDS allowlist to authorize this private owner desk.`);
       return;
     }
-    if (canUseOwnerDesk && isOwnerTelegramChat(chatId)) await ensureTelegramCallbackUpdates();
+    if (canUseOwnerDesk && isOwnerTelegramChat(chatId)) await ensureTelegramCallbackUpdates().catch(() => console.error('Telegram button setup unavailable; typed commands remain usable'));
     const ownerResult = canUseOwnerDesk
       ? await handleOwnerTelegramCommand({ chatId, text: userMessage, photos })
       : { handled: false, response: '' };
