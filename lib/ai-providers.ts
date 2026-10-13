@@ -24,18 +24,21 @@ export class ModelCallError extends Error {
   readonly provider: AiProviderName;
   readonly model: string;
   readonly status?: number;
+  readonly code?: string;
 
   constructor(
     message: string,
     provider: AiProviderName,
     model: string,
     status?: number,
+    code?: string,
   ) {
     super(message);
     this.name = 'ModelCallError';
     this.provider = provider;
     this.model = model;
     this.status = status;
+    this.code = code;
   }
 }
 
@@ -231,12 +234,22 @@ export async function callChatModel(
 
   if (!response.ok) {
     coolDown(attempt, response.status);
-    await response.body?.cancel();
+    let code: string | undefined;
+    // Log only a short machine error code, never provider bodies or credentials.
+    try {
+      const payload = await response.json();
+      const candidate = payload?.error?.code || payload?.error?.type || payload?.code;
+      if (typeof candidate === 'string' && /^[a-z_]{1,80}$/.test(candidate)) code = candidate;
+      const message = String(payload?.error?.message || '');
+      if (/customer.verification|payment method|verify your account/i.test(message)) code = 'customer_verification_required';
+      else if (/insufficient.funds|insufficient.credits|credit balance/i.test(message)) code = 'insufficient_funds';
+    } catch { /* Status remains sufficient for failover. */ }
     throw new ModelCallError(
       `Provider returned status ${response.status}`,
       attempt.provider,
       attempt.model,
       response.status,
+      code,
     );
   }
 

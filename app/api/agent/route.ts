@@ -142,7 +142,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ response: result.content, sessionId, source, actions: getCustomerReplyActions(result.content, snapshot.catalog), mode: 'ai' });
       } catch (error) {
         const status = error instanceof ModelCallError ? error.status : undefined;
-        const detail = `${attempt.provider}/${attempt.model}: ${status ? `HTTP ${status}` : 'request failed or timed out'}`;
+        const code = error instanceof ModelCallError ? error.code : undefined;
+        const detail = `${attempt.provider}/${attempt.model}: ${status ? `HTTP ${status}` : 'request failed or timed out'}${code ? ` (${code})` : ''}`;
         console.error('Customer AI attempt failed:', detail);
         alerts.push(detail);
         if (status && [401, 402, 403].includes(status)) unavailableProviders.add(attempt.provider);
