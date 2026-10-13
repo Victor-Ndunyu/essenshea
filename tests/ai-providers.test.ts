@@ -188,3 +188,9 @@ test('missing OIDC does not break NVIDIA and an explicit Gateway key takes prece
   const keyed = await getRuntimeModelAttempts({VERCEL:'1', AI_GATEWAY_API_KEY:'explicit'}, async () => {throw new Error('should not be called');});
   assert.equal(keyed[0].apiKey, 'explicit');
 });
+
+
+test('reports safe Gateway account-verification code without returning raw provider messages', async () => {
+  const attempt = {provider:'gateway' as const, model:'verification-probe', apiKey:'verification-test', baseUrl:'https://example.test/v1'};
+  await assert.rejects(callChatModel(attempt, [], (async () => new Response(JSON.stringify({error:{message:'A valid payment method is required. private detail', code:'customer_verification_required'}}), {status:403})) as typeof fetch), (error: unknown) => error instanceof ModelCallError && error.code === 'customer_verification_required' && !error.message.includes('private detail'));
+});
