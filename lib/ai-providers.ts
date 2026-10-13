@@ -1,4 +1,4 @@
-export type AiProviderName = 'nvidia' | 'huggingface';
+export type AiProviderName = 'nvidia' | 'huggingface' | 'gateway';
 
 export type ModelAttempt = {
   provider: AiProviderName;
@@ -41,8 +41,23 @@ type Environment = Record<string, string | undefined>;
 
 const DEFAULT_NVIDIA_BASE_URL = 'https://integrate.api.nvidia.com/v1';
 const DEFAULT_HUGGING_FACE_BASE_URL = 'https://router.huggingface.co/v1';
-const DEFAULT_PROVIDER_ORDER: AiProviderName[] = ['nvidia', 'huggingface'];
-const MAX_MODEL_ATTEMPTS = 3;
+const DEFAULT_PROVIDER_ORDER: AiProviderName[] = ['nvidia', 'gateway', 'huggingface'];
+export const MODEL_CHAIN_BUDGET_MS = 28_000;
+const cooldowns = new Map<string, number>();
+const providerKey = (attempt: ModelAttempt) => `${attempt.provider}:${attempt.baseUrl}:${attempt.apiKey}`;
+const modelKey = (attempt: ModelAttempt) => `${providerKey(attempt)}:${attempt.model}`;
+
+export function isModelCoolingDown(attempt: ModelAttempt, now = Date.now()): boolean {
+  return [providerKey(attempt), modelKey(attempt)].some(key => (cooldowns.get(key) || 0) > now);
+}
+
+function coolDown(attempt: ModelAttempt, status?: number) {
+  // Auth, billing and rate limits affect a credential; model errors affect one model.
+  const shared = status !== undefined && [401, 402, 403, 429].includes(status);
+  for (const [key, until] of cooldowns) if (until <= Date.now()) cooldowns.delete(key);
+  if (cooldowns.size >= 100) cooldowns.delete(cooldowns.keys().next().value!);
+  cooldowns.set(shared ? providerKey(attempt) : modelKey(attempt), Date.now() + (shared ? 60_000 : 30_000));
+}
 
 function nonEmpty(value: string | undefined): string | undefined {
   const normalized = value?.trim();
@@ -55,7 +70,7 @@ function providerOrder(value: string | undefined): AiProviderName[] {
     .map((item) => item.trim().toLowerCase())
     .filter(
       (item): item is AiProviderName =>
-        item === 'nvidia' || item === 'huggingface',
+        item === 'nvidia' || item === 'huggingface' || item === 'gateway',
     );
 
   return requested.length ? [...new Set(requested)] : DEFAULT_PROVIDER_ORDER;
@@ -64,6 +79,7 @@ function providerOrder(value: string | undefined): AiProviderName[] {
 export function getModelAttempts(env: Environment = process.env): ModelAttempt[] {
   const nvidiaKey = nonEmpty(env.NVIDIA_AGENT_API_KEY) || nonEmpty(env.AGENT_API_KEY);
   const huggingFaceKey = nonEmpty(env.HF_TOKEN);
+  const gatewayKey = nonEmpty(env.AI_GATEWAY_API_KEY) || nonEmpty(env.VERCEL_OIDC_TOKEN);
 
   const attemptsByProvider: Record<AiProviderName, ModelAttempt[]> = {
     nvidia: nvidiaKey
@@ -78,7 +94,7 @@ export function getModelAttempts(env: Environment = process.env): ModelAttempt[]
             model:
               nonEmpty(env.NVIDIA_AGENT_MODEL) ||
               nonEmpty(env.AGENT_MODEL) ||
-              'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning',
+              'nvidia/nemotron-3-super-120b-a12b',
           },
           {
             provider: 'nvidia',
@@ -90,9 +106,23 @@ export function getModelAttempts(env: Environment = process.env): ModelAttempt[]
             model:
               nonEmpty(env.NVIDIA_AGENT_FALLBACK_MODEL) ||
               nonEmpty(env.AGENT_FALLBACK_MODEL) ||
-              'nvidia/nemotron-3-super-120b-a12b',
+              'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning',
+          },
+          {
+            provider: 'nvidia',
+            baseUrl: nonEmpty(env.NVIDIA_AGENT_BASE_URL) || nonEmpty(env.AGENT_BASE_URL) || DEFAULT_NVIDIA_BASE_URL,
+            apiKey: nvidiaKey,
+            model: nonEmpty(env.NVIDIA_AGENT_SECOND_FALLBACK_MODEL) || 'nvidia/nemotron-3.5-lightning-30b-a3b',
           },
         ]
+      : [],
+    gateway: gatewayKey
+      ? ['AI_GATEWAY_AGENT_MODEL', 'AI_GATEWAY_AGENT_FALLBACK_MODEL'].map((key, index) => ({
+          provider: 'gateway' as const,
+          baseUrl: 'https://ai-gateway.vercel.sh/v1',
+          apiKey: gatewayKey,
+          model: nonEmpty(env[key]) || ['anthropic/claude-haiku-5.5', 'google/gemini-3.8-flash'][index],
+        }))
       : [],
     huggingface: huggingFaceKey
       ? [
@@ -137,14 +167,18 @@ export function getModelAttempts(env: Environment = process.env): ModelAttempt[]
     }
   }
 
-  return attempts.slice(0, MAX_MODEL_ATTEMPTS);
+  return attempts;
 }
 
 export async function callChatModel(
   attempt: ModelAttempt,
   messages: ChatMessage[],
   fetcher: typeof fetch = fetch,
+  timeoutMs = 10_000,
 ): Promise<ModelCallResult> {
+  if (isModelCoolingDown(attempt)) {
+    throw new ModelCallError('Provider is temporarily cooling down', attempt.provider, attempt.model);
+  }
   let response: Response;
   try {
     response = await fetcher(`${attempt.baseUrl.replace(/\/+$/, '')}/chat/completions`, {
@@ -156,23 +190,30 @@ export async function callChatModel(
       body: JSON.stringify({
         model: attempt.model,
         messages,
-        max_tokens: 450,
+        max_tokens: attempt.provider === 'gateway' ? 1_200 : 450,
+        ...(attempt.provider === 'gateway' && attempt.model === 'anthropic/claude-haiku-5.5'
+          ? { reasoning: { effort: 'none' } } : {}),
+        ...(attempt.provider === 'gateway' && attempt.model === 'google/gemini-3.8-flash'
+          ? { reasoning: { effort: 'low' } } : {}),
         temperature: 0.3,
-        ...(attempt.provider === 'nvidia' && attempt.model.startsWith('nvidia/nemotron-3-')
+        ...(attempt.provider === 'nvidia' && /^nvidia\/nemotron-3(?:-|\.)/.test(attempt.model)
           ? { chat_template_kwargs: { enable_thinking: false } }
           : {}),
       }),
-      signal: AbortSignal.timeout(10_000),
+      signal: AbortSignal.timeout(Math.max(1, Math.min(10_000, timeoutMs))),
     });
-  } catch (error) {
+  } catch {
+    coolDown(attempt);
     throw new ModelCallError(
-      `Request failed: ${error instanceof Error ? error.message : String(error)}`,
+      'Request failed or timed out',
       attempt.provider,
       attempt.model,
     );
   }
 
   if (!response.ok) {
+    coolDown(attempt, response.status);
+    await response.body?.cancel();
     throw new ModelCallError(
       `Provider returned status ${response.status}`,
       attempt.provider,
@@ -181,17 +222,26 @@ export async function callChatModel(
     );
   }
 
-  const data = await response.json();
-  const content = String(data.choices?.[0]?.message?.content || '').trim();
-  if (!content) {
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    coolDown(attempt);
+    throw new ModelCallError('Provider returned invalid JSON', attempt.provider, attempt.model);
+  }
+  const message = data?.choices?.[0]?.message?.content;
+  const content = typeof message === 'string' ? message.trim() : '';
+  if (!content || data?.choices?.[0]?.finish_reason === 'length') {
+    coolDown(attempt);
     throw new ModelCallError(
-      'Provider returned an empty response',
+      'Provider returned an empty or incomplete response',
       attempt.provider,
       attempt.model,
       response.status,
     );
   }
 
+  cooldowns.delete(modelKey(attempt));
   return {
     content,
     provider: attempt.provider,

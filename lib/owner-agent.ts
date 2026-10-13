@@ -3,7 +3,7 @@ import { randomBytes } from 'node:crypto';
 import { getSupabaseAdmin } from './supabase-admin';
 import { resolveCatalogProduct, slugifyCatalogValue, getMergedCatalog, getCatalogSnapshot } from './catalog';
 import { formatConversationMemory, loadRecentOwnerConversation, retrieveOwnerMemory, saveOwnerMemory } from './agent-memory';
-import { callChatModel, getModelAttempts } from './ai-providers';
+import { callChatModel, getModelAttempts, MODEL_CHAIN_BUDGET_MS, isModelCoolingDown } from './ai-providers';
 import { parseTelegramOwnerIds } from './security';
 import { parseNaturalOwnerMutation, parseOwnerActionApproval } from './owner-command';
 import { percentageChange } from './analytics';
@@ -430,12 +430,15 @@ ${memory}
 Recent conversation:
 ${formatConversationMemory(recentConversation)}`;
 
+  const deadline = Date.now() + MODEL_CHAIN_BUDGET_MS;
   for (const attempt of getModelAttempts()) {
+    if (Date.now() >= deadline) break;
+    if (isModelCoolingDown(attempt)) continue;
     try {
       const result = await callChatModel(attempt, [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: message },
-      ]);
+      ], fetch, deadline - Date.now());
       await saveOwnerMemory(chatId, 'owner_agent_reply', result.content, {
         source: 'telegram_owner',
         provider: result.provider,

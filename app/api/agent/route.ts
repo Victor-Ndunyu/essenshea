@@ -6,6 +6,8 @@ import {
   callChatModel,
   getModelAttempts,
   ModelCallError,
+  MODEL_CHAIN_BUDGET_MS,
+  isModelCoolingDown,
 } from '../../../lib/ai-providers';
 import { getCatalogSnapshot } from '../../../lib/catalog';
 import { ESSENSHEA_SITE_FACTS, formatSiteFacts } from '../../../lib/site-facts';
@@ -16,6 +18,7 @@ import {
 } from '../../../lib/agent-memory';
 
 export const runtime = 'nodejs';
+export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
 const MAX_MESSAGE_LENGTH = 2_000;
@@ -27,10 +30,10 @@ When a fact is missing, say so and offer to connect the customer with the owner.
 Ask one short, relevant follow-up question when the customer's goal, preference, sensitivity, or budget would materially improve the recommendation.
 When recommending products, explain why each option fits and keep the shortlist small. Do not pretend a product is suitable when the catalog does not support that claim.
 Treat skin or hair concerns as shopping preferences, not medical diagnoses. For severe, persistent, painful, or worsening symptoms, advise professional care instead of product treatment.
-Reply in the customer's language when practical. Keep normal replies to five short sentences or fewer unless the customer explicitly asks for a detailed list.
+Reply in the customer's language, including Swahili when they write in Swahili. Keep normal replies to five short sentences or fewer unless the customer explicitly asks for a detailed list.
 For a greeting, welcome the customer and ask what they are looking for. Do not mention outages or send them away.
 Ask one question at a time; do not demand a full questionnaire. Recognize when the customer has already given an answer and use it.
-Give ingredient or usage information only if supplied in the catalogue. Never suggest applying undiluted essential oils, and never claim a product cures acne or grows hair.
+Never infer fragrance-free, unscented, hypoallergenic, pregnancy-safe, or sensitive-skin suitability from a product name or general knowledge. If that exact property is absent from the supplied catalogue, say it is unconfirmed and offer to ask Essenshea. Give ingredient or usage information only if supplied in the catalogue. Never suggest applying undiluted essential oils, and never claim a product cures acne or grows hair.
 Never repeat catalogue marketing claims about treating eczema or acne, healing wounds, fading stretch marks, or promoting hair growth. Limit product explanations to supplied ingredients, size, scent, texture and cosmetic care.
 If the customer wants a human, offer the WhatsApp contact directly. Never say you placed an order or contacted the owner unless a tool actually confirmed it.
 Do not repeat the same point or sentence.
@@ -117,7 +120,10 @@ export async function POST(req: NextRequest) {
     const attempts = getModelAttempts();
     const alerts: string[] = [];
     const unavailableProviders = new Set<string>();
+    const deadline = Date.now() + MODEL_CHAIN_BUDGET_MS;
     for (const attempt of attempts) {
+      if (Date.now() >= deadline) break;
+      if (isModelCoolingDown(attempt)) continue;
       // A second model with the same rejected credential cannot repair auth/billing.
       if (unavailableProviders.has(attempt.provider)) continue;
       try {
@@ -125,12 +131,11 @@ export async function POST(req: NextRequest) {
           { role: 'system', content: systemPrompt },
           ...memoryMessages.filter(item => item.role !== 'assistant' || !hasUnsupportedTreatmentClaim(item.content)).map(item => ({ role: item.role, content: item.content })),
           { role: 'user', content: message },
-        ]);
+        ], fetch, deadline - Date.now());
         if (hasUnsupportedTreatmentClaim(result.content)) {
           console.warn('Customer AI treatment claim blocked');
-          const guide = getCatalogReply(message, snapshot.catalog, liveVerified);
-          finishTurn({ sessionId, source, userMessage: message, assistantMessage: guide.response });
-          return NextResponse.json({ ...guide, sessionId, source, mode: 'catalog', degraded: true });
+          alerts.push(`${attempt.provider}/${attempt.model}: unsupported claim blocked`);
+          continue;
         }
         console.info(`Agent answered via ${result.provider}/${result.model}`);
         finishTurn({ sessionId, source, userMessage: message, assistantMessage: result.content }, alerts);
