@@ -3,7 +3,7 @@ import { randomBytes } from 'node:crypto';
 import { getSupabaseAdmin } from './supabase-admin';
 import { resolveCatalogProduct, slugifyCatalogValue, getMergedCatalog, getCatalogSnapshot } from './catalog';
 import { formatConversationMemory, loadRecentOwnerConversation, retrieveOwnerMemory, saveOwnerMemory } from './agent-memory';
-import { callChatModel, getModelAttempts, MODEL_CHAIN_BUDGET_MS, isModelCoolingDown } from './ai-providers';
+import { callChatModel, getRuntimeModelAttempts, MODEL_CHAIN_BUDGET_MS, isModelCoolingDown } from './ai-providers';
 import { parseTelegramOwnerIds } from './security';
 import { parseNaturalOwnerMutation, parseOwnerActionApproval } from './owner-command';
 import { percentageChange } from './analytics';
@@ -431,7 +431,7 @@ Recent conversation:
 ${formatConversationMemory(recentConversation)}`;
 
   const deadline = Date.now() + MODEL_CHAIN_BUDGET_MS;
-  for (const attempt of getModelAttempts()) {
+  for (const attempt of await getRuntimeModelAttempts()) {
     if (Date.now() >= deadline) break;
     if (isModelCoolingDown(attempt)) continue;
     try {

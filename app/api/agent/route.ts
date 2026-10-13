@@ -4,7 +4,7 @@ import { checkMemoryRateLimit } from '../../../lib/memory-rate-limit';
 import { sendOperationalAlert } from '../../../lib/notifications';
 import {
   callChatModel,
-  getModelAttempts,
+  getRuntimeModelAttempts,
   ModelCallError,
   MODEL_CHAIN_BUDGET_MS,
   isModelCoolingDown,
@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
     const liveVerified = !snapshot.issues.some(issue => issue.code === 'unverified_live_data');
     const memoryMessages = await loadCustomerConversation(sessionId);
     const systemPrompt = `${assistantPersona}\n${formatSiteFacts()}\n${formatCustomerCatalog(snapshot.catalog, message, liveVerified)}\nReply warmly in plain text. Use recent conversation turns to follow up naturally.`;
-    const attempts = getModelAttempts();
+    const attempts = await getRuntimeModelAttempts();
     const alerts: string[] = [];
     const unavailableProviders = new Set<string>();
     const deadline = Date.now() + MODEL_CHAIN_BUDGET_MS;

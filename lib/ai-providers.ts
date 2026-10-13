@@ -1,3 +1,5 @@
+import { getVercelOidcToken } from '@vercel/oidc';
+
 export type AiProviderName = 'nvidia' | 'huggingface' | 'gateway';
 
 export type ModelAttempt = {
@@ -168,6 +170,22 @@ export function getModelAttempts(env: Environment = process.env): ModelAttempt[]
   }
 
   return attempts;
+}
+
+// Vercel Functions carry fresh OIDC tokens in request context, not necessarily env.
+export async function getRuntimeModelAttempts(
+  env: Environment = process.env,
+  readToken: () => Promise<string> = getVercelOidcToken,
+): Promise<ModelAttempt[]> {
+  if (!nonEmpty(env.AI_GATEWAY_API_KEY) && env.VERCEL === '1') {
+    try {
+      const token = await readToken();
+      return getModelAttempts({ ...env, VERCEL_OIDC_TOKEN: token });
+    } catch {
+      console.warn('Customer AI Gateway OIDC token unavailable');
+    }
+  }
+  return getModelAttempts(env);
 }
 
 export async function callChatModel(
