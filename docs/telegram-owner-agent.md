@@ -51,3 +51,10 @@ Expired, cancelled, reused and ambiguous requests make no change.
 6. Rotate Telegram setup/webhook secrets if administrative control also changed.
 
 No code change is required for the handover.
+
+
+## Approval and outage recovery
+
+Supported natural-language edits (including "I want to change PRODUCT from CATEGORY to CATEGORY") create a saved preview. The destination must be an existing catalogue category. Replying "Proceed", "Go ahead", or "I would like to proceed" approves only when exactly one unexpired preview is pending for that owner. With multiple previews, select the specific Approve button or use its token. Repeated approvals never replay a used action, and already-saved product values do not create a new action.
+
+The conversational model cannot prepare or apply changes; unsupported mutation wording receives command guidance. Review commands access the same database directly rather than calling the site's API over HTTP. Read requests can retry once, but writes are never automatically repeated. If a product write response is lost, the agent reads the live result before reporting success. An uncertain outcome directs the owner to `/activity` and `/describe` or `/reviews` before retrying. Telegram callback acknowledgements and button setup checks cannot block authenticated typed commands. Historical failed tokens must not be reused; resend the full request for a fresh preview.

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { parseTelegramOwnerIds, secretsMatch } from '../lib/security.ts';
-import { ownerLowStockThreshold, parseNaturalOwnerMutation, parseOwnerActionApproval } from '../lib/owner-command.ts';
+import { ownerLowStockThreshold, parseNaturalOwnerMutation, parseOwnerActionApproval, parseNaturalOwnerApproval, looksLikeOwnerMutation, ownerErrorReply } from '../lib/owner-command.ts';
 import { percentageChange } from '../lib/analytics.ts';
 
 test('owner telegram chat id parsing is strict', () => {
@@ -63,4 +63,17 @@ test('owner insight trend labels are honest when the baseline is empty', () => {
   assert.equal(percentageChange(0, 0), 'no change');
   assert.equal(percentageChange(3, 0), 'new activity');
   assert.equal(percentageChange(4, 8), '-50%');
+});
+
+
+test('conversational owner edit wording includes the screenshot request', () => {
+ assert.equal(parseNaturalOwnerMutation('I want to change the turmeric scrub from mens care to body care'), '/edit turmeric scrub | category=body care');
+ assert.equal(parseNaturalOwnerMutation('Could you move the turmeric scrub to Body Scrubs?'), '/edit turmeric scrub | category=Body Scrubs');
+ assert.equal(parseNaturalOwnerMutation('Please change the category of Turmeric Scrub to Body Scrubs'), '/edit Turmeric Scrub | category=Body Scrubs');
+ assert.equal(parseNaturalOwnerMutation('I would like to update the price of Turmeric Scrub to KSh 800'), '/edit Turmeric Scrub | price=KSh 800');
+ for (const message of ['Proceed','I would like to proceed','Go ahead','Yes please']) assert.equal(parseNaturalOwnerApproval(message),'confirm');
+ assert.equal(parseNaturalOwnerApproval('Please proceed with whatever you think'),null);
+ assert.equal(looksLikeOwnerMutation('Please change the website colours'),true);
+ assert.doesNotMatch(ownerErrorReply(new TypeError('fetch failed'),true),/fetch failed/);
+ assert.match(ownerErrorReply(new TypeError('fetch failed'),true),/before repeating/);
 });
