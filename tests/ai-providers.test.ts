@@ -3,6 +3,7 @@ import test from 'node:test';
 import {
   callChatModel,
   getModelAttempts,
+  getRuntimeModelAttempts,
   ModelCallError,
   isModelCoolingDown,
 } from '../lib/ai-providers.ts';
@@ -171,4 +172,19 @@ test('a timed-out primary falls through to a successful independent provider wit
   }
   assert.equal(result?.provider, 'gateway');
   assert.deepEqual(received, [messages, messages]);
+});
+
+
+test('uses fresh request-context OIDC token on Vercel without exposing it globally', async () => {
+  const env = {VERCEL:'1', NVIDIA_AGENT_API_KEY:'n'};
+  const attempts = await getRuntimeModelAttempts(env, async () => 'fresh-token');
+  assert.equal(attempts.find(a=>a.provider === 'gateway')?.apiKey, 'fresh-token');
+  assert.equal('VERCEL_OIDC_TOKEN' in env, false);
+});
+
+test('missing OIDC does not break NVIDIA and an explicit Gateway key takes precedence', async () => {
+  const attempts = await getRuntimeModelAttempts({VERCEL:'1', NVIDIA_AGENT_API_KEY:'n'}, async () => {throw new Error('not available');});
+  assert.equal(attempts.length, 3);
+  const keyed = await getRuntimeModelAttempts({VERCEL:'1', AI_GATEWAY_API_KEY:'explicit'}, async () => {throw new Error('should not be called');});
+  assert.equal(keyed[0].apiKey, 'explicit');
 });
