@@ -15,31 +15,45 @@ function getAgentApiUrl(): string {
   return url;
 }
 
+export function splitTelegramText(text: string, limit = 4000): string[] {
+  const chunks: string[] = [];
+  let rest = text;
+  while (rest.length > limit) {
+    let end = rest.lastIndexOf('\n', limit);
+    if (end < limit / 2) end = limit;
+    // Keep surrogate pairs intact. Telegram's limit counts UTF-16 code units.
+    if (/[\uD800-\uDBFF]/.test(rest[end - 1])) end--;
+    chunks.push(rest.slice(0, end));
+    rest = rest.slice(end);
+  }
+  if (rest) chunks.push(rest);
+  return chunks;
+}
+
 export async function sendTelegramMessage(chatId: number, text: string, replyMarkup?: InlineKeyboard): Promise<void> {
   if (!text || text.length === 0) {
     throw new Error('Message text cannot be empty');
   }
 
   const botToken = getTelegramBotToken();
-  const truncatedText = text.substring(0, 4096);
-
-  const response = await fetch(
-    `https://api.telegram.org/bot${botToken}/sendMessage`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: truncatedText,
-        ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
-      }),
-      signal: AbortSignal.timeout(10_000),
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Telegram API error: ${response.statusText} - ${error}`);
+  const chunks = splitTelegramText(text);
+  for (const [index, chunk] of chunks.entries()) {
+    const response = await fetch(
+      `https://api.telegram.org/bot${botToken}/sendMessage`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: chunk,
+          ...(replyMarkup && index === chunks.length - 1 ? { reply_markup: replyMarkup } : {}),
+        }),
+        signal: AbortSignal.timeout(10_000),
+      },
+    );
+    if (!response.ok) throw new Error('Telegram message delivery failed (' + response.status + ').');
+    const result = await response.json();
+    if (result?.ok !== true) throw new Error('Telegram did not confirm message delivery.');
   }
 }
 

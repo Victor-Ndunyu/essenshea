@@ -102,8 +102,10 @@ export async function getCatalogSnapshot(options: { includeHidden?: boolean } = 
   return snapshot;
 }
 
-export async function getMergedCatalog(options: { includeHidden?: boolean } = {}): Promise<CatalogData> {
-  return (await getCatalogSnapshot(options)).catalog;
+export async function getMergedCatalog(options: { includeHidden?: boolean; requireVerified?: boolean } = {}): Promise<CatalogData> {
+  const snapshot = await getCatalogSnapshot(options);
+  if (options.requireVerified && snapshot.issues.some(issue=>issue.code==='unverified_live_data')) throw new Error('Live catalogue data is unavailable. Nothing was changed.');
+  return snapshot.catalog;
 }
 
 export async function getCatalogSummary(): Promise<string> {
@@ -134,10 +136,10 @@ function normalizeCatalogQuery(value: string): string {
   return value.toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').trim();
 }
 
-export async function resolveCatalogProduct(query: string): Promise<CatalogResolution> {
+export async function resolveCatalogProduct(query: string, options: { requireVerified?: boolean } = {}): Promise<CatalogResolution> {
   const clean = normalizeCatalogQuery(query);
   if (!clean) return { status: 'not_found', matches: [] };
-  const catalog = await getMergedCatalog({ includeHidden: true });
+  const catalog = await getMergedCatalog({ includeHidden: true, requireVerified: options.requireVerified });
   const candidates: Array<{ category: CatalogCategory; product: CatalogProduct; score: number }> = [];
   for (const category of catalog.categories || []) {
     for (const product of category.products || []) {
@@ -162,6 +164,7 @@ export async function resolveCatalogProduct(query: string): Promise<CatalogResol
   if (!candidates.length) return { status: 'not_found', matches: [] };
   const bestScore = candidates[0].score;
   const plausible = candidates.filter((candidate) => candidate.score >= Math.max(3, bestScore - 1)).slice(0, 5);
+  if (!plausible.length) return { status: 'not_found', matches: [] };
   if (plausible.length !== 1) {
     return { status: 'ambiguous', matches: plausible.map(({ category, product }) => ({ category, product })) };
   }
