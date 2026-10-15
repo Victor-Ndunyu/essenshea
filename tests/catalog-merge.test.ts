@@ -25,7 +25,7 @@ test('owner-created category contains new products and is flagged for review', (
 test('hidden products stay hidden after category moves', () => {
   const rows = [override({ category_slug: 'haircare', hidden: true })];
   assert.equal(mergeCatalogData(source, rows).catalog.categories.length, 0);
-  assert.equal(mergeCatalogData(source, rows, true).catalog.categories[0].products[0].hidden, true);
+  assert.equal(mergeCatalogData(source, rows, true).catalog.categories.find(c => c.slug === 'haircare')?.products[0].hidden, true);
 });
 test('orphan edits and missing category assignments are reported without adding phantom items', () => {
   const result = mergeCatalogData(source, [override({ product_slug: 'missing' }), override({ category_slug: ' ' })]);
@@ -38,4 +38,10 @@ test('zero price and stock are preserved and unset prices are reported', () => {
   assert.equal(result.catalog.categories[0].products[0].priceValue, 0);
   assert.equal(result.catalog.categories[0].products[0].stock, 0);
   assert.ok(!result.issues.some(issue => issue.code === 'unknown_stock'));
+});
+
+test('owner catalogue preserves empty categories as valid edit destinations', () => {
+ const result=mergeCatalogData(source,[override({category_slug:'haircare'})],true);
+ assert.equal(result.catalog.categories.find(c=>c.slug==='oils')?.products.length,0);
+ assert.equal(result.catalog.categories.find(c=>c.slug==='haircare')?.products.length,1);
 });

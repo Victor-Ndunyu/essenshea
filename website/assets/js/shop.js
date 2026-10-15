@@ -206,7 +206,12 @@ function getProductConcernIds(product) {
   return concernOptions
     .filter(function(option) {
       if (option.id === 'all') return false;
-      return option.terms.some(function(term) { return haystack.includes(normalizeSearchValue(term)); });
+      return option.terms.some(function(term) {
+        const normalizedTerm = normalizeSearchValue(term);
+        return option.id === 'mens-care'
+          ? (' ' + haystack + ' ').includes(' ' + normalizedTerm + ' ')
+          : haystack.includes(normalizedTerm);
+      });
     })
     .map(function(option) { return option.id; });
 }

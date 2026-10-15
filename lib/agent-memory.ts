@@ -79,10 +79,10 @@ export function formatConversationMemory(messages: AgentMemoryMessage[]): string
   return ['Recent conversation memory for this customer session:', ...messages.map((message) => `${message.role}: ${message.content}`)].join('\n');
 }
 
-export async function saveOwnerMemory(chatId: number, memoryType: string, content: string, metadata: Record<string, unknown> = {}): Promise<void> {
-  if (!content.trim()) return;
+export async function saveOwnerMemory(chatId: number, memoryType: string, content: string, metadata: Record<string, unknown> = {}): Promise<boolean> {
+  if (!content.trim()) return false;
   try {
-    await getSupabaseAdmin().from('owner_agent_memory').insert([
+    const { error } = await getSupabaseAdmin().from('owner_agent_memory').insert([
       {
         telegram_chat_id: chatId,
         memory_type: memoryType,
@@ -90,8 +90,11 @@ export async function saveOwnerMemory(chatId: number, memoryType: string, conten
         metadata,
       },
     ]);
+    if (error) throw error;
+    return true;
   } catch (error) {
-    console.error('Owner memory save failed:', error);
+    console.error('Owner memory save failed');
+    return false;
   }
 }
 

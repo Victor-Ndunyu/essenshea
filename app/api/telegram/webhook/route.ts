@@ -54,7 +54,11 @@ export async function POST(req: NextRequest) {
     const chatId = message.chat.id;
     const senderId = message.from?.id;
     const chatType = String(message.chat?.type || '');
-    const userMessage = String(message.text || message.caption || '').trim().slice(0, 2_000);
+    const userMessage = String(message.text || message.caption || '').trim();
+    if (userMessage.length > 8_000) {
+      await sendTelegramMessage(chatId, 'That message is too long to process safely. Nothing changed. Send a shorter request with the product name and proposed change.');
+      return NextResponse.json({ ok: true });
+    }
     const photos = Array.isArray(message.photo) ? message.photo : [];
     if (!userMessage && photos.length === 0) return NextResponse.json({ ok: true });
 

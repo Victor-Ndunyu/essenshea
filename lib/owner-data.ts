@@ -25,6 +25,7 @@ export type OwnerBusinessData = {
   recentOrders: RecentOrder[];
   ecoRewards: { activeAccounts: number | null; availableRewards: number | null };
   publicPageText: string;
+  unavailable?: string[];
 };
 
 async function loadReviews(): Promise<SiteReview[]> {
@@ -55,11 +56,12 @@ async function countRows(table: string, filters: Array<[string, unknown]>): Prom
   return count;
 }
 
-async function safeLoad<T>(label: string, load: () => Promise<T>, fallback: T): Promise<T> {
+async function safeLoad<T>(label: string, load: () => Promise<T>, fallback: T, unavailable: string[] = []): Promise<T> {
   try {
     return await load();
   } catch (error) {
-    console.error(`Owner data ${label} unavailable:`, error);
+    console.error(`Owner data ${label} unavailable`);
+    unavailable.push(label);
     return fallback;
   }
 }
@@ -85,15 +87,16 @@ async function loadPublicPageText(): Promise<string> {
 }
 
 export async function loadOwnerBusinessData(): Promise<OwnerBusinessData> {
+  const unavailable: string[] = [];
   const [snapshot, reviews, recentOrders, activeAccounts, availableRewards, publicPageText] = await Promise.all([
     getCatalogSnapshot({ includeHidden: true }),
-    safeLoad('reviews', loadReviews, []),
-    safeLoad('orders', loadRecentOrders, []),
-    safeLoad('eco accounts', () => countRows('eco_reward_accounts', [['active', true]]), null),
-    safeLoad('eco rewards', () => countRows('eco_reward_benefits', [['status', 'available']]), null),
-    safeLoad('public pages', loadPublicPageText, 'Public page text unavailable.'),
+    safeLoad('reviews', loadReviews, [], unavailable),
+    safeLoad('orders', loadRecentOrders, [], unavailable),
+    safeLoad('eco accounts', () => countRows('eco_reward_accounts', [['active', true]]), null, unavailable),
+    safeLoad('eco rewards', () => countRows('eco_reward_benefits', [['status', 'available']]), null, unavailable),
+    safeLoad('public pages', loadPublicPageText, 'Public page text unavailable.', unavailable),
   ]);
-  return { catalog: snapshot.catalog, catalogIssues: snapshot.issues, reviews, recentOrders, ecoRewards: { activeAccounts, availableRewards }, publicPageText };
+  return { unavailable, catalog: snapshot.catalog, catalogIssues: snapshot.issues, reviews, recentOrders, ecoRewards: { activeAccounts, availableRewards }, publicPageText };
 }
 
 function productStatus(product: CatalogProduct): string {
@@ -125,6 +128,7 @@ export function formatOwnerBusinessContext(data: OwnerBusinessData): string {
     'CURRENT PUBLIC PAGE TEXT (authoritative checked-in website copy)',
     data.publicPageText,
     '',
+    'UNAVAILABLE DATA: ' + (data.unavailable?.join(', ') || 'none'),
     'CATALOGUE LISTING DIAGNOSTICS',
     ...(data.catalogIssues || []).filter(issue => ['unverified_live_data', 'missing_category', 'orphan_override', 'duplicate_product', 'owner_category'].includes(issue.code)).map(issue => '- ' + issue.message),
     '',
@@ -132,10 +136,10 @@ export function formatOwnerBusinessContext(data: OwnerBusinessData): string {
     ...catalogue,
     '',
     'RECENT ORDER OPERATIONS (no customer contact details)',
-    ...(orders.length ? orders : ['- No recent orders were returned.']),
+    ...(orders.length ? orders : [data.unavailable?.includes('orders') ? '- Order data is unavailable; do not infer a zero count.' : '- No recent orders were returned.']),
     '',
     'SITE REVIEWS',
-    ...(reviews.length ? reviews : ['- No reviews were returned.']),
+    ...(reviews.length ? reviews : [data.unavailable?.includes('reviews') ? '- Review data is unavailable.' : '- No reviews were returned.']),
     '',
     'ECO-REWARDS OPERATIONS',
     `- Active accounts: ${data.ecoRewards.activeAccounts ?? 'unavailable'}`,
@@ -190,6 +194,7 @@ export function formatCatalogHealth(data: OwnerBusinessData): string {
 }
 
 export function formatRecentOrders(data: OwnerBusinessData): string {
+  if (data.unavailable?.includes('orders')) return 'Recent order data is unavailable. I cannot confirm the order count right now.';
   if (!data.recentOrders.length) return 'No recent order requests were returned.';
   return ['Recent order requests:', ...data.recentOrders.slice(0, 10).map((order) => {
     const items = (order.order_items || []).map((item) => `${item.quantity}× ${item.title}`).join(', ') || 'items unavailable';

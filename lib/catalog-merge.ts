@@ -68,6 +68,6 @@ export function mergeCatalogData(source: CatalogData, overrides: CatalogOverride
     category.items = category.products.length;
     category.image = category.image || category.products[0]?.image || '/assets/images/essenshea-logo.jpg';
   }
-  catalog.categories = categories.filter(category => category.products.length);
+  catalog.categories = categories.filter(category => includeHidden || category.products.length);
   return { catalog, issues };
 }

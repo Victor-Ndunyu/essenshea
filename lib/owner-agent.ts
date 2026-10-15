@@ -30,9 +30,10 @@ const MUTATING_COMMANDS = ['/edit ', '/stock ', '/available ', '/availablenow ',
 const ACTION_TTL_MINUTES = 10;
 
 function ownerChatIds(): Set<number> {
-  const preferred = parseTelegramOwnerIds(process.env.OWNER_TELEGRAM_CHAT_IDS);
-  const legacy = parseTelegramOwnerIds(process.env.OWNER_TELEGRAM_CHAT_ID);
-  return new Set([...preferred, ...legacy]);
+  // An explicit allowlist replaces legacy ownership, including an empty deny-all list.
+  return parseTelegramOwnerIds(process.env.OWNER_TELEGRAM_CHAT_IDS !== undefined
+    ? process.env.OWNER_TELEGRAM_CHAT_IDS
+    : process.env.OWNER_TELEGRAM_CHAT_ID);
 }
 
 export function isOwnerTelegramChat(chatId: number): boolean {
@@ -102,7 +103,7 @@ async function logOwnerEvent(chatId: number, eventType: string, productSlug: str
 }
 
 async function resolveProductOrThrow(productName: string) {
-  const resolution = await resolveCatalogProduct(productName);
+  const resolution = await resolveCatalogProduct(productName, { requireVerified: true });
   if (resolution.status === 'not_found') throw new Error(`I could not find "${productName}" in the catalogue.`);
   if (resolution.status === 'ambiguous') {
     const choices = resolution.matches.map((match, index) => `${index + 1}. ${match.product.name} (${match.category.title})`).join('\n');
@@ -173,9 +174,10 @@ async function handleStockCommand(chatId: number, text: string, availableByOrder
 async function handleAddProduct(chatId: number, text: string): Promise<string> {
   const args = splitPipeArgs(text);
   if (args.length < 4) return 'Use: /addproduct category | name | price | description';
-  const [category, name, price, description] = args;
+  const [category, name, price] = args;
+  const description = args.slice(3).join(' | ');
   const productSlug = slugifyCatalogValue(name);
-  const catalog = await getMergedCatalog({ includeHidden: true });
+  const catalog = await getMergedCatalog({ includeHidden: true, requireVerified: true });
   const categorySlug = String(parseProductEdit('/edit New product | category=' + category, catalog.categories).patch.category_slug);
   const { error } = await getSupabaseAdmin().from('catalog_overrides').insert({
     product_slug: productSlug,
@@ -191,7 +193,10 @@ async function handleAddProduct(chatId: number, text: string): Promise<string> {
     updated_by: String(chatId),
     updated_at: new Date().toISOString(),
   });
-  if (error) throw new Error(error.message);
+  if (error) throw new Error('Product creation could not be verified.');
+  const snapshot = await getCatalogSnapshot({ includeHidden: true });
+  const savedProduct = snapshot.catalog.categories.find(c => c.slug === categorySlug)?.products.find(p => p.slug === productSlug);
+  if (snapshot.issues.some(i => i.code === 'unverified_live_data') || !savedProduct || savedProduct.name !== name || savedProduct.description !== description || savedProduct.price !== price || !savedProduct.availableByOrder) throw new Error('Product creation could not be verified.');
   await logOwnerEvent(chatId, 'catalog_add_product', productSlug, { category, name, price });
   return `${name} has been added under ${category}. It is public as available by order. Send a product photo with caption: /setimage ${name}`;
 }
@@ -204,6 +209,7 @@ type PendingOwnerAction = {
   expiresAt: string;
   photoFileId?: string;
   edit?: PreparedEdit;
+  memoryIds?: string[];
 };
 
 async function actionSummary(command: string, photos?: TelegramPhoto[]): Promise<string> {
@@ -211,6 +217,7 @@ async function actionSummary(command: string, photos?: TelegramPhoto[]): Promise
   if (lower.startsWith('/addproduct ')) {
     const args = splitPipeArgs(command.slice(12));
     if (args.length < 4) throw new Error('Use: /addproduct category | name | price | description');
+    if (args[1].length > 180 || args.slice(3).join(' | ').length > 6000) throw new Error('Use: a product name under 180 characters and description under 6,000 characters.');
     ownerMoney(args[2]);
     const snapshot = await getCatalogSnapshot({ includeHidden: true });
     if (snapshot.issues.some(issue => issue.code === 'unverified_live_data')) throw new Error('Live catalogue is unavailable. Retry before adding products.');
@@ -219,7 +226,12 @@ async function actionSummary(command: string, photos?: TelegramPhoto[]): Promise
     if (snapshot.catalog.categories.flatMap(category => category.products).some(product => product.slug === slug)) throw new Error('That product already exists. Use /edit to change it.');
     return `Add a public by-order product\nCategory: ${args[0]}\nName: ${args[1]}\nPrice: ${args[2]}\nDescription: ${args.slice(3).join(' | ')}`;
   }
-  if (lower.startsWith('/addreview ')) return `Add this review to the public site:\n${command.slice(11)}`;
+  if (lower.startsWith('/addreview ')) {
+    const parts = splitPipeArgs(command.slice(11));
+    if (parts.length < 2 || !cleanReviewText(parts.length > 2 ? parts.slice(2).join(' | ') : parts[1])) throw new Error('Use: /addreview Author | Role | Review text');
+    if (parts[0].length > 120 || (parts.length > 2 && parts[1].length > 120)) throw new Error('Use: /addreview with an author and role under 120 characters.');
+    return `Add this review to the public site:\n${command.slice(11)}`;
+  }
   if (lower.startsWith('/removereview ') || lower.startsWith('/delreview ')) return `Hide site review: ${command.split(/\s+/).slice(1).join(' ')}`;
   if (lower.startsWith('/forget ')) {
     const query = command.slice(8).trim();
@@ -281,7 +293,7 @@ async function createPendingAction(chatId: number, command: string, photos?: Tel
   }
   const productCommand = command.match(/^\/(edit|setimage)\s+([^|]+)([\s\S]*)$/i);
   if (productCommand) {
-    const resolution = await resolveCatalogProduct(productCommand[2].trim());
+    const resolution = await resolveCatalogProduct(productCommand[2].trim(), { requireVerified: true });
     if (resolution.status === 'ambiguous') {
       const choices = resolution.matches.map(match => ({ slug: match.product.slug, name: match.product.name, category: match.category.title }));
       const token = randomBytes(4).toString('hex').toUpperCase();
@@ -296,9 +308,39 @@ async function createPendingAction(chatId: number, command: string, photos?: Tel
     }
     if (resolution.status === 'matched') command = '/' + productCommand[1] + ' ' + resolution.match.product.slug + productCommand[3];
   }
-  const edit = /^\/edit\s/i.test(command) ? await prepareProductEdit(command) : undefined;
+  let edit: PreparedEdit | undefined;
+  try {
+    edit = /^\/edit\s/i.test(command) ? await prepareProductEdit(command) : undefined;
+  } catch (error) {
+    if (!(error instanceof Error) || !error.message.startsWith('Choose an existing category:')) throw error;
+    await abandonClarification(chatId);
+    const { error: saveError } = await getSupabaseAdmin().from('owner_agent_events').insert([{
+      telegram_chat_id: chatId, event_type: 'owner_clarification_pending', product_slug: null,
+      payload: { command, expiresAt: new Date(Date.now() + ACTION_TTL_MINUTES * 60_000).toISOString() },
+    }]);
+    if (saveError) throw new Error('Could not save the category question. Nothing changed.');
+    return error.message + '\nFor ' + command.match(/^\/edit\s+([^|]+)/i)?.[1]?.trim() +
+      ', reply with the category name. I will then show a saved approval preview. Nothing has changed. Reply Cancel to discard this request.';
+  }
   if (edit && Object.entries(edit.patch).every(([key,value]) => JSON.stringify(edit.before[key]) === JSON.stringify(value))) return edit.summary + '\nThese values are already saved. Nothing needs to be changed or approved.';
-  const summary = edit?.summary || await actionSummary(command, photos);
+  let summary = edit?.summary || await actionSummary(command, photos);
+  let memoryIds: string[] | undefined;
+  if (/^\/forget /i.test(command)) {
+    const notes = await matchingOwnerNotes(chatId, command.slice(8));
+    if (!notes.length) return 'No permanent owner notes matched that topic. Nothing was removed.';
+    memoryIds = notes.map(note => note.id);
+    summary += '\nMatching notes: ' + notes.length + '. Only these saved notes will be removed.';
+  }
+  const { data: existing, error: existingError } = await getSupabaseAdmin().from('owner_agent_events')
+    .select('payload').eq('telegram_chat_id', chatId).eq('event_type', 'owner_action_pending')
+    .order('created_at', { ascending: false }).limit(30);
+  if (existingError) throw new Error('Existing approval previews could not be checked. Nothing changed.');
+  const duplicate = (existing || []).find(row => row.payload?.command === command
+    && row.payload?.summary === summary && row.payload?.photoFileId === (latestPhotoFileId(photos) || undefined)
+    && Date.parse(row.payload?.expiresAt || '') > Date.now());
+  if (duplicate) return ['This edit already has a saved preview. Nothing has changed yet.', summary,
+    `Approve within ${ACTION_TTL_MINUTES} minutes: /confirm ${duplicate.payload.token}`,
+    `Cancel: /cancel ${duplicate.payload.token}`].join('\n');
   const token = randomBytes(4).toString('hex').toUpperCase();
   const expiresAt = new Date(Date.now() + ACTION_TTL_MINUTES * 60 * 1000).toISOString();
   const payload = {
@@ -308,6 +350,7 @@ async function createPendingAction(chatId: number, command: string, photos?: Tel
     expiresAt,
     photoFileId: latestPhotoFileId(photos) || undefined,
     edit,
+    memoryIds,
   };
   const { error } = await getSupabaseAdmin().from('owner_agent_events').insert([{
     telegram_chat_id: chatId,
@@ -324,6 +367,47 @@ async function createPendingAction(chatId: number, command: string, photos?: Tel
     `Approve within ${ACTION_TTL_MINUTES} minutes: /confirm ${token}`,
     `Cancel: /cancel ${token}`,
   ].join('\n');
+}
+
+// Persist clarification outside process memory so the next Telegram request can resume it.
+async function abandonClarification(chatId: number) {
+  const { error } = await getSupabaseAdmin().from('owner_agent_events')
+    .update({ event_type: 'owner_clarification_closed' })
+    .eq('telegram_chat_id', chatId).eq('event_type', 'owner_clarification_pending');
+  if (error) throw new Error('The previous category question could not be closed. Nothing changed.');
+}
+
+async function resumeCategoryClarification(chatId: number, text: string): Promise<string | null> {
+  const { data, error } = await getSupabaseAdmin().from('owner_agent_events').select('id, payload')
+    .eq('telegram_chat_id', chatId).eq('event_type', 'owner_clarification_pending')
+    .order('created_at', { ascending: false }).limit(1);
+  if (error) throw new Error('Pending category questions could not be checked. Nothing changed.');
+  const row = data?.[0];
+  if (!row) return null;
+  if (Date.parse(row.payload?.expiresAt || '') <= Date.now() || !Number.isFinite(Date.parse(row.payload?.expiresAt || ''))) {
+    await abandonClarification(chatId);
+    return 'The category question expired. Nothing changed. Send the full edit request again.';
+  }
+  if (parseNaturalOwnerApproval(text) === 'cancel') {
+    await abandonClarification(chatId);
+    return 'Cancelled the category request. Nothing changed.';
+  }
+  const catalog = await getMergedCatalog({ includeHidden: true, requireVerified: true });
+  const normalize = (s: string) => s.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]/g, '');
+  const reply = text.trim().replace(/^(?:actually[, ]*|use |make it |i meant |please use )/i, '').replace(/[.!]+$/, '');
+  const category = catalog.categories.find(c => normalize(c.title) === normalize(reply) || normalize(c.slug) === normalize(reply));
+  if (!category) {
+    if (parseNaturalOwnerApproval(text)) return 'No approval preview exists for this category request yet. Reply with an existing category: ' + catalog.categories.map(c => c.title).join(', ');
+    if (text.length <= 60 && !/[?]/.test(text)) return 'I still need an existing category for this request: ' + catalog.categories.map(c => c.title).join(', ') + '. Reply with its name or Cancel. Nothing changed.';
+    await abandonClarification(chatId);
+    return null;
+  }
+  const { data: claimed, error: claimError } = await getSupabaseAdmin().from('owner_agent_events')
+    .update({ event_type: 'owner_clarification_closed' }).eq('id', row.id)
+    .eq('event_type', 'owner_clarification_pending').select('id').maybeSingle();
+  if (claimError) throw new Error('The category reply could not be saved. Nothing changed.');
+  if (!claimed) return 'That category question has already been answered. Check the latest preview.';
+  return createPendingAction(chatId, String(row.payload.command).replace(/(\|\s*category=)[^|]+/i, '$1' + category.slug));
 }
 
 async function selectPendingProduct(chatId: number, token: string, index: number): Promise<string> {
@@ -344,7 +428,7 @@ async function selectPendingProduct(chatId: number, token: string, index: number
 }
 
 async function browseOwnerProducts(page: number): Promise<OwnerCommandResult> {
-  const catalog = await getMergedCatalog({ includeHidden: true });
+  const catalog = await getMergedCatalog({ includeHidden: true, requireVerified: true });
   const products = catalog.categories.flatMap(category => category.products.map(product => ({ product, category })));
   const pages = Math.max(1, Math.ceil(products.length / 8));
   page = Math.max(0, Math.min(page, pages - 1));
@@ -379,6 +463,7 @@ async function findPendingAction(chatId: number, token: string): Promise<Pending
     expiresAt: String(row.payload.expiresAt || ''),
     photoFileId: row.payload.photoFileId ? String(row.payload.photoFileId) : undefined,
     edit: row.payload.edit,
+    memoryIds: row.payload.memoryIds,
   };
 }
 
@@ -394,9 +479,9 @@ async function cancelPendingAction(chatId: number, token: string): Promise<strin
   return 'Cancelled. No website or business data was changed.';
 }
 
-async function forgetOwnerNotes(chatId: number, query: string): Promise<string> {
+async function matchingOwnerNotes(chatId: number, query: string): Promise<Array<{id:string;content:string}>> {
   const clean = query.toLowerCase().trim();
-  if (clean.length < 3) return 'Use a specific topic of at least 3 characters: /forget topic';
+  if (clean.length < 3) throw new Error('Use a specific topic of at least 3 characters: /forget topic');
   const { data, error } = await getSupabaseAdmin()
     .from('owner_agent_memory')
     .select('id, content')
@@ -405,12 +490,16 @@ async function forgetOwnerNotes(chatId: number, query: string): Promise<string> 
     .order('created_at', { ascending: false })
     .limit(100);
   if (error) throw new Error(error.message);
-  const matches = (data || []).filter((item) => String(item.content || '').toLowerCase().includes(clean));
+  return (data || []).filter((item) => String(item.content || '').toLowerCase().includes(clean));
+}
+
+async function forgetOwnerNotes(chatId: number, query: string, approvedIds: string[] = []): Promise<string> {
+  const matches = (await matchingOwnerNotes(chatId, query)).filter(item => approvedIds.includes(item.id));
   if (!matches.length) return `No permanent owner notes matched "${query}". Nothing was removed.`;
   const ids = matches.map((item) => item.id);
-  const { error: deleteError } = await getSupabaseAdmin().from('owner_agent_memory').delete().in('id', ids);
+  const { error: deleteError } = await getSupabaseAdmin().from('owner_agent_memory').delete().eq('telegram_chat_id',chatId).in('id', ids);
   if (deleteError) throw new Error(deleteError.message);
-  await logOwnerEvent(chatId, 'owner_memory_forgotten', null, { query: clean, removedCount: ids.length });
+  await logOwnerEvent(chatId, 'owner_memory_forgotten', null, { query: query.toLowerCase().trim(), removedCount: ids.length });
   return `Removed ${ids.length} permanent owner note${ids.length === 1 ? '' : 's'} matching "${query}". Recent conversation history was not deleted.`;
 }
 
@@ -448,7 +537,9 @@ Recent conversation:
 ${formatConversationMemory(recentConversation)}`;
 
   const deadline = Date.now() + MODEL_CHAIN_BUDGET_MS;
-  for (const attempt of await getRuntimeModelAttempts()) {
+  let attempts;
+  try { attempts = await getRuntimeModelAttempts(); } catch { return ownerFallbackText(); }
+  for (const attempt of attempts) {
     if (Date.now() >= deadline) break;
     if (isModelCoolingDown(attempt)) continue;
     try {
@@ -456,6 +547,10 @@ ${formatConversationMemory(recentConversation)}`;
         { role: 'system', content: systemPrompt },
         { role: 'user', content: message },
       ], fetch, deadline - Date.now());
+      if (!result.content?.trim()) continue;
+      if (/\b(?:proceed|confirm|approve)\b|(?:i (?:have |will |can )?|successfully )(?:update[ds]?|change[ds]?|move[ds]?|save[ds]?|delete[ds]?|remove[ds]?|prepare[ds]?|appl(?:y|ied))|(?:has been|have been|was|is) (?:updated|changed|moved|saved|deleted|removed|prepared|applied)/i.test(result.content)) {
+        return 'I have not prepared or applied a change in this answer. Tell me the exact product and edit, for example: Move Turmeric Scrub to Body Scrubs. A saved preview with Approve and Cancel buttons is required before anything changes.';
+      }
       await saveOwnerMemory(chatId, 'owner_agent_reply', result.content, {
         source: 'telegram_owner',
         provider: result.provider,
@@ -463,7 +558,7 @@ ${formatConversationMemory(recentConversation)}`;
       });
       return result.content;
     } catch (error) {
-      console.error(`Owner AI attempt failed for ${attempt.provider}/${attempt.model}:`, error);
+      console.error(`Owner AI attempt failed for ${attempt.provider}/${attempt.model}`);
     }
   }
 
@@ -479,12 +574,12 @@ async function describeProduct(productName: string): Promise<string> {
   }
   const product = match.product;
   const stock = typeof product.stock === 'number' ? (product.stock <= 0 ? '\nStock: 0 (currently out)' : '\nStock: ' + product.stock) : '\nStock: not set';
-  const order = product.availableByOrder ? '\nStatus: available by order' : typeof product.stock === 'number' && product.stock <= 0 ? '\nStatus: currently out' : '\nStatus: available now or standard request';
-  return [`${product.name}`, `Category: ${match.category.title}`, `Price: ${product.price || 'Price on request'}`, stock, order, '', product.description || 'No description is listed.'].join('\n');
+  const order = product.availableByOrder ? '\nStatus: available by order' : typeof product.stock === 'number' ? (product.stock <= 0 ? '\nStatus: currently out' : '\nStatus: available now') : '\nStatus: stock availability is not confirmed';
+  return [`${product.name}`, `Category: ${match.category.title}`, `Price: ${product.price || 'Price on request'}`, `Concern filters: ${product.concerns ? product.concerns.join(', ') || 'none' : 'automatically inferred from product text'}`, stock, order, '', product.description || 'No description is listed.'].join('\n');
 }
 
 async function findProductsForOwner(query: string): Promise<string> {
-  const catalog = await getMergedCatalog();
+  const catalog = await getMergedCatalog({ requireVerified: true });
   const clean = query.toLowerCase().trim();
   if (!clean) return 'Use: /find product name';
   const matches: string[] = [];
@@ -493,7 +588,7 @@ async function findProductsForOwner(query: string): Promise<string> {
       const haystack = [product.name, category.title, product.description].join(' ').toLowerCase();
       if (haystack.includes(clean) || clean.split(/\s+/).filter(Boolean).every((word) => haystack.includes(word))) {
         const stock = typeof product.stock === 'number' ? ', stock ' + product.stock : '';
-        const status = product.availableByOrder ? ', by order' : typeof product.stock === 'number' && product.stock <= 0 ? ', out' : ', available';
+        const status = product.availableByOrder ? ', by order' : typeof product.stock === 'number' ? (product.stock <= 0 ? ', out' : ', available') : ', stock availability not confirmed';
         matches.push(`${product.name} (${category.title}${stock}${status})`);
       }
     }
@@ -502,7 +597,7 @@ async function findProductsForOwner(query: string): Promise<string> {
 }
 
 async function summarizeSite(): Promise<string> {
-  const catalog = await getMergedCatalog({ includeHidden: true });
+  const catalog = await getMergedCatalog({ includeHidden: true, requireVerified: true });
   const lines = ['Current public catalogue:'];
   let total = 0;
   let stockSet = 0;
@@ -539,7 +634,7 @@ async function ownerDashboard(): Promise<string> {
     'Essenshea owner dashboard',
     `Public products: ${products.filter((product) => !product.hidden).length}`,
     `Hidden products: ${products.filter((product) => product.hidden).length}`,
-    `Open recent order requests: ${recentOrders}`,
+    `Open recent order requests: ${data.unavailable?.includes('orders') ? 'unavailable' : recentOrders}`,
     `Active Eco-Rewards accounts: ${data.ecoRewards.activeAccounts ?? 'unavailable'}`,
     `Available Eco-Rewards benefits: ${data.ecoRewards.availableRewards ?? 'unavailable'}`,
     '',
@@ -626,6 +721,7 @@ export async function handleOwnerTelegramCommand(params: {
   photos?: TelegramPhoto[];
   approvedCommand?: string;
   approvedPhotoFileId?: string;
+  approvedMemoryIds?: string[];
 }): Promise<OwnerCommandResult> {
   const { chatId } = params;
   const photos = params.approvedPhotoFileId
@@ -639,7 +735,17 @@ export async function handleOwnerTelegramCommand(params: {
   }
 
   try {
+    if (/^(?:hi|hello|hey|good morning|good afternoon|good evening)[!. ]*$/i.test(text)) {
+      return { handled: true, response: 'Hello! Your private Essenshea owner desk is ready. You can ask for /dashboard, browse /products, or tell me the product and change you need. I will show an approval preview before changing the site.' };
+    }
+    if (lower === '/start' || lower === '/help' || lower === 'help') return { handled: true, response: helpText() };
     if (!params.approvedCommand) {
+      if ((text.startsWith('/') && lower !== '/categories') || looksLikeOwnerMutation(text)) {
+        await abandonClarification(chatId);
+      } else {
+        const resumed = await resumeCategoryClarification(chatId, text);
+        if (resumed) return { handled: true, response: resumed };
+      }
       const choice = text.match(/^\/choose ([A-F0-9]{8}) ([1-5])$/i);
       if (choice) return {handled:true, response:await selectPendingProduct(chatId, choice[1].toUpperCase(), Number(choice[2]))};
       const browse = text.match(/^\/products(?: (\d{1,4}))?$/);
@@ -683,7 +789,7 @@ export async function handleOwnerTelegramCommand(params: {
             const updated = await upsertOverride(pending.edit.slug, pending.edit.patch, chatId, pending.edit.expected);
             result = { handled: true, response: updated.name + ' updated and verified on the website.\n' + productEditPreview(pending.edit.before, pending.edit.patch) };
           } else {
-            result = await handleOwnerTelegramCommand({ chatId, text: pending.command, approvedCommand: pending.command, approvedPhotoFileId: pending.photoFileId });
+            result = await handleOwnerTelegramCommand({ chatId, text: pending.command, approvedCommand: pending.command, approvedPhotoFileId: pending.photoFileId, approvedMemoryIds: pending.memoryIds });
           }
           if (result.failed) throw new Error(result.response);
           try { await getSupabaseAdmin().from('owner_agent_events').update({
@@ -701,12 +807,8 @@ export async function handleOwnerTelegramCommand(params: {
       }
     }
 
-    if (lower === '/start' || lower === '/help' || lower === 'help') {
-      return { handled: true, response: helpText() };
-    }
-
     if (lower === '/categories') {
-      const catalog = await getMergedCatalog({ includeHidden: true });
+      const catalog = await getMergedCatalog({ includeHidden: true, requireVerified: true });
       return { handled: true, response: catalog.categories.map(category => category.title + ': ' + category.products.filter(product => !product.hidden).length + ' public products').join('\n') };
     }
 
@@ -751,7 +853,8 @@ export async function handleOwnerTelegramCommand(params: {
 
     if (lower.startsWith('/remember ')) {
       const note = text.slice(10).trim();
-      await saveOwnerMemory(chatId, 'owner_note', note, { source: 'telegram_owner' });
+      const saved = await saveOwnerMemory(chatId, 'owner_note', note, { source: 'telegram_owner' });
+      if (!saved) throw new Error('Owner note could not be saved.');
       return { handled: true, response: note ? 'Saved to owner memory.' : 'Use: /remember note to save' };
     }
 
@@ -761,7 +864,7 @@ export async function handleOwnerTelegramCommand(params: {
     }
 
     if (lower.startsWith('/forget ')) {
-      return { handled: true, response: await forgetOwnerNotes(chatId, text.slice(8).trim()) };
+      return { handled: true, response: await forgetOwnerNotes(chatId, text.slice(8).trim(), params.approvedMemoryIds) };
     }
 
     if (lower.startsWith('/stock ')) {
@@ -861,6 +964,8 @@ export async function handleOwnerTelegramCommand(params: {
       if (!hidden) return {handled:true, failed:true, response:'That review ID was not found. Use /reviews, then copy the full ID.'};
       return { handled: true, response: 'Review has been hidden from the site.' };
     }
+
+    if (text.startsWith('/')) return { handled: true, response: 'That command is incomplete or unsupported. Send /help for the exact formats. Nothing changed.' };
 
     if (photos?.length) {
       return { handled: true, response: 'I received the image. To attach it to a product, resend it with caption: /setimage product name' };
