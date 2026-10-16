@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
   sendTelegramMessage,
+  sendTelegramProductPhoto,
   sendTypingIndicator,
   answerTelegramCallback,
   ensureTelegramCallbackUpdates,
@@ -43,6 +44,7 @@ export async function POST(req: NextRequest) {
       }
       await answerTelegramCallback(callback.id, 'Processing your selection').catch(() => console.error('Telegram callback acknowledgement unavailable'));
       const result = await handleOwnerTelegramCommand({ chatId, text: command });
+      if (result.previewPhotoFileId) await sendTelegramProductPhoto(chatId, result.previewPhotoFileId);
       if (result.handled) await sendTelegramMessage(chatId, result.response, result.replyMarkup || ownerReplyMarkup(result.response));
       return NextResponse.json({ ok: true });
     }
@@ -90,6 +92,7 @@ async function handleMessage(
       ? await handleOwnerTelegramCommand({ chatId, text: userMessage, photos })
       : { handled: false, response: '' };
     if (ownerResult.handled) {
+      if ('previewPhotoFileId' in ownerResult && ownerResult.previewPhotoFileId) await sendTelegramProductPhoto(chatId, ownerResult.previewPhotoFileId);
       await sendTelegramMessage(chatId, ownerResult.response, ownerResult.replyMarkup || ownerReplyMarkup(ownerResult.response));
       return;
     }
@@ -108,3 +111,4 @@ async function handleMessage(
     ).catch((sendError) => console.error('Telegram error reply failed:', sendError));
   }
 }
+

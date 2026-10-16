@@ -29,14 +29,14 @@ test('owner edit flow previews, confirms once, rejects outsiders and stale edits
    const run = () => {
     if(failDb)return {data:null,error:{message:'private database diagnostic'}};
     if (failCompletionAudit && operation === 'update' && value?.event_type === 'owner_action_applied') throw new TypeError('fetch failed');
-    const matches = (table === 'owner_agent_memory' ? notes : table === 'site_reviews' ? reviews : table === 'catalog_overrides' ? (saved ? [saved] : []) : events).filter(row => filters.every(([key,val])=>Array.isArray(val)?val.includes(row[key]):row[key]===val));
+    const matches = (table === 'owner_agent_memory' ? notes : table === 'site_reviews' ? reviews : table === 'catalog_overrides' ? (saved ? [saved] : []) : events).filter(row => filters.every(([key,val])=>Array.isArray(val)?val.includes(row[key]):(key.includes('->') ? key.split(/->>?/).reduce((obj:any,part:string)=>obj?.[part],row)?.toString() : row[key])===val));
     if (table === 'site_reviews' && operation === 'insert') {
       if (failReview) return {data:null,error:{message:'fetch failed'}};
       const row = {id:'review-id-test',...value}; reviews.push(row); return {data:[row],error:null};
     }
     if(operation === 'delete') {for(const row of matches) notes.splice(notes.indexOf(row),1);}
     if(table === 'catalog_overrides' && operation === 'insert') {saved=value;return {data:[saved],error:null};}
-    if(operation === 'insert') for(const row of value) events.push({id:events.length+1,...row});
+    if(operation === 'insert') { const inserted=value.map((row:any)=>({id:events.length+1+value.indexOf(row),...row})); events.push(...inserted); return {data:inserted,error:null}; }
     if(operation === 'update') for(const row of matches) Object.assign(row,value);
     return {data:matches,error:null};
    };
@@ -63,6 +63,16 @@ test('owner edit flow previews, confirms once, rejects outsiders and stale edits
   }
  };
  const mocks: any = {cleanReviewText,getSupabaseAdmin:()=>admin,resolveCatalogProduct:resolve,slugifyCatalogValue:(s: string)=>s.toLowerCase().replace(/\s/g,'-'),getMergedCatalog:async()=>snapshot().catalog,getCatalogSnapshot:async()=>{const result=snapshot();if(failCatalog)result.issues.push({code:'unverified_live_data',message:'Unavailable'});return result;},parseNaturalOwnerMutation,parseOwnerActionApproval,parseNaturalOwnerApproval,looksLikeOwnerMutation,ownerErrorReply,parseProductEdit,productRecord,productEditPreview,ownerMoney,ownerStock,parseTelegramOwnerIds,saveOwnerMemory:async(chatId:number,type:string,content:string)=>{if(failMemory)return false;if(type==='owner_note')notes.push({id:'00000000-0000-4000-8000-'+String(notes.length+1).padStart(12,'0'),telegram_chat_id:chatId,memory_type:type,content});return true;},loadRecentOwnerConversation:async()=>[],retrieveOwnerMemory:async()=>'',formatConversationMemory:()=>'',callChatModel:async()=>{modelCalls++;if(failModels)throw new Error('simulated outage');return {content:modelAnswer,provider:'test',model:'test'};},getRuntimeModelAttempts:async()=>modelAttempts,isModelCoolingDown:()=>false,MODEL_CHAIN_BUDGET_MS:28000,percentageChange:()=>'',formatCatalogHealth:()=>'',formatLowStock:()=>'',formatOwnerBusinessContext:()=>'',formatRecentOrders:()=>'',loadOwnerBusinessData:async()=>({catalog:snapshot().catalog,recentOrders:[],ecoRewards:{activeAccounts:2,availableRewards:1}})};
+ async function loadSource(file:string,bindings:any) {
+   const key='__listingModule'+Math.random().toString(36).slice(2);
+   (globalThis as any)[key]=bindings;
+   const raw=await readFile(new URL('../lib/'+file,import.meta.url),'utf8');
+   const code=stripTypeScriptTypes(raw.trimStart().replace(/^import[\s\S]*?;\s*/gm,''),{mode:'strip'});
+   return import('data:text/javascript;base64,'+Buffer.from('import { randomBytes } from "node:crypto";const {'+Object.keys(bindings).join(',')+'}=globalThis.'+key+';'+code).toString('base64'));
+ }
+ const creation = await loadSource('product-create.ts',{parseProductEdit});
+ const drafting = await loadSource('owner-product-draft.ts',{...mocks,...creation});
+ Object.assign(mocks,drafting);
  const key='__essensheaOwnerEditTest';
  (globalThis as any)[key]=mocks;
  try {
@@ -153,11 +163,41 @@ test('owner edit flow previews, confirms once, rejects outsiders and stale edits
   assert.match(imageSaved.response,/image has been updated/);assert.equal(saved.image_url,'/api/catalog/image?fileId=test-photo');
   events.length=0;saved=null;
   const add=await mod.handleOwnerTelegramCommand({chatId:owner,text:'/addproduct Haircare | Test Balm | KSh 600 | Test description'});
-  assert.match(add.response,/Approve within/);assert.equal(saved,null);
+  assert.match(add.response,/draft is saved/);assert.equal(saved,null);
+  const draftPreview=await mod.handleOwnerTelegramCommand({chatId:owner,text:'/draft size=100ml | variants=clear | availability=by order | stock=unknown | ingredients=clear | benefits=clear | labels=clear | concerns=clear',photos:[{file_id:'listing-photo'}]});
+  assert.match(draftPreview.response,/Approve within/);assert.equal(saved,null);assert.equal(draftPreview.previewPhotoFileId,'listing-photo');
   assert.match((await mod.handleOwnerTelegramCommand({chatId:owner,text:'Proceed'})).response,/has been added/);
   assert.equal(saved.product_name,'Test Balm');assert.equal(saved.available_by_order,true);
-  const duplicateAdd=await mod.handleOwnerTelegramCommand({chatId:owner,text:'/addproduct Haircare | Test Balm | KSh 600 | Test description'});
+  assert.equal(saved.image_url,'/api/catalog/image?fileId=listing-photo');assert.ok(saved.created_at);
+  const duplicateAdd=await mod.handleOwnerTelegramCommand({chatId:owner,text:'/addproduct Haircare | Test Balm | KSh 600 | Test description | size=100ml | variants=clear | availability=by order | stock=unknown | ingredients=clear | benefits=clear | labels=clear | concerns=clear',photos:[{file_id:'listing-photo'}]});
   assert.equal(duplicateAdd.failed,true);
+
+  // New listing approvals are bound to an immutable draft revision.
+  events.length=0;saved=null;
+  const draftInput='/addproduct Haircare | Revision Balm | 600 | Confirmed description | size=100ml | variants=clear | availability=now | stock=3 | ingredients=clear | benefits=clear | labels=clear | concerns=clear';
+  const revisionPreview=await mod.handleOwnerTelegramCommand({chatId:owner,text:draftInput,photos:[{file_id:'revision-photo'}]});
+  const revisionToken=revisionPreview.response.match(/confirm ([A-F0-9]+)/)![1];
+  const revised=await mod.handleOwnerTelegramCommand({chatId:owner,text:'/draft price=700'});
+  assert.match(revised.response,/700/);assert.equal(saved,null);
+  assert.match((await mod.handleOwnerTelegramCommand({chatId:owner,text:'/confirm '+revisionToken})).response,/invalid|already/);
+  const freshToken=revised.response.match(/confirm ([A-F0-9]+)/)![1];
+  const resultOnce=await mod.handleOwnerTelegramCommand({chatId:owner,text:'/confirm '+freshToken});
+  assert.match(resultOnce.response,/has been added/);assert.equal(saved.price_value,700);
+  const timeOnce=saved.created_at;
+  await mod.handleOwnerTelegramCommand({chatId:owner,text:'/confirm '+freshToken});assert.equal(saved.created_at,timeOnce);
+  events.length=0;saved=null;
+  const discarded=await mod.handleOwnerTelegramCommand({chatId:owner,text:draftInput,photos:[{file_id:'revision-photo'}]});
+  const discardedToken=discarded.response.match(/confirm ([A-F0-9]+)/)![1];
+  await mod.handleOwnerTelegramCommand({chatId:owner,text:'/discardproduct'});
+  assert.match((await mod.handleOwnerTelegramCommand({chatId:owner,text:'/confirm '+discardedToken})).response,/discarded|changed/);assert.equal(saved,null);
+  events.length=0;
+  const expiring=await mod.handleOwnerTelegramCommand({chatId:owner,text:draftInput,photos:[{file_id:'revision-photo'}]});
+  const expiringToken=expiring.response.match(/confirm ([A-F0-9]+)/)![1];
+  events.find(e=>e.event_type==='owner_action_pending').payload.expiresAt='2000-01-01T00:00:00Z';
+  assert.match((await mod.handleOwnerTelegramCommand({chatId:owner,text:'/confirm '+expiringToken})).response,/expired/);assert.equal(saved,null);
+  events.length=0;
+  events.length=0;
+
   events.length=0;saved=null;
   for(const command of ['/addreview Name','/stock Amla Oil | 1.5','/setprice Amla Oil | -9','/setimage Amla Oil','/edit Amla Oil | variants=100ml:500;100ml:600']) {
    const invalid=await mod.handleOwnerTelegramCommand({chatId:owner,text:command});
@@ -325,3 +365,4 @@ test('owner edit flow previews, confirms once, rejects outsiders and stale edits
   if(env===undefined)delete process.env.OWNER_TELEGRAM_CHAT_IDS;else process.env.OWNER_TELEGRAM_CHAT_IDS=env;
  }
 });
+

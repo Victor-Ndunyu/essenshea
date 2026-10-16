@@ -13,6 +13,7 @@ export type CatalogProduct = {
   stock?: number | null;
   availableByOrder?: boolean;
   hidden?: boolean;
+  publishedAt?: string | null;
   bestFor?: string[] | null;
   concerns?: string[] | null;
   benefits?: string[] | null;
@@ -49,6 +50,7 @@ export type CatalogOverrideRow = {
   available_by_order: boolean | null;
   hidden: boolean | null;
   is_new: boolean | null;
+  created_at?: string | null;
   sort_order: number | null;
   best_for?: string[] | null;
   concerns?: string[] | null;
@@ -84,7 +86,7 @@ async function loadCatalogOverrides(): Promise<{ rows: CatalogOverrideRow[]; ava
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
       .from('catalog_overrides')
-      .select('product_slug, category_slug, product_name, description, price_text, price_value, image_url, stock, available_by_order, hidden, is_new, sort_order, best_for, concerns, benefits, ingredients, size_text, variants')
+      .select('product_slug, category_slug, product_name, description, price_text, price_value, image_url, stock, available_by_order, hidden, is_new, created_at, sort_order, best_for, concerns, benefits, ingredients, size_text, variants')
       .order('sort_order', { ascending: true, nullsFirst: false });
     if (error) throw error;
     return { rows: data || [], available: true };
@@ -170,3 +172,4 @@ export async function resolveCatalogProduct(query: string, options: { requireVer
   }
   return { status: 'matched', match: { category: plausible[0].category, product: plausible[0].product } };
 }
+

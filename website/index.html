@@ -13,6 +13,7 @@
   <link rel="icon" href="assets/images/star-mark.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="assets/css/style-new.css" />
   <link rel="stylesheet" href="assets/css/luxury-refinement.css?v=26" />
+  <link rel="stylesheet" href="/assets/css/new-arrivals.css?v=1" />
 </head>
 <body>
   <div class="page-shell">
@@ -96,6 +97,21 @@
           </aside>
         </div>
         <div class="craft-rail-cue" aria-hidden="true"><span>Swipe to explore catalogues</span><i></i><b>&rarr;</b></div>
+      </section>
+
+      <section class="section section--divider arrivals" id="new-arrivals" aria-labelledby="arrivals-title" hidden>
+        <div class="arrivals__head">
+          <div>
+            <span class="arrivals__eyebrow">Fresh to Essenshea</span>
+            <h2 class="arrivals__title" id="arrivals-title">A little newness.</h2>
+            <p class="arrivals__intro">Meet the latest additions to your skin and hair care.</p>
+          </div>
+          <div class="arrivals__controls" hidden>
+            <button type="button" data-arrivals-prev aria-label="Previous new arrivals" aria-controls="arrivals-rail">&#8592;</button>
+            <button type="button" data-arrivals-next aria-label="Next new arrivals" aria-controls="arrivals-rail">&#8594;</button>
+          </div>
+        </div>
+        <div class="arrivals__rail" id="arrivals-rail" aria-label="New products"></div>
       </section>
 
       <!-- -- Featured Care (daily edit linked to the shared shop detail modal) -- -->
@@ -343,6 +359,7 @@
   <script src="assets/js/agent-config.js"></script>
   <script src="assets/js/agent.js?v=8"></script>
   <script src="assets/js/featured-care.js?v=1"></script>
+  <script src="/assets/js/new-arrivals.js?v=1" defer></script>
   <script>
     const form = document.getElementById('main-inquiry-form');
     const status = document.getElementById('inquiry-status');
@@ -507,3 +524,4 @@
   </script>
 </body>
 </html>
+
