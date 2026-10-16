@@ -41,6 +41,7 @@ export function mergeCatalogData(source: CatalogData, overrides: CatalogOverride
       priceValue: override.price_text !== null ? (override.price_value ?? null) : (override.price_value ?? base?.priceValue ?? null),
       image: override.image_url || base?.image || target.image || '/assets/images/essenshea-logo.jpg',
       stock: override.stock,
+      publishedAt: override.is_new ? override.created_at ?? null : null,
       bestFor: override.best_for ?? base?.bestFor,
       concerns: override.concerns ?? base?.concerns,
       benefits: override.benefits ?? base?.benefits,
@@ -71,3 +72,4 @@ export function mergeCatalogData(source: CatalogData, overrides: CatalogOverride
   catalog.categories = categories.filter(category => includeHidden || category.products.length);
   return { catalog, issues };
 }
+

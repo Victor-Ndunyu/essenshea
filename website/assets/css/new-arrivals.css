@@ -1,0 +1,49 @@
+/* A compact boutique display that expands only when there are arrivals. */
+#new-arrivals[hidden], .arrivals__controls[hidden] { display: none !important; }
+#new-arrivals { --arrival-ink: #30261f; --arrival-gold: #8f6438; padding-block: clamp(36px, 5vw, 72px); color: var(--arrival-ink); }
+.arrivals__head { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+.arrivals__eyebrow { display: block; color: var(--arrival-gold); font-size: 10px; text-transform: uppercase; letter-spacing: .2em; margin-bottom: 10px; }
+.arrivals__title { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: clamp(36px, 4vw, 56px); line-height: 1.05; margin: 0; }
+.arrivals__intro { margin: 10px 0 0; font-size: 14px; color: #716357; max-width: 38ch; }
+.arrivals__controls { display: flex; gap: 8px; flex-shrink: 0; }
+.arrivals__controls button { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid #d6c5b2; border-radius: 50%; color: #4b3827; background: transparent; font-size: 20px; cursor: pointer; transition: background .2s, color .2s; }
+.arrivals__controls button:hover:not(:disabled) { background: #8f6438; color: #fffaf3; }
+.arrivals__controls button:disabled { opacity: .35; cursor: default; }
+.arrivals__rail { display: flex; gap: clamp(18px, 2.5vw, 30px); width: 100%; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding: 2px 2px 18px; scrollbar-width: thin; scrollbar-color: #c3a98d transparent; }
+.arrival { flex: 0 0 clamp(240px, 29%, 345px); min-width: 0; display: flex; flex-direction: column; color: inherit; text-decoration: none; scroll-snap-align: start; }
+.arrival:first-child { margin-left: auto; }
+.arrival:last-child { margin-right: auto; }
+.arrival__media { position: relative; background: #f1e8dd; overflow: hidden; border-radius: 3px 3px 46px 3px; aspect-ratio: 1; }
+.arrival__image { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .65s cubic-bezier(.2,.65,.3,1); }
+.arrival:hover .arrival__image { transform: scale(1.035); }
+.arrival__badge { position: absolute; top: 14px; left: 14px; padding: 6px 10px; background: #fffaf0ed; color: #68513a; font-size: 9px; letter-spacing: .13em; text-transform: uppercase; }
+.arrival__body { padding: 20px 2px 0; display: flex; flex-direction: column; flex: 1; }
+.arrival__category { color: #80674f; font-size: 10px; letter-spacing: .13em; text-transform: uppercase; }
+.arrival__name { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 29px; line-height: 1.1; margin: 8px 0 10px; overflow-wrap: anywhere; }
+.arrival__description { font-size: 13px; line-height: 1.6; color: #716357; margin: 0 0 18px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.arrival__meta { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-top: auto; }
+.arrival__price { font-size: 14px; font-weight: 500; }
+.arrival__size, .arrival__availability { font-size: 11px; color: #776757; }
+.arrival__availability { margin-top: 4px; }
+.arrival__action { margin-top: 16px; padding-top: 13px; border-top: 1px solid #d9cab9; font-size: 11px; letter-spacing: .04em; color: #765230; }
+#new-arrivals[data-count="1"] .arrivals__head { text-align: center; justify-content: center; }
+#new-arrivals[data-count="1"] .arrivals__intro { margin-inline: auto; }
+#new-arrivals[data-count="1"] .arrival { flex: 0 1 760px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(20px, 4vw, 48px); align-items: center; }
+#new-arrivals[data-count="1"] .arrival__body { padding: 10px 0; }
+#new-arrivals[data-count="1"] .arrival__name { font-size: clamp(32px, 3.5vw, 45px); }
+#new-arrivals[data-count="1"] .arrival__description { -webkit-line-clamp: 3; }
+.arrival:focus-visible, .arrivals__controls button:focus-visible { outline: 2px solid #8f6438; outline-offset: 4px; }
+@media (prefers-reduced-motion: no-preference) {
+  .arrivals--entered .arrival { animation: arrival-unfold .8s cubic-bezier(.2,.65,.3,1) both; animation-delay: calc(var(--arrival-index) * 70ms); }
+  @keyframes arrival-unfold { from { opacity: .25; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+}
+@media (max-width: 600px) {
+  .arrivals__head { gap: 12px; margin-bottom: 22px; }
+  .arrivals__intro { font-size: 12px; max-width: 28ch; }
+  .arrival { flex-basis: 80%; }
+  #new-arrivals[data-count="1"] .arrival { display: flex; flex-basis: min(100%, 360px); gap: 0; }
+  #new-arrivals[data-count="1"] .arrival__body { padding-top: 20px; }
+  #new-arrivals[data-count="1"] .arrival__name { font-size: 32px; }
+  .arrival__name { font-size: 28px; }
+}
+@media (prefers-reduced-motion: reduce) { .arrival__image, .arrivals__controls button { transition: none; } .arrivals__rail { scroll-behavior: auto; } }

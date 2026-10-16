@@ -70,6 +70,16 @@ export async function sendTypingIndicator(chatId: number): Promise<void> {
   }).catch((err) => console.error('Failed to send typing indicator:', err));
 }
 
+export async function sendTelegramProductPhoto(chatId: number, fileId: string): Promise<void> {
+  const response = await fetch(`https://api.telegram.org/bot${getTelegramBotToken()}/sendPhoto`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, photo: fileId, caption: 'Your proposed product image. Review the complete listing below before approving publication.' }),
+    signal: AbortSignal.timeout(10_000),
+  });
+  const result = await response.json();
+  if (!response.ok || result?.ok !== true) throw new Error('Telegram product preview photo could not be delivered.');
+}
+
 export async function callBusinessAgent(message: string, sessionId: string): Promise<string> {
   const agentUrl = getAgentApiUrl();
   const response = await fetch(agentUrl, {
@@ -129,3 +139,4 @@ export async function ensureTelegramCallbackUpdates(): Promise<void> {
   })();
   try { await callbackUpdatesCheck; } finally { callbackUpdatesCheck = null; }
 }
+

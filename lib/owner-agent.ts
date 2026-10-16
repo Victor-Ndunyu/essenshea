@@ -1,3 +1,5 @@
+import { handleNewProductDraft, publishNewProduct } from './owner-product-draft';
+import type { NewProductPreview } from './product-create';
 import { cleanReviewText } from './review-text';
 import type { InlineKeyboard } from './telegram-ui';
 import { randomBytes } from 'node:crypto';
@@ -24,6 +26,7 @@ type OwnerCommandResult = {
   response: string;
   failed?: boolean;
   replyMarkup?: InlineKeyboard;
+  previewPhotoFileId?: string;
 };
 
 const MUTATING_COMMANDS = ['/edit ', '/stock ', '/available ', '/availablenow ', '/order ', '/setdesc ', '/addproduct ', '/hide ', '/show ', '/setimage ', '/addreview ', '/removereview ', '/delreview ', '/forget '];
@@ -74,7 +77,11 @@ function helpText(): string {
     'More /edit fields: concerns, availability=now/by order, visibility=visible/hidden. Lists use semicolons; clear removes optional lists.',
     'Examples: Change the price of Amla Oil to KSh 850. Move Amla Oil to Haircare.',
     '/setdesc product name | new description - preview a description update',
-    '/addproduct category | name | price | description - add product as by order',
+    '/newproduct - guided complete listing with photo and approval preview',
+    '/draft field=value - correct a saved product draft',
+    '/previewproduct - review the saved draft before publishing',
+    '/discardproduct - discard the current unpublished draft',
+    '/addproduct category | name | price | description - prefill a guided draft',
     '/hide product name - remove from public catalogue',
     '/show product name - restore product',
     'Image update: send a photo with caption /setimage product name',
@@ -171,36 +178,6 @@ async function handleStockCommand(chatId: number, text: string, availableByOrder
   return `${updated.name} is updated. Stock: ${stock}. Status: ${availableByOrder ? 'available by order' : 'available now'}.`;
 }
 
-async function handleAddProduct(chatId: number, text: string): Promise<string> {
-  const args = splitPipeArgs(text);
-  if (args.length < 4) return 'Use: /addproduct category | name | price | description';
-  const [category, name, price] = args;
-  const description = args.slice(3).join(' | ');
-  const productSlug = slugifyCatalogValue(name);
-  const catalog = await getMergedCatalog({ includeHidden: true, requireVerified: true });
-  const categorySlug = String(parseProductEdit('/edit New product | category=' + category, catalog.categories).patch.category_slug);
-  const { error } = await getSupabaseAdmin().from('catalog_overrides').insert({
-    product_slug: productSlug,
-    category_slug: categorySlug,
-    product_name: name,
-    price_text: price,
-    price_value: ownerMoney(price),
-    description,
-    image_url: '/assets/images/essenshea-logo.jpg',
-    is_new: true,
-    hidden: false,
-    available_by_order: true,
-    updated_by: String(chatId),
-    updated_at: new Date().toISOString(),
-  });
-  if (error) throw new Error('Product creation could not be verified.');
-  const snapshot = await getCatalogSnapshot({ includeHidden: true });
-  const savedProduct = snapshot.catalog.categories.find(c => c.slug === categorySlug)?.products.find(p => p.slug === productSlug);
-  if (snapshot.issues.some(i => i.code === 'unverified_live_data') || !savedProduct || savedProduct.name !== name || savedProduct.description !== description || savedProduct.price !== price || !savedProduct.availableByOrder) throw new Error('Product creation could not be verified.');
-  await logOwnerEvent(chatId, 'catalog_add_product', productSlug, { category, name, price });
-  return `${name} has been added under ${category}. It is public as available by order. Send a product photo with caption: /setimage ${name}`;
-}
-
 type PendingOwnerAction = {
   id: number;
   command: string;
@@ -210,22 +187,11 @@ type PendingOwnerAction = {
   photoFileId?: string;
   edit?: PreparedEdit;
   memoryIds?: string[];
+  newProduct?: NewProductPreview;
 };
 
 async function actionSummary(command: string, photos?: TelegramPhoto[]): Promise<string> {
   const lower = command.toLowerCase();
-  if (lower.startsWith('/addproduct ')) {
-    const args = splitPipeArgs(command.slice(12));
-    if (args.length < 4) throw new Error('Use: /addproduct category | name | price | description');
-    if (args[1].length > 180 || args.slice(3).join(' | ').length > 6000) throw new Error('Use: a product name under 180 characters and description under 6,000 characters.');
-    ownerMoney(args[2]);
-    const snapshot = await getCatalogSnapshot({ includeHidden: true });
-    if (snapshot.issues.some(issue => issue.code === 'unverified_live_data')) throw new Error('Live catalogue is unavailable. Retry before adding products.');
-    parseProductEdit('/edit New product | category=' + args[0], snapshot.catalog.categories);
-    const slug = slugifyCatalogValue(args[1]);
-    if (snapshot.catalog.categories.flatMap(category => category.products).some(product => product.slug === slug)) throw new Error('That product already exists. Use /edit to change it.');
-    return `Add a public by-order product\nCategory: ${args[0]}\nName: ${args[1]}\nPrice: ${args[2]}\nDescription: ${args.slice(3).join(' | ')}`;
-  }
   if (lower.startsWith('/addreview ')) {
     const parts = splitPipeArgs(command.slice(11));
     if (parts.length < 2 || !cleanReviewText(parts.length > 2 ? parts.slice(2).join(' | ') : parts[1])) throw new Error('Use: /addreview Author | Role | Review text');
@@ -464,6 +430,7 @@ async function findPendingAction(chatId: number, token: string): Promise<Pending
     photoFileId: row.payload.photoFileId ? String(row.payload.photoFileId) : undefined,
     edit: row.payload.edit,
     memoryIds: row.payload.memoryIds,
+    newProduct: row.payload.newProduct,
   };
 }
 
@@ -740,6 +707,8 @@ export async function handleOwnerTelegramCommand(params: {
     }
     if (lower === '/start' || lower === '/help' || lower === 'help') return { handled: true, response: helpText() };
     if (!params.approvedCommand) {
+      const listing = await handleNewProductDraft(chatId, text, photos);
+      if (listing) return listing;
       if ((text.startsWith('/') && lower !== '/categories') || looksLikeOwnerMutation(text)) {
         await abandonClarification(chatId);
       } else {
@@ -783,7 +752,9 @@ export async function handleOwnerTelegramCommand(params: {
         if (!claimed) return { handled: true, response: 'That action was already confirmed, cancelled, or expired.' };
         try {
           let result: OwnerCommandResult;
-          if (pending.edit) {
+          if (pending.newProduct) {
+            result = { handled: true, response: await publishNewProduct(chatId, pending.newProduct) };
+          } else if (pending.edit) {
             const current = await resolveProductOrThrow(pending.edit.slug);
             if (JSON.stringify(productRecord(current.product, current.category.slug)) !== JSON.stringify(pending.edit.before)) throw new Error('This product changed after the preview. Send the edit request again to review the latest values.');
             const updated = await upsertOverride(pending.edit.slug, pending.edit.patch, chatId, pending.edit.expected);
@@ -906,7 +877,7 @@ export async function handleOwnerTelegramCommand(params: {
     }
 
     if (lower.startsWith('/addproduct ')) {
-      return { handled: true, response: await handleAddProduct(chatId, text.slice(12)) };
+      return { handled: true, response: 'Use /newproduct to prepare a complete listing for review. Nothing was published.' };
     }
 
     if (lower.startsWith('/hide ')) {
@@ -979,3 +950,4 @@ export async function handleOwnerTelegramCommand(params: {
     return { handled: true, failed: true, response };
   }
 }
+
