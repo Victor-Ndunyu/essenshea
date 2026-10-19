@@ -116,7 +116,7 @@ export function formatOwnerBusinessContext(data: OwnerBusinessData): string {
   );
   const orders = data.recentOrders.map((order) => {
     const items = (order.order_items || []).map((item) => `${item.quantity}× ${item.title}`).join(', ') || 'items unavailable';
-    return `- ${order.reference}: ${order.status}; ${order.payment_status}; ${order.fulfilment_method}; ${items}; ${order.created_at}`;
+    return `- ${order.reference}: order status ${order.status}; payment ${order.payment_status}; ${order.fulfilment_method}; ${items}; ${order.created_at}`;
   });
   const reviews = data.reviews.map((review) =>
     `- ${review.is_visible ? 'visible' : 'hidden'}: ${review.author}${review.role ? ` (${review.role})` : ''} — ${review.text.slice(0, 240)}`,
@@ -199,6 +199,6 @@ export function formatRecentOrders(data: OwnerBusinessData): string {
   return ['Recent order requests:', ...data.recentOrders.slice(0, 10).map((order) => {
     const items = (order.order_items || []).map((item) => `${item.quantity}× ${item.title}`).join(', ') || 'items unavailable';
     const when = new Date(order.created_at).toLocaleString('en-KE', { timeZone: 'Africa/Nairobi' });
-    return `- ${order.reference} — ${order.status}, ${order.payment_status}, ${order.fulfilment_method}; ${items}; ${when}`;
+    return `- ${order.reference} — order status ${order.status}, payment ${order.payment_status}, ${order.fulfilment_method}; ${items}; ${when}`;
   })].join('\n');
 }

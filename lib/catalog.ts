@@ -133,7 +133,7 @@ export type CatalogResolution =
   | { status: 'not_found'; matches: [] };
 
 function normalizeCatalogQuery(value: string): string {
-  return value.toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').trim();
+  return value.toLowerCase().replace(/\btumeric\b/g, 'turmeric').replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').trim();
 }
 
 export async function resolveCatalogProduct(query: string, options: { requireVerified?: boolean } = {}): Promise<CatalogResolution> {

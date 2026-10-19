@@ -1,3 +1,4 @@
+import { parseTelegramOwnerIds } from './security';
 import { getSupabaseAdmin } from './supabase-admin';
 
 export type NotificationChannel = 'telegram' | 'whatsapp' | 'email';
@@ -33,7 +34,7 @@ async function recordAttempt(alert: OrderAlert, result: AttemptResult): Promise<
 
 async function sendTelegram(text: string): Promise<Omit<AttemptResult, 'channel'>> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.ORDERS_TELEGRAM_CHAT_ID;
+  const chatId = [...parseTelegramOwnerIds(process.env.OWNER_TELEGRAM_CHAT_IDS !== undefined ? process.env.OWNER_TELEGRAM_CHAT_IDS : process.env.OWNER_TELEGRAM_CHAT_ID || process.env.ORDERS_TELEGRAM_CHAT_ID)][0];
   if (!token || !chatId) throw new Error('Telegram order notifications are not configured');
 
   const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {

@@ -1,3 +1,4 @@
+import { unsafeActionClaim, answerCatalogQuestion, orderConfirmationHelp } from '../lib/owner-answers.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -15,6 +16,7 @@ test('owner edit flow previews, confirms once, rejects outsiders and stale edits
  let failDb=false;let failCatalog=false;let failModels=false;let failMemory=false;
  let modelAnswer = ''; let modelAttempts: any[]=[]; let modelCalls=0;
  const notes: any[]=[];
+ const orderRows:any[]=[{reference:'ESS-20261019-TEST',status:'new',payment_status:'awaiting_confirmation',fulfilment_method:'pickup',updated_at:'original',total_amount:null,delivery_location:null}];
  const events: any[] = []; let saved: any = null; let rpcMode = ''; let rpcCalls = 0; let failCompletionAudit = false; let failReview = false; const reviews: any[] = [];
  const snapshot = () => mergeCatalogData(base, saved ? [saved] : [], true);
  const resolve = async (query: string) => {
@@ -29,7 +31,7 @@ test('owner edit flow previews, confirms once, rejects outsiders and stale edits
    const run = () => {
     if(failDb)return {data:null,error:{message:'private database diagnostic'}};
     if (failCompletionAudit && operation === 'update' && value?.event_type === 'owner_action_applied') throw new TypeError('fetch failed');
-    const matches = (table === 'owner_agent_memory' ? notes : table === 'site_reviews' ? reviews : table === 'catalog_overrides' ? (saved ? [saved] : []) : events).filter(row => filters.every(([key,val])=>Array.isArray(val)?val.includes(row[key]):row[key]===val));
+    const matches = (table === 'orders' ? orderRows : table === 'owner_agent_memory' ? notes : table === 'site_reviews' ? reviews : table === 'catalog_overrides' ? (saved ? [saved] : []) : events).filter(row => filters.every(([key,val])=>Array.isArray(val)?val.includes(row[key]):row[key]===val));
     if (table === 'site_reviews' && operation === 'insert') {
       if (failReview) return {data:null,error:{message:'fetch failed'}};
       const row = {id:'review-id-test',...value}; reviews.push(row); return {data:[row],error:null};
@@ -52,6 +54,7 @@ test('owner edit flow previews, confirms once, rejects outsiders and stale edits
    };return builder;
   },
   async rpc(_name: string, params: any) {
+   if(_name==='owner_apply_order_patch'){const o=orderRows[0];if(o.updated_at!==params.p_expected)return {error:{message:'stale'}};Object.assign(o,{[params.p_field]:params.p_value,updated_at:'updated'});return{data:o,error:null};}
    rpcCalls++;
    if (rpcMode === 'before-write') return {error:{message:'TypeError: fetch failed'}};
    if(JSON.stringify(saved)!==JSON.stringify(params.p_expected)) return {error:{message:'Stale saved row'}};
@@ -62,7 +65,11 @@ test('owner edit flow previews, confirms once, rejects outsiders and stale edits
    return {data:saved,error:null};
   }
  };
- const mocks: any = {cleanReviewText,getSupabaseAdmin:()=>admin,resolveCatalogProduct:resolve,slugifyCatalogValue:(s: string)=>s.toLowerCase().replace(/\s/g,'-'),getMergedCatalog:async()=>snapshot().catalog,getCatalogSnapshot:async()=>{const result=snapshot();if(failCatalog)result.issues.push({code:'unverified_live_data',message:'Unavailable'});return result;},parseNaturalOwnerMutation,parseOwnerActionApproval,parseNaturalOwnerApproval,looksLikeOwnerMutation,ownerErrorReply,parseProductEdit,productRecord,productEditPreview,ownerMoney,ownerStock,parseTelegramOwnerIds,saveOwnerMemory:async(chatId:number,type:string,content:string)=>{if(failMemory)return false;if(type==='owner_note')notes.push({id:'00000000-0000-4000-8000-'+String(notes.length+1).padStart(12,'0'),telegram_chat_id:chatId,memory_type:type,content});return true;},loadRecentOwnerConversation:async()=>[],retrieveOwnerMemory:async()=>'',formatConversationMemory:()=>'',callChatModel:async()=>{modelCalls++;if(failModels)throw new Error('simulated outage');return {content:modelAnswer,provider:'test',model:'test'};},getRuntimeModelAttempts:async()=>modelAttempts,isModelCoolingDown:()=>false,MODEL_CHAIN_BUDGET_MS:28000,percentageChange:()=>'',formatCatalogHealth:()=>'',formatLowStock:()=>'',formatOwnerBusinessContext:()=>'',formatRecentOrders:()=>'',loadOwnerBusinessData:async()=>({catalog:snapshot().catalog,recentOrders:[],ecoRewards:{activeAccounts:2,availableRewards:1}})};
+ const orderRaw=await readFile(new URL('../lib/owner-orders.ts',import.meta.url),'utf8');
+ (globalThis as any).__orderFlowDb=admin;
+ const orderMod=await import('data:text/javascript;base64,'+Buffer.from('const getSupabaseAdmin=()=>globalThis.__orderFlowDb;\n'+stripTypeScriptTypes(orderRaw.replace(/^import.*;\n/gm,''))).toString('base64'));
+ const {parseOrderMutation,prepareOrderEdit,applyOrderEdit,orderDetails,mostOrderedProducts}=orderMod;
+ const mocks: any = {prepareOrderEdit,applyOrderEdit,orderDetails,mostOrderedProducts,customerLearningContext:async()=>'No customer signals',parseOrderMutation,unsafeActionClaim,answerCatalogQuestion,orderConfirmationHelp,cleanReviewText,getSupabaseAdmin:()=>admin,resolveCatalogProduct:resolve,slugifyCatalogValue:(s: string)=>s.toLowerCase().replace(/\s/g,'-'),getMergedCatalog:async()=>snapshot().catalog,getCatalogSnapshot:async()=>{const result=snapshot();if(failCatalog)result.issues.push({code:'unverified_live_data',message:'Unavailable'});return result;},parseNaturalOwnerMutation,parseOwnerActionApproval,parseNaturalOwnerApproval,looksLikeOwnerMutation,ownerErrorReply,parseProductEdit,productRecord,productEditPreview,ownerMoney,ownerStock,parseTelegramOwnerIds,saveOwnerMemory:async(chatId:number,type:string,content:string)=>{if(failMemory)return false;if(type==='owner_note')notes.push({id:'00000000-0000-4000-8000-'+String(notes.length+1).padStart(12,'0'),telegram_chat_id:chatId,memory_type:type,content});return true;},loadRecentOwnerConversation:async()=>[],retrieveOwnerMemory:async()=>'',formatConversationMemory:()=>'',callChatModel:async()=>{modelCalls++;if(failModels)throw new Error('simulated outage');return {content:modelAnswer,provider:'test',model:'test'};},getRuntimeModelAttempts:async()=>modelAttempts,isModelCoolingDown:()=>false,MODEL_CHAIN_BUDGET_MS:28000,percentageChange:()=>'',formatCatalogHealth:()=>'',formatLowStock:()=>'',formatOwnerBusinessContext:()=>'',formatRecentOrders:()=>'',loadOwnerBusinessData:async()=>({catalog:snapshot().catalog,recentOrders:[],ecoRewards:{activeAccounts:2,availableRewards:1}})};
  const key='__essensheaOwnerEditTest';
  (globalThis as any)[key]=mocks;
  try {
@@ -89,6 +96,11 @@ test('owner edit flow previews, confirms once, rejects outsiders and stale edits
   }
   const denied=await mod.handleOwnerTelegramCommand({chatId:8262729456,text:'/setprice Amla Oil | 850'});
   assert.equal(denied.handled,false);assert.equal(events.length,0);
+  const orderPreview=await mod.handleOwnerTelegramCommand({chatId:owner,text:'confirm order ESS-20261019-TEST'});
+  assert.match(orderPreview.response,/new → confirmed/);assert.equal(orderRows[0].status,'new');
+  const orderApproved=await mod.handleOwnerTelegramCommand({chatId:owner,text:'Proceed'});
+  assert.match(orderApproved.response,/updated and verified/);assert.equal(orderRows[0].status,'confirmed');assert.equal(orderRows[0].payment_status,'awaiting_confirmation');
+  events.length=0;
   const ambiguous=await mod.handleOwnerTelegramCommand({chatId:owner,text:'/setprice oil | 850'});
   assert.equal(saved,null);assert.match(ambiguous.response,/Choose the exact product/);
   const selectionToken=ambiguous.response.match(/\/choose ([A-F0-9]{8}) 1/)[1];
