@@ -1,4 +1,4 @@
-﻿import { getSupabaseAdmin } from './supabase-admin';
+import { getSupabaseAdmin } from './supabase-admin';
 
 export type AgentMemoryMessage = {
   role: 'user' | 'assistant';
@@ -103,12 +103,14 @@ export async function retrieveOwnerMemory(chatId: number, query: string): Promis
     const terms = query.toLowerCase().split(/\s+/).filter((word) => word.length > 2).slice(0, 8);
     const { data, error } = await getSupabaseAdmin()
       .from('owner_agent_memory')
-      .select('memory_type, content, created_at')
+      .select('memory_type, content, created_at, metadata')
       .eq('telegram_chat_id', chatId)
+      .in('memory_type', ['owner_note', 'market_research'])
       .order('created_at', { ascending: false })
       .limit(60);
     if (error) throw error;
     const scored = (data || [])
+      .filter(item=>!item.metadata?.expires_at || Date.parse(item.metadata.expires_at)>Date.now())
       .map((item) => {
         const haystack = [item.memory_type, item.content].join(' ').toLowerCase();
         const score = terms.reduce((total, term) => total + (haystack.includes(term) ? 1 : 0), 0);
@@ -117,7 +119,7 @@ export async function retrieveOwnerMemory(chatId: number, query: string): Promis
       .filter((row) => row.score > 0 || terms.length === 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, 8)
-      .map((row) => `- ${row.item.memory_type}: ${row.item.content}`);
+      .map((row) => `- ${row.item.memory_type} (${row.item.created_at}): ${row.item.content}${row.item.memory_type==='market_research'?'\nSources: '+JSON.stringify(row.item.metadata?.sources||[]):''}`);
     return scored.length ? ['Owner memory:', ...scored].join('\n') : 'No owner memory matched that yet.';
   } catch (error) {
     console.error('Owner memory retrieval failed:', error);

@@ -17,7 +17,7 @@ async function loadModule(file:string, mocks:Record<string,unknown>) {
 
 test('owner catalogue reads fail closed when saved edits cannot be loaded',async()=>{
   let unavailable=true;
-  const query:any={select:()=>query,order:()=>query,then:(resolve:any)=>Promise.resolve({data:[],error:unavailable?{message:'Unavailable'}:null}).then(resolve)};
+  const query:any={select:()=>query,order:()=>query,then:(resolve:any)=>Promise.resolve({data:[{product_slug:'300g-turmeric-face-and-body-scrub',category_slug:'body-scrubs',product_name:'300g Turmeric Face & Body Scrub',is_new:true}],error:unavailable?{message:'Unavailable'}:null}).then(resolve)};
   const mod=await loadModule('catalog.ts',{fs,path,mergeCatalogData,getSupabaseAdmin:()=>({from:()=>query})});
   const degraded=await mod.getCatalogSnapshot();
   assert.ok(degraded.issues.some((issue:any)=>issue.code==='unverified_live_data'));
@@ -25,6 +25,7 @@ test('owner catalogue reads fail closed when saved edits cannot be loaded',async
   await assert.rejects(mod.resolveCatalogProduct('Amla Oil',{requireVerified:true}),/Live catalogue data is unavailable/);
   unavailable=false;
   assert.equal((await mod.resolveCatalogProduct('Amla Oil',{requireVerified:true})).status,'matched');
+  assert.equal((await mod.resolveCatalogProduct('tumeric scrub',{requireVerified:true})).status,'matched');
   assert.equal((await mod.resolveCatalogProduct('zzzzzzqqqqqq',{requireVerified:true})).status,'not_found');
 });
 

@@ -55,7 +55,7 @@ export function looksLikeOwnerMutation(text: string): boolean {
 export function ownerErrorReply(error: unknown, confirming: boolean): string {
   const message = error instanceof Error ? error.message : '';
   // Preserve actionable validation, not arbitrary SQL, transport or credential errors.
-  if (/^(?:Use(?: |:)|Choose an existing category:|I could not find |That name matches |This product changed |Another product already |Stock must |Stock is too |Price must |Each (?:change|size|variant) |Product names must |Keep the description |Concern choices:|Unknown field |Availability must |Visibility must |The edit was saved but website verification failed)/.test(message)) return message;
+  if (/^(?:Order change:|Use(?: |:)|Choose an existing category:|I could not find |That name matches |This product changed |Another product already |Stock must |Stock is too |Price must |Each (?:change|size|variant) |Product names must |Keep the description |Concern choices:|Unknown field |Availability must |Visibility must |The edit was saved but website verification failed)/.test(message)) return message;
   if (confirming) return 'I could not verify the result of that approval. Check /activity, then verify the product with /describe Product Name or the review with /reviews before repeating the edit. I will not claim it succeeded or apply it again automatically.';
   return 'I could not complete that request because the saved business data is unavailable. Please try again shortly. For an edit, resend the full product name and proposed change to get a fresh preview.';
 }
