@@ -117,7 +117,7 @@
   }
 
   const revealSelector = [
-    'main > section:not([data-no-reveal])',
+    'main > section:not(.hero):not([data-no-reveal])',
     '.product-trio__card',
     '.catalog-collection-card',
     '.category-product-card',

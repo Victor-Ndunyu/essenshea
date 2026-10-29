@@ -18,9 +18,9 @@ const pages = [
 test('every storefront surface loads the final calm-luxury design layer', async () => {
   for (const page of pages) {
     const html = await readFile(new URL(`../website/${page}`, import.meta.url), 'utf8');
-    assert.match(html, /luxury-refinement\.css\?v=26/, `${page} is missing the current design layer`);
-    assert.match(html, /design-system\.js\?v=10/, `${page} is missing the atelier interaction layer`);
-    assert.match(html, /name="color-scheme" content="light only"/, `${page} can be auto-darkened`);
+    assert.match(html, /luxury-refinement\.css\?v=27/, `${page} is missing the current design layer`);
+    assert.match(html, /design-system\.js\?v=11/, `${page} is missing the atelier interaction layer`);
+    assert.match(html, /name="color-scheme" content="light dark"/, `${page} is missing system theme support`);
     if (page !== 'eco-rewards-admin.html') {
       assert.match(html, /agent\.js\?v=8/, `${page} is missing the current assistant bundle`);
     }
@@ -122,7 +122,7 @@ test('shop hero presents a layered product lookbook with restrained pointer moti
   assert.match(html, /#shop-products-grid \.product-card\{opacity:1!important/);
   assert.match(html, /id="shop-products" data-no-reveal/);
   assert.match(html, /#shop-products,#shop-products-grid,#shop-products-grid \.product-card\{opacity:1!important/);
-  assert.match(designScript, /main > section:not\(\[data-no-reveal\]\)/);
+  assert.match(designScript, /main > section:not\(\.hero\):not\(\[data-no-reveal\]\)/);
   assert.match(script, /prepareProductCardMotion/);
   assert.match(css, /\.product-card\.product-card--motion[\s\S]*opacity:\s*1 !important/);
   assert.match(css, /\.cart-widget \{ z-index: 1250 !important; \}/);
@@ -164,7 +164,9 @@ test('angel artwork and mobile assistant have deliberate detail', async () => {
   assert.match(css, /--agent-viewport-bottom/);
   assert.match(agent, /window\.visualViewport/);
   assert.match(agent, /enhanceMobileNavigation\(\)/);
-  assert.match(css, /color-scheme:\s*only light/);
+  assert.match(css, /color-scheme:\s*light;/);
+  assert.match(css, /@media \(prefers-color-scheme: dark\)[\s\S]*color-scheme:\s*dark/);
+  assert.doesNotMatch(css, /color-scheme:\s*only light/);
   assert.match(css, /main \.section > \*[\s\S]*opacity:\s*1 !important/);
 });
 
