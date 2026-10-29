@@ -46,6 +46,7 @@ export async function sendTelegramMessage(chatId: number, text: string, replyMar
         body: JSON.stringify({
           chat_id: chatId,
           text: chunk,
+          link_preview_options: { is_disabled: true },
           ...(replyMarkup && index === chunks.length - 1 ? { reply_markup: replyMarkup } : {}),
         }),
         signal: AbortSignal.timeout(10_000),

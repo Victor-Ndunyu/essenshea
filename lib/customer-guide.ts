@@ -73,6 +73,18 @@ export function getCatalogReply(message: string, catalog: CatalogData, liveVerif
       actions: [...matches.map(({ product }) => ({ label: product.name, href: `/shop?product=${encodeURIComponent(product.slug)}` })), ownerContact],
     };
   }
+  // Conservative spelling suggestions require every meaningful token to match;
+  // never convert an unrelated request into a recommendation.
+  const near = (a:string,b:string) => {
+    if(a===b||b===`${a}s`)return true;
+    if(a.length<5||b.length<5||Math.abs(a.length-b.length)>1)return false;
+    let i=0,j=0,edits=0;
+    while(i<a.length&&j<b.length){if(a[i]===b[j]){i++;j++;continue;}if(++edits>1)return false;if(a.length>=b.length)i++;if(b.length>=a.length)j++;}
+    return edits+(a.length-i)+(b.length-j)<=1;
+  };
+  const possible=catalog.categories.flatMap(c=>c.products.filter(p=>!p.hidden).map(product=>({product,words:clean(`${product.name} ${c.title}`).split(' ')})))
+    .filter(item=>terms.length>0&&terms.every(term=>item.words.some(word=>near(term,word)))).slice(0,3);
+  if(possible.length)return {response:`Did you mean ${possible.map(({product})=>product.name).join(' or ')}? Please confirm which product you mean.`,actions:possible.map(({product})=>({label:product.name,href:`/shop?product=${encodeURIComponent(product.slug)}`}))};
   // A transparent useful handoff, rather than pretending an AI answer succeeded.
   return { response: 'I can’t give a personalised answer right now. You can still browse skin care, hair care, fragrances and gifts, or send your question to Essenshea on WhatsApp for help choosing.', actions: [shop, ownerContact] };
 }

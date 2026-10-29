@@ -1,8 +1,7 @@
 import { COMPETITORS, fetchCompetitor, compareCompetitor, type CompetitorEvidence } from './competitor-sources';
 import { getSupabaseAdmin } from './supabase-admin';
+import type { CatalogData } from './catalog';
 import { getCatalogSnapshot } from './catalog';
-import { callChatModel, getRuntimeModelAttempts, isModelCoolingDown } from './ai-providers';
-import { customerLearningContext } from './owner-research';
 
 export type CompetitorSnapshot = { competitor_id: string; captured_at: string; status: 'ok' | 'unavailable'; evidence: CompetitorEvidence | null };
 
@@ -14,7 +13,7 @@ export function canNudgeCompetitors(text: string, response: string, failed = fal
   if (failed || hasPhotos || isCompetitorRequest(text)) return false;
   // Never interrupt actions, pending clarifications, payments, support, or approvals.
   if (/\/(?:confirm|cancel|choose)\b|approval preview|reply with.*category|which order reference|nothing.*changed/i.test(response)) return false;
-  if (/order|payment|refund|complaint|urgent|error|problem|remember|remind|cancel|proceed|approve|confirm|change|update|move|edit|hide|delete|remove|stock|set|add|category|categories/i.test(text)) return false;
+  if (/escalat|resolved|dismiss|what is it|follow.?up|order|payment|refund|complaint|urgent|error|problem|remember|remind|cancel|proceed|approve|confirm|change|update|move|edit|hide|delete|remove|stock|set|add|category|categories/i.test(text)) return false;
   return !text.startsWith('/') || /^\/(?:start|dashboard|summary|insights|learning)$/.test(text);
 }
 
@@ -67,14 +66,35 @@ export function competitorFacts(rows: CompetitorSnapshot[], now = Date.now()): {
   return { text: sections.join('\n\n'), fresh, freshSources };
 }
 
-async function improvementAdvice(facts: string, question: string, freshSources: number[]): Promise<string> {
+async function improvementAdvice(rows: CompetitorSnapshot[]): Promise<string> {
   const snapshot = await getCatalogSnapshot({ includeHidden: false });
   if (snapshot.issues.some(i => i.code === 'unverified_live_data')) return 'Your live catalogue could not be verified, so I cannot make a grounded comparison yet.';
-  const products = snapshot.catalog.categories.flatMap(c => c.products);
+  return catalogueAdvice(snapshot.catalog, rows);
+}
+
+export function catalogueAdvice(catalog: CatalogData, rows: CompetitorSnapshot[], now = Date.now()): string {
+  const products = catalog.categories.flatMap(c => c.products).filter(p=>!p.hidden);
   const sizeMissing = products.filter(p => !p.size && !/\b\d+(?:\.\d+)?\s*(?:ml|g|kg|litres?|liters?)\b/i.test(p.name + ' ' + (p.description || ''))).length;
   const ingredientsMissing = products.filter(p => !p.ingredients && !/ingredients?\s*:/i.test(p.description || '')).length;
   const priceMissing = products.filter(p => typeof p.priceValue !== 'number').length;
-  return `Catalogue review: ${sizeMissing} listings have no size detected in structured fields, name or description; ${ingredientsMissing} have no ingredient field or labelled ingredient text detected; ${priceMissing} lack a structured numeric price. These are extraction checks, not proof that customer-facing information is absent. Custom and multi-size offers may legitimately need individual pricing.\n\nNext step: select an existing Essenshea product and verify a same-category competitor variant, size, currency and regular price from its linked listing before comparing value. Clearance offers must be evaluated separately. No new variant or discount is recommended from this baseline alone.\nMeasure any agreed experiment using completed orders and gross margin, not competitor listing presence. Public listings do not establish demand or promotion effectiveness.`;
+  const sizeOf=(value:string)=>{const found=[...value.toLowerCase().matchAll(/\b(\d+(?:\.\d+)?)\s*(ml|g|kg|l|litres?|liters?)\b/g)].map(m=>`${Number(m[1])*(/^(kg|l|lit)/.test(m[2])?1000:1)}${/^(g|kg)$/.test(m[2])?'g':'ml'}`);return new Set(found).size===1?found[0]:null;};
+  const categoryOf=(value:string)=>value.toLowerCase().match(/\b(body oil|face oil|body lotion|body wash|body scrub|shea (?:body )?butter|shampoo|conditioner)\b/)?.[0];
+  const comparisons:string[]=[];
+  for(const [index,source] of COMPETITORS.entries()){
+    const latest=rows.find(r=>r.competitor_id===source.id);
+    const age=latest?now-Date.parse(latest.captured_at):Infinity;
+    if(latest?.status!=='ok'||!latest.evidence||!Number.isFinite(age)||age<0||age>8*86400000)continue;
+    for(const rival of latest.evidence.products){
+      if(comparisons.length>=3)break;
+      if(rival.currency!=='KES'||/clearance|sale|bundle|gift|set/i.test(rival.name)||rival.compareAt!==null&&rival.compareAt>rival.price)continue;
+      const category=categoryOf(rival.name),size=sizeOf(rival.size||'');
+      if(!category||!size||new URL(rival.url).origin!==source.origin)continue;
+      const own=products.find(p=>typeof p.priceValue==='number'&&Number.isFinite(p.priceValue)&&categoryOf(p.name)===category&&sizeOf(p.size||p.name)===size);
+      if(own)comparisons.push(`- Existing Essenshea ${own.name}: KES ${own.priceValue}; ${source.name} ${rival.name} (${rival.variant}): KES ${rival.price}, ${rival.size}. Same category and stated size; formulas and positioning may differ. [${index+1}]\n${rival.url}`);
+    }
+  }
+  const comparisonText=comparisons.length?'Category-and-size price references (not equivalent formulations or a recommendation to change prices):\n'+comparisons.join('\n'):'No verified regular-price, same-category and same-size comparison was found in this sample.';
+  return `Catalogue review: ${sizeMissing} listings have no size detected in structured fields, name or description; ${ingredientsMissing} have no ingredient field or labelled ingredient text detected; ${priceMissing} lack a structured numeric price. These are extraction checks, not proof that customer-facing information is absent. Custom and multi-size offers may legitimately need individual pricing.${"\n\n"+comparisonText}\n\nNext step: select an existing Essenshea product and verify a same-category competitor variant, size, currency and regular price from its linked listing before comparing value. Clearance offers must be evaluated separately. No new variant or discount is recommended from this baseline alone.\nMeasure any agreed experiment using completed orders and gross margin, not competitor listing presence. Public listings do not establish demand or promotion effectiveness.`;
 
 }
 
@@ -101,7 +121,7 @@ export async function competitorReport(chatId: number, text: string): Promise<st
     } catch { refreshProblem = 'The refresh could not be saved. Showing the available history.'; }
   }
   const facts = competitorFacts(rows);
-  const advice = facts.fresh ? await improvementAdvice(facts.text, text, facts.freshSources) : 'Fresh competitor evidence is unavailable. I cannot claim current competitor trends. Try /competitors refresh later.';
+  const advice = facts.fresh ? await improvementAdvice(rows) : 'Fresh competitor evidence is unavailable. I cannot claim current competitor trends. Try /competitors refresh later.';
   return ['Competitor review — ' + COMPETITORS.map(c => c.name).join(', '), refreshProblem, facts.text, advice,
     'Coverage: selected public catalogue listings; prices are observed asking prices. Social posts, ads, private sales and the wider market are not covered. Newly observed does not mean newly launched.',
     'Weekly checks: Mondays around 8 AM Nairobi time. Nudges: after 14 days without a review, at most once per 14 days during a suitable owner conversation. /competitors snooze pauses them for 30 days; /competitors off disables nudges.',

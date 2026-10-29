@@ -69,3 +69,19 @@ test('cron rejects missing and incorrect authorization before scanning',async()=
  assert.equal((await cron.GET(new Request('https://test/',{headers:{authorization:'Bearer test-only'}}))).status,200);assert.equal(calls,1);
  }finally{if(saved===undefined)delete process.env.CRON_SECRET;else process.env.CRON_SECRET=saved;}
 });
+test('four sources are isolated and ambiguous sizes cannot become a price comparison',()=>{
+ assert.equal(COMPETITORS.length,4);assert.equal(new Set(COMPETITORS.map(c=>c.origin)).size,4);
+ const mixed=structuredClone(raw);mixed.products[0].variants[0].title='500ml';
+ assert.equal(parseCompetitorProducts(mixed,html,COMPETITORS[0]).products[0].size,null);
+ assert.match(evidence().products[0].url,/\?variant=123$/);
+});
+test('advice separates own catalogue from fresh regular competitor price evidence',()=>{
+ const now=Date.now();const rows=[{competitor_id:'ythera',captured_at:new Date(now).toISOString(),status:'ok',evidence:evidence()}];
+ const catalog={categories:[{products:[{name:'Lavender Shea Body Butter 250ml',priceValue:850,ingredients:'Shea'}]}]};
+ const advice=mod.catalogueAdvice(catalog,rows,now);
+ assert.match(advice,/0 listings have no size/);assert.match(advice,/Existing Essenshea Lavender Shea Body Butter 250ml: KES 850; Ythera Shea Body Butter 250ml/);
+ assert.doesNotMatch(advice,/market acceptance|tactic is effective|Introduce a|Launch a clearance/);
+ const discounted=structuredClone(rows);discounted[0].evidence.products[0].compareAt=1400;
+ assert.match(mod.catalogueAdvice(catalog,discounted,now),/No verified regular-price/);
+ assert.match(mod.catalogueAdvice(catalog,rows,now+9*86400000),/No verified regular-price/);
+});
