@@ -872,7 +872,7 @@ async function runOwnerTelegramCommand(params: {
     const orderRead = text.match(/^\/(orderdetails|followup)\s+(\S+)$/i);
     if(orderRead) return {handled:true,response:await orderDetails(orderRead[2],orderRead[1].toLowerCase()==='followup')};
     if (/follow.?up.{0,30}orders|orders.{0,30}follow.?up/i.test(text)) return {handled:true,response:formatRecentOrders(await loadOwnerBusinessData())+'\nOpen /orderdetails REFERENCE for contact and next steps; /followup REFERENCE creates an unsent draft. /orderhelp explains the full flow.'};
-    if(lower==='/escalations') return {handled:true,response:await listCustomerEscalations()};
+    if(lower==='/escalations' || /^(?:what needs escalating|what (?:is it|is the escalation)|show (?:me )?(?:the )?escalations)[?.!]*$/i.test(text.trim())) return {handled:true,response:await listCustomerEscalations()};
     if(lower.startsWith('/resolve ')) return {handled:true,response:await resolveCustomerEscalation(text.slice(9).trim())};
     if(lower==='/market' || lower.startsWith('/market ') || /(?:market analysis|market research|current market|market trends)/i.test(text)) return {handled:true,response:await marketResearch(chatId,text)};
     if(lower==='/learning') return {handled:true,response:await customerLearningContext()};

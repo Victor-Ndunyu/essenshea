@@ -5,9 +5,8 @@ import { parseTelegramOwnerIds } from './security';
 import { sendTelegramMessage } from './telegram';
 
 export function escalationReason(message:string,answer:string):string|null {
- if(/\b(?:human|owner|manager|complaint|refund|cancel.{0,15}order|missing.{0,15}order|wrong.{0,15}(?:item|product)|damaged|not (?:arrived|received)|late delivery|speak to|talk to)\b/i.test(message)) return 'Customer requests owner support or reports an order problem';
+ if(/\b(?:(?:speak|talk|connect).{0,20}(?:human|owner|manager)|complaint|refund|cancel.{0,15}order|missing.{0,15}order|wrong.{0,15}(?:item|product)|damaged|not (?:arrived|received)|late delivery|speak to|talk to)\b/i.test(message)) return 'Customer requests owner support or reports an order problem';
  if(/\b(?:allergic reaction|burning|swelling|rash after|reaction to)\b/i.test(message)) return 'Customer reports a product reaction';
- if(/(?:cannot|can't|could not|couldn't|not able to|unable to|unconfirmed|not confirmed|not (?:listed|available|provided)|don't have|do not have|check with|ask (?:the owner|essenshea)|contact (?:the owner|essenshea))/i.test(answer) && !/^(hi|hello|hey)[!. ]*$/i.test(message)) return 'Question needs information or a decision from the owner';
  return null;
 }
 export function redactCustomerText(text:string):string {
@@ -39,7 +38,7 @@ export async function deliverPendingEscalations():Promise<void> {
   const notified:number[]=row.notified_owner_ids||[];
   for(const id of ids.filter(id=>!notified.includes(id))) {
    try {
-    await sendTelegramMessage(id,`Customer needs attention — ${row.id}\n${row.reason}\n\nCustomer text (untrusted): ${row.question}\nAgent answer: ${row.answer}\n\nUse /escalations to review. Customer contact is not inferred from a website session. Use the order reference, if provided, to find their verified contact.`,undefined);
+    await sendTelegramMessage(id,`There is something I need to escalate. Ask “what needs escalating?” for the details.`,undefined);
     notified.push(id);
     await db.from('customer_escalations').update({notified_owner_ids:notified}).eq('id',row.id);
    }catch {console.error('Customer escalation Telegram delivery failed');}
