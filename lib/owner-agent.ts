@@ -1,6 +1,6 @@
+import { handleEscalationConversation, escalationFollowupNudge } from './escalation-workflow';
 import { isCompetitorRequest, competitorReport, canNudgeCompetitors, competitorNudge } from './competitor-intelligence';
 import { marketResearch, customerLearningContext } from './owner-research';
-import { listCustomerEscalations, resolveCustomerEscalation } from './customer-escalations';
 import { prepareOrderEdit, applyOrderEdit, parseOrderMutation, orderDetails, mostOrderedProducts, type OrderEdit } from './owner-orders';
 import { unsafeActionClaim, answerCatalogQuestion, orderConfirmationHelp } from './owner-answers';
 import { cleanReviewText } from './review-text';
@@ -76,7 +76,9 @@ function helpText(): string {
     '/market topic - dated live market source scan and suggestions',
     '/learning - anonymous customer topic patterns',
     '/escalations - unresolved website customer requests and alert retries',
-    '/resolve UUID - close an escalation after handling it',
+    '/escalation ID - details and decision history',
+    '/resolve ID decision | /dismiss ID reason | /reopen ID reason',
+    '/escalationfollowup ID DAYS next step | /escalations history',
     '/activity - show the latest owner-agent changes',
     '/insights - show the latest 7-day storefront and order signals',
     '/edit product name | price=850 | stock=12 - preview several changes together',
@@ -547,6 +549,7 @@ Product views are not sales, checkout starts are not completed orders, and missi
 Do not reveal customer contact details, secrets, access codes, API keys, tokens, hashes, or hidden configuration. Recent order references and operational statuses are allowed.
 You cannot create previews, approve actions or apply changes yourself. Never ask the owner to say proceed or confirm a live-site change in a conversational answer. Only the command handler can create a real saved preview with Approve and Cancel buttons. If a change request reaches you, explain the exact /edit Product Name | field=value syntax, rather than promise to prepare it or repeat a confirmation request.
 Ask at most one focused follow-up question only when the missing detail materially changes the answer.
+Escalation status and decisions must come from /escalations or /escalation ID. Never claim to resolve, dismiss, follow up or remember an escalation decision through prose alone. Explain the exact commands when a request is ambiguous.
 Keep Telegram replies clear and conversational, normally under 10 short sentences unless the owner requests detail.
 
 Verified Essenshea business and website data:
@@ -754,6 +757,7 @@ async function runOwnerTelegramCommand(params: {
   }
 
   try {
+    if(!params.approvedCommand){const escalation=await handleEscalationConversation(chatId,text);if(escalation!==null)return {handled:true,response:escalation};}
     if (/^(?:hi|hello|hey|good morning|good afternoon|good evening)[!. ]*$/i.test(text)) {
       return { handled: true, response: 'Hello! Your private Essenshea owner desk is ready. You can ask for /dashboard, browse /products, or tell me the product and change you need. I will show an approval preview before changing the site.' };
     }
@@ -872,8 +876,6 @@ async function runOwnerTelegramCommand(params: {
     const orderRead = text.match(/^\/(orderdetails|followup)\s+(\S+)$/i);
     if(orderRead) return {handled:true,response:await orderDetails(orderRead[2],orderRead[1].toLowerCase()==='followup')};
     if (/follow.?up.{0,30}orders|orders.{0,30}follow.?up/i.test(text)) return {handled:true,response:formatRecentOrders(await loadOwnerBusinessData())+'\nOpen /orderdetails REFERENCE for contact and next steps; /followup REFERENCE creates an unsent draft. /orderhelp explains the full flow.'};
-    if(lower==='/escalations') return {handled:true,response:await listCustomerEscalations()};
-    if(lower.startsWith('/resolve ')) return {handled:true,response:await resolveCustomerEscalation(text.slice(9).trim())};
     if(lower==='/market' || lower.startsWith('/market ') || /(?:market analysis|market research|current market|market trends)/i.test(text)) return {handled:true,response:await marketResearch(chatId,text)};
     if(lower==='/learning') return {handled:true,response:await customerLearningContext()};
     if (lower === '/activity') {
@@ -1035,7 +1037,7 @@ export async function handleOwnerTelegramCommand(params: Parameters<typeof runOw
       if(/remind/i.test(notes)) result.response+='\n\nSaved reminder:\n'+notes;
     }
     if (!result.replyMarkup && canNudgeCompetitors(params.text, result.response, !!result.failed, !!params.photos?.length)) {
-      const nudge = await competitorNudge(params.chatId);
+      const nudge = await escalationFollowupNudge(params.chatId) || await competitorNudge(params.chatId);
       if(nudge) result.response += '\n\n' + nudge;
     }
     await saveOwnerMemory(params.chatId, 'owner_message', params.text, {source:'telegram_owner'});

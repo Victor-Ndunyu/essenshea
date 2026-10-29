@@ -64,3 +64,9 @@ test('excludes medical marketing claims from model context', () => {
   assert.equal(getCustomerReplyActions('Welcome to Essenshea!', data).length, 0);
   assert.match(getCatalogReply('I want a body butter with a lavender scent. What do you have?',data,true).response,/Lavender Whipped/);
 });
+
+test('minor spelling differences get a confirmation question, not a missing-product assertion',()=>{
+ const result=getCatalogReply('castoor oil',catalog,true);
+ assert.match(result.response,/Did you mean Castor Oil/);
+ assert.doesNotMatch(result.response,/missing|unavailable|escalat/i);
+});

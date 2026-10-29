@@ -2,6 +2,8 @@
 export const COMPETITORS = [
   { id: 'ythera', name: 'Ythera', origin: 'https://ytherake.com' },
   { id: 'cinnabar-green', name: 'Cinnabar Green', origin: 'https://cinnabargreen.com' },
+  { id: 'organic-savanna', name: 'Organic Savanna', origin: 'https://organicsavanna.com' },
+  { id: 'marini-naturals', name: 'Marini Naturals', origin: 'https://www.marininaturals.com' },
 ] as const;
 export type Competitor = typeof COMPETITORS[number];
 export type CompetitorProduct = {
@@ -80,8 +82,10 @@ export function parseCompetitorProducts(raw: unknown, html: string, competitor: 
       const compareAt = /^\d+(?:\.\d{1,2})?$/.test(String(v.compare_at_price)) ? Number(v.compare_at_price) : null;
       const name = p.title.replace(/[\r\n\u0000-\u001f]/g, ' ').slice(0, 180);
       const variant = String(v.title || '').replace(/[\r\n\u0000-\u001f]/g, ' ').slice(0, 100);
-      const size = (name + ' ' + variant).match(/\b(\d+(?:\.\d+)?)\s*(ml|g|kg|litres?|liters?|l)\b/i)?.[0] || null;
-      products.push({ key: p.handle + ':' + v.id, name, variant, price, currency, compareAt, size, url: competitor.origin + '/products/' + p.handle });
+      const measurements = [...(name + ' ' + variant).matchAll(/\b(\d+(?:\.\d+)?)\s*(ml|g|kg|litres?|liters?|l)\b/gi)].map(m=>m[0].toLowerCase().replace(/\s/g,''));
+      const uniqueSizes=[...new Set(measurements)];
+      const size = uniqueSizes.length===1 ? uniqueSizes[0] : null;
+      products.push({ key: p.handle + ':' + v.id, name, variant, price, currency, compareAt, size, url: competitor.origin + '/products/' + p.handle + '?variant=' + v.id });
     }
   }
   if (!products.length) throw new Error('Product records could not be validated');
