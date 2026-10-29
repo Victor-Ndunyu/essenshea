@@ -1,5 +1,6 @@
 {
   "cleanUrls": true,
+  "crons": [{ "path": "/api/cron/competitors", "schedule": "0 5 * * 1" }],
   "trailingSlash": false,
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },

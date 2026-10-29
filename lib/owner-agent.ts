@@ -1,3 +1,4 @@
+import { isCompetitorRequest, competitorReport, canNudgeCompetitors, competitorNudge } from './competitor-intelligence';
 import { marketResearch, customerLearningContext } from './owner-research';
 import { listCustomerEscalations, resolveCustomerEscalation } from './customer-escalations';
 import { prepareOrderEdit, applyOrderEdit, parseOrderMutation, orderDetails, mostOrderedProducts, type OrderEdit } from './owner-orders';
@@ -71,6 +72,7 @@ function helpText(): string {
     '/remember note - store an owner note permanently',
     '/memory topic - retrieve owner memory',
     '/forget topic - preview removal of matching owner notes',
+    '/competitors - competitor observations and improvement ideas; on/off/snooze/refresh',
     '/market topic - dated live market source scan and suggestions',
     '/learning - anonymous customer topic patterns',
     '/escalations - unresolved website customer requests and alert retries',
@@ -764,6 +766,7 @@ async function runOwnerTelegramCommand(params: {
       const saved=await saveOwnerMemory(chatId,'owner_note',note,{source:'telegram_owner',trigger});
       return {handled:true,response:saved?(trigger?'Saved. I will surface this note when categories come up again.':'Saved as an owner note for future relevant conversations. For a timed reminder, specify a schedule in a supported reminder service.'):'The note could not be saved; I cannot promise to remember it.'};
     }
+    if (!params.approvedCommand && isCompetitorRequest(text)) return {handled:true,response:await competitorReport(chatId,text)};
     if (!params.approvedCommand && /(?:how|what|need|help).{0,65}(?:confirm|comfirm).{0,25}order|^\/orderhelp$/i.test(text)) return {handled:true,response:orderConfirmationHelp()};
     if (!params.approvedCommand && !text.startsWith('/') && !looksLikeOwnerMutation(text) && !parseNaturalOwnerApproval(text)) {
       const history = await loadRecentOwnerConversation(chatId);
@@ -1030,6 +1033,10 @@ export async function handleOwnerTelegramCommand(params: Parameters<typeof runOw
     if(/\bcategor(?:y|ies)\b/i.test(params.text) && !/remember|remind|\/memory/i.test(params.text)) {
       const notes=await retrieveOwnerMemory(params.chatId,'categor');
       if(/remind/i.test(notes)) result.response+='\n\nSaved reminder:\n'+notes;
+    }
+    if (!result.replyMarkup && canNudgeCompetitors(params.text, result.response, !!result.failed, !!params.photos?.length)) {
+      const nudge = await competitorNudge(params.chatId);
+      if(nudge) result.response += '\n\n' + nudge;
     }
     await saveOwnerMemory(params.chatId, 'owner_message', params.text, {source:'telegram_owner'});
     await saveOwnerMemory(params.chatId, 'owner_agent_reply', result.response, {source:'telegram_owner', failed:!!result.failed});
